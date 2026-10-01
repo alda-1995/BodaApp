@@ -5,6 +5,10 @@
         <x-ui.message-notification type="success" :message="session('success')" />
     @endif
 
+    @if (session('warning'))
+        <x-ui.message-notification type="warning" :message="session('warning')" />
+    @endif
+
     @if (session('error'))
         <x-ui.message-notification type="error" :message="session('error')" />
     @endif

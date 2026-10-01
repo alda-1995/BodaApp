@@ -4,6 +4,7 @@ namespace App\Templates\Sections;
 
 use App\FormBuilder\Controls\RepeaterField;
 use App\FormBuilder\Field;
+use App\Models\Event;
 
 /**
  * Una sección del catálogo, como la usa una plantilla concreta.
@@ -158,6 +159,16 @@ final class TemplateSection extends Section
     public function modelAttributes(): array
     {
         return $this->section->modelAttributes();
+    }
+
+    public function rulesFor(Event $event): array
+    {
+        return $this->section->rulesFor($event);
+    }
+
+    public function reconcile(Event $event, string $savedStep): ?string
+    {
+        return $this->section->reconcile($event, $savedStep);
     }
 
     public function isVisible(array $data): bool

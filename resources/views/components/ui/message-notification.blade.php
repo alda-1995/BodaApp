@@ -8,11 +8,14 @@
     $styles = [
         'success' => 'bg-green-100 border-green-400 text-green-700 border-green-700',
         'error' => 'bg-red-100 border-red-400 text-red-700 border-red-700',
+        // Ni error ni éxito: se guardó, pero hay algo que el organizador debe revisar.
+        'warning' => 'bg-amber-100 border-amber-400 text-amber-800 border-amber-700',
         'info' => 'bg-blue-100 border-blue-400 text-blue-700 border-blue-700',
     ];
     $iconPaths = [
         'success' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', // Check circle
         'error' => 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z', // X circle
+        'warning' => 'M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0l-7.1 12.25A2 2 0 005 19z', // Triangle
         'info' => 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', // Info circle
     ];
     $baseClass = $styles[$type] ?? $styles['info'];

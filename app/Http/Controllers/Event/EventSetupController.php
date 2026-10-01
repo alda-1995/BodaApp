@@ -56,14 +56,15 @@ class EventSetupController extends Controller
 
         try {
             // Guarda los datos validados y procesa archivos polimórficos
-            $this->wizardService->saveStep($event, $step, $request->validated());
+            $avisos = $this->wizardService->saveStep($event, $step, $request->validated());
 
             // Resolver cuál es el siguiente paso a mostrar
             $nextStep = $request->input('next_step') ?? $this->wizardService->getNextStepKey($event, $step);
 
             return redirect()
                 ->route('events.wizard.edit', ['event' => $event->slug, 'step' => $nextStep])
-                ->with('success', 'Cambios guardados correctamente.');
+                ->with('success', 'Cambios guardados correctamente.')
+                ->with('warning', $avisos ? implode(' ', $avisos) : null);
 
         } catch (Exception $e) {
             return back()

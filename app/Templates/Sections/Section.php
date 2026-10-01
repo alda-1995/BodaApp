@@ -2,6 +2,7 @@
 
 namespace App\Templates\Sections;
 
+use App\Models\Event;
 use Illuminate\Support\Str;
 
 /**
@@ -39,6 +40,38 @@ abstract class Section
     public function modelAttributes(): array
     {
         return [];
+    }
+
+    /**
+     * Reglas que no se pueden declarar en el campo porque dependen de la boda.
+     *
+     * Un campo se declara una vez y sirve para cualquier evento, así que no
+     * puede saber, por ejemplo, qué día se casa esta pareja. Lo que sí necesita
+     * ese dato se pide aquí, donde ya hay un Event, y se suma a las reglas del
+     * paso en vez de reemplazarlas.
+     *
+     * @return array<string, array<int, string>> campo => reglas extra
+     */
+    public function rulesFor(Event $event): array
+    {
+        return [];
+    }
+
+    /**
+     * Ajusta lo propio cuando otro paso cambió algo de lo que depende.
+     *
+     * La validación sólo alcanza al paso que se está guardando, así que no ve
+     * lo que ese cambio descuadra en otro: mover la boda a antes de la fecha
+     * límite para confirmar deja un límite imposible, y bloquear el cambio
+     * sería peor —le impediría al organizador corregir la fecha de su boda—.
+     *
+     * Aquí la sección acomoda sus propios datos sobre $event (sin guardarlo: de
+     * eso se encarga quien guarda el paso) y devuelve lo que hay que avisarle
+     * al organizador, o null si no hubo nada que tocar.
+     */
+    public function reconcile(Event $event, string $savedStep): ?string
+    {
+        return null;
     }
 
     /**

@@ -212,10 +212,17 @@ class EventWizardService
     /**
      * Guarda la información ya validada del paso actual.
      */
-    public function saveStep(Event $event, string $stepKey, array $validatedData): void
+    /**
+     * Guarda un paso del wizard.
+     *
+     * @return array<int, string> avisos para el organizador, cuando este paso
+     *                            obligó a acomodar algo de otro
+     */
+    public function saveStep(Event $event, string $stepKey, array $validatedData): array
     {
         // dd($validatedData);
         $uploadedFilesPaths = [];
+        $avisos = [];
 
         // Extraer medios y valores planos
         $mediaFiles = MediaArrayHelper::extractFilesAndMedia($validatedData);
@@ -224,7 +231,7 @@ class EventWizardService
         $formValues = MediaArrayHelper::extractFormValues($validatedData);
         // dd($formValues);
         try {
-            DB::transaction(function () use ($event, $stepKey, $formValues, $mediaFiles, &$uploadedFilesPaths) {
+            DB::transaction(function () use ($event, $stepKey, $formValues, $mediaFiles, &$uploadedFilesPaths, &$avisos) {
 
                 // Procesar subidas, reemplazos y eliminación de omitidos
                 $uploadedFilesPaths = $this->processStepFiles($event, $stepKey, $mediaFiles, $uploadedFilesPaths);
@@ -239,6 +246,14 @@ class EventWizardService
 
                 $event->fill($modelUpdates);
                 $event->features = $currentFeatures;
+
+                /*
+                | Antes de guardar, cada sección acomoda lo suyo si este paso le
+                | descuadró algo: mover la boda a antes de la fecha límite para
+                | confirmar deja un límite imposible. Va aquí dentro para que se
+                | guarde todo junto o nada.
+                */
+                $avisos = $this->reconcileSections($event, $stepKey);
 
                 if (!$event->save()) {
                     throw new Exception("No se pudieron guardar los cambios en la base de datos.");
@@ -255,6 +270,33 @@ class EventWizardService
 
             throw new Exception("Ocurrió un problema al guardar la información. Por favor inténtalo de nuevo.");
         }
+
+        return $avisos;
+    }
+
+    /**
+     * Le da a cada sección la oportunidad de acomodar sus datos tras un cambio
+     * en otro paso, y junta lo que haya que avisarle al organizador.
+     *
+     * @return array<int, string>
+     */
+    protected function reconcileSections(Event $event, string $savedStep): array
+    {
+        $strategy = $this->discoveryService->resolveStrategy($event->template?->view_path);
+
+        if (!method_exists($strategy, 'sections')) {
+            return [];
+        }
+
+        $avisos = [];
+
+        foreach ($strategy->sections() as $section) {
+            if ($aviso = $section->reconcile($event, $savedStep)) {
+                $avisos[] = $aviso;
+            }
+        }
+
+        return $avisos;
     }
 
     protected function processStepFiles(

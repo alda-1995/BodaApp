@@ -5,6 +5,7 @@ namespace App\Http\Requests\Concerns;
 use App\Contracts\ValidatableFieldInterface;
 use App\Models\Event;
 use App\Services\Template\TemplateDiscoveryService;
+use App\Templates\Sections\Section;
 
 trait HasEventWizardStrategy
 {
@@ -44,6 +45,30 @@ trait HasEventWizardStrategy
         return $steps[$stepKey]['fields'] ?? [];
     }
 
+    /** La sección que atiende el paso actual, para lo que depende de la boda. */
+    protected function getStepSection(): ?Section
+    {
+        $event = $this->getEventModel();
+
+        if (!$event || !$event->template) {
+            return null;
+        }
+
+        $sections = app(TemplateDiscoveryService::class)
+            ->resolveStrategy($event->template->view_path)
+            ->sections();
+
+        $stepKey = $this->getStepKey();
+
+        foreach ($sections as $section) {
+            if ($section->key() === $stepKey) {
+                return $section;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Extrae las reglas de validación delegando a cada campo.
      */
@@ -53,9 +78,23 @@ trait HasEventWizardStrategy
 
         foreach ($this->getStepFields() as $field) {
             if ($field instanceof ValidatableFieldInterface) {
-                // Se pasa string vacío como prefijo porque el FormRequest valida 
+                // Se pasa string vacío como prefijo porque el FormRequest valida
                 // directamente sobre la raíz de los inputs del paso actual.
                 $rules = array_merge($rules, $field->toValidationRules(''));
+            }
+        }
+
+        /*
+        | Y lo que la sección sólo puede decidir viendo la boda: por ejemplo,
+        | que la fecha límite para confirmar no se pase del día del evento.
+        | Se SUMAN a las del campo, no las reemplazan, porque si no el campo
+        | perdería su 'required' y su 'date'.
+        */
+        $event = $this->getEventModel();
+
+        if ($event && $section = $this->getStepSection()) {
+            foreach ($section->rulesFor($event) as $campo => $extra) {
+                $rules[$campo] = array_merge($rules[$campo] ?? [], (array) $extra);
             }
         }
 
