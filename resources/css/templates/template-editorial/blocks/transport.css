@@ -180,6 +180,10 @@
     opacity: 0.7;
 }
 
+.te-transport__nav.swiper-button-lock {
+    display: none;
+}
+
 /* Swiper las apaga en los extremos cuando el carrusel no da la vuelta. */
 .te-transport__nav.swiper-button-disabled {
     opacity: 0.3;
