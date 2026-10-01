@@ -13,9 +13,21 @@
  */
 
 .te-gallery {
-    /* Cada foto */
-    --te-gallery-slide-width: clamp(15rem, 28vw, 22rem);
-    --te-gallery-slide-height: clamp(20rem, 38vw, 30rem);
+    /*
+     * Cada foto.
+     *
+     * El alto manda y el ancho lo sigue, para que la foto tenga la misma forma
+     * en cualquier pantalla: la del diseño, 352x480.
+     *
+     * Y el alto sale sobre todo del ALTO de la ventana, no de su ancho. Antes
+     * se calculaba con vw y la sección medía lo mismo —784px— en una pantalla
+     * de 1000 que en una de 600, así que en cualquier portátil bajito la foto
+     * no cabía entera y había que ir bajando para verla. El 86vw es el tope
+     * para que en un móvil muy angosto no se salga de lado.
+     */
+    --te-gallery-slide-ratio: 11 / 15;
+    --te-gallery-slide-height: clamp(17rem, min(58vh, 90vw), 32rem);
+    --te-gallery-slide-width: calc(var(--te-gallery-slide-height) * var(--te-gallery-slide-ratio));
 
     /*
      * La del centro crece y por eso se encima sobre sus vecinas. Se hace así,
@@ -54,7 +66,11 @@
     --te-gallery-bg: #000000;
     --te-gallery-bg-image: none;
 
-    padding-block: clamp(3rem, 6vw, 5rem);
+    /*
+     * El aire de arriba y abajo también cede cuando la pantalla es bajita: si
+     * no, se lleva 160px que le hacen falta a la foto.
+     */
+    padding-block: clamp(2rem, min(6vw, 8vh), 5rem);
     background:
         linear-gradient(0deg, var(--te-gallery-shade) 0%, var(--te-gallery-shade) 100%),
         linear-gradient(0deg, var(--te-gallery-shade) 0%, var(--te-gallery-shade) 100%),
@@ -98,6 +114,15 @@
     scroll-snap-align: center;
 }
 
+/*
+ * La foto es un enlace a sí misma, para abrirla grande en el visor. El bloque
+ * es para que no se cuele el hueco de línea que deja un enlace en línea.
+ */
+.te-gallery__link {
+    display: block;
+    cursor: zoom-in;
+}
+
 .te-gallery__slide img {
     display: block;
     width: 100%;
@@ -126,6 +151,13 @@
     content: "";
     position: absolute;
     inset: 0;
+    /*
+     * Es decoración y nada más: sin esto se traga el clic de la foto que tiene
+     * debajo —cubre toda la diapositiva— y el visor no abre. Ni siquiera basta
+     * con que la del centro vaya en opacity:0, porque una capa transparente
+     * sigue recibiendo el clic.
+     */
+    pointer-events: none;
     background:
         linear-gradient(0deg, var(--te-gallery-shade) 0%, var(--te-gallery-shade) 100%),
         linear-gradient(0deg, var(--te-gallery-shade) 0%, var(--te-gallery-shade) 100%);

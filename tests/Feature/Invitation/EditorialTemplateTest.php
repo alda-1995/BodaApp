@@ -156,6 +156,11 @@ class EditorialTemplateTest extends TestCase
             // no llegue a correr.
             ->assertSee('te-gallery__slide', false)
             ->assertSee('images/assets-editorial/galeria-1.png', false)
+            /*
+            | Cada foto va dentro de un enlace a sí misma: así el visor la abre
+            | en grande, y sin JS el enlace sigue sirviendo para verla.
+            */
+            ->assertSee('<a class="te-gallery__link" href="' . asset('images/assets-editorial/galeria-1.png'), false)
             // La mesa de regalos: las tiendas con su liga y las cuentas en la
             // tarjeta, que es como su diseño reparte lo que hay configurado.
             ->assertSee('MESA DE REGALOS')
