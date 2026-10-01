@@ -1,0 +1,7 @@
+.item-menu-nav{
+    @apply flex items-center gap-3 px-3 py-2 rounded-lg text-[#111418] text-sm font-medium hover:bg-primary400;
+}
+
+.item-menu-nav.active{
+    @apply bg-primary400;
+}

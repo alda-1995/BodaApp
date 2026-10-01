@@ -1,0 +1,377 @@
+/*
+ * Bloque Confirmación de la plantilla "Boda Barco".
+ *
+ * La tarjeta se arma con tres piezas recortadas por máscara: el encabezado
+ * (masktitle), el cuerpo de papel (fondomask) y el pie dentado (footermask).
+ */
+
+.tv-confirm {
+    position: relative;
+    min-height: 500px;
+    padding-block: 4rem;
+    overflow: hidden;
+}
+
+.tv-confirm__bg {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.tv-confirm__content {
+    position: relative;
+    z-index: 5;
+}
+
+.tv-confirm__card {
+    position: relative;
+    width: 100%;
+    max-width: 502px;
+    margin-inline: auto;
+}
+
+/* Flor que se asoma por la esquina y hace parallax con el scroll. */
+.tv-confirm__flower {
+    position: absolute;
+    top: 20%;
+    right: 0;
+    z-index: 5;
+    width: 150px;
+    transform: translateX(60%);
+}
+
+.tv-confirm__flower img {
+    max-width: 100%;
+}
+
+/* --- Encabezado ------------------------------------------------------------ */
+
+.tv-confirm__header {
+    position: relative;
+}
+
+.tv-confirm__header-mask {
+    position: absolute;
+    inset: 0;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+
+.tv-confirm__header-content {
+    position: relative;
+    z-index: 2;
+    min-height: 394px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (min-width: 1024px) {
+    .tv-confirm__header-content {
+        min-height: 570px;
+    }
+}
+
+.tv-confirm__title {
+    width: 300px;
+    font-family: var(--font-antura);
+    font-size: var(--text-size-main);
+    color: #fff;
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .tv-confirm__title {
+        width: 380px;
+    }
+}
+
+/* --- Cuerpo ---------------------------------------------------------------- */
+
+.tv-confirm__body {
+    padding: 2rem 2rem 0;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+@media (min-width: 768px) {
+    .tv-confirm__body {
+        padding: 2.5rem 2.5rem 0;
+    }
+}
+
+@media (min-width: 1024px) {
+    .tv-confirm__body {
+        padding: 3rem 3rem 0;
+    }
+}
+
+.tv-confirm__intro {
+    margin-bottom: 1rem;
+    font-family: var(--font-main);
+    font-size: var(--text-parrafo);
+    color: var(--tv-ink);
+}
+
+.tv-confirm__form-wrap {
+    position: relative;
+}
+
+.tv-confirm__actions {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.tv-confirm__errors ul {
+    margin-top: 0.5rem;
+    padding-left: 1.25rem;
+    list-style: disc;
+    font-family: var(--font-main);
+    font-size: var(--text-parrafo);
+    color: #dc2626;
+    text-align: left;
+}
+
+/* Pie dentado de la tarjeta. */
+.tv-confirm__footer {
+    height: 104px;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: cover;
+    mask-size: cover;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+
+/* --- Campos ---------------------------------------------------------------- */
+
+.tv-field {
+    display: block;
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+.tv-field__label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-family: var(--font-main);
+    font-size: var(--text-size-small-heading);
+    color: var(--tv-ink);
+}
+
+.tv-field input[type="text"],
+.tv-field input[type="tel"],
+.tv-field input[type="email"],
+.tv-field select,
+.tv-field textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(77, 61, 126, 0.3);
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.7);
+    font-family: var(--font-main);
+    font-size: var(--text-parrafo);
+    color: var(--tv-ink);
+}
+
+.tv-field input:disabled {
+    opacity: 0.7;
+}
+
+.tv-field input:focus,
+.tv-field select:focus,
+.tv-field textarea:focus {
+    outline: 2px solid var(--color-brand, #4d3d7e);
+    outline-offset: 1px;
+}
+
+.tv-field__options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.tv-radio {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-main);
+    font-size: var(--text-parrafo);
+    color: var(--tv-ink);
+    cursor: pointer;
+}
+
+/* --- Capa de envío --------------------------------------------------------- */
+
+.tv-confirm__loading {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.5);
+    font-family: var(--font-main);
+    color: var(--tv-ink);
+}
+
+.tv-confirm__loading.is-visible {
+    display: flex;
+}
+
+.tv-confirm__spinner {
+    width: 3rem;
+    height: 3rem;
+    border: 2px solid transparent;
+    border-bottom-color: var(--color-brand, #4d3d7e);
+    border-radius: 50%;
+    animation: tv-spin 1s linear infinite;
+}
+
+@keyframes tv-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* --- Capas de resultado ---------------------------------------------------- */
+
+.tv-confirm__status {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(77, 61, 126, 0.5);
+}
+
+.tv-confirm__status.is-visible {
+    display: flex;
+}
+
+.tv-confirm__calendar {
+    width: 100%;
+    max-width: 400px;
+    min-height: 393px;
+    padding: 3.5rem 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+
+@media (min-width: 768px) {
+    .tv-confirm__calendar {
+        max-width: 560px;
+    }
+}
+
+.tv-confirm__status-title {
+    margin-bottom: 0.5rem;
+    font-family: var(--font-main);
+    font-size: var(--text-size-title);
+    color: var(--tv-ink);
+}
+
+.tv-confirm__status-text {
+    font-family: var(--font-main);
+    font-size: var(--text-size-heading);
+    color: var(--tv-muted);
+}
+
+.tv-confirm__calendar-buttons {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+@media (min-width: 768px) {
+    .tv-confirm__calendar-buttons {
+        margin-top: 2rem;
+    }
+}
+
+.tv-confirm__calendar-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.6);
+    font-family: var(--font-secondary);
+    font-size: var(--text-size-small-heading);
+    color: var(--tv-ink);
+    cursor: pointer;
+    transition: box-shadow 0.3s ease;
+}
+
+.tv-confirm__calendar-button:hover {
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Outlook sólo tiene sentido en escritorio. */
+.tv-confirm__calendar-button--desktop {
+    display: none;
+}
+
+@media (min-width: 1024px) {
+    .tv-confirm__calendar-button--desktop {
+        display: inline-flex;
+    }
+}
+
+.tv-confirm__note {
+    width: 380px;
+    max-width: 100%;
+    padding: 30px;
+    border-radius: 19px;
+    background: var(--color-brand, #4d3d7e);
+    text-align: left;
+}
+
+.tv-confirm__note--error {
+    background: #dc2626;
+}
+
+.tv-confirm__note-title {
+    margin-bottom: 0.5rem;
+    font-family: var(--font-main);
+    font-size: var(--text-size-title);
+    color: #fff;
+}
+
+.tv-confirm__note-text {
+    font-family: var(--font-main);
+    font-size: var(--text-size-subtitle);
+    color: #fff;
+}

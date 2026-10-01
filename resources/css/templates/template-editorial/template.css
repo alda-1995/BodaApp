@@ -1,0 +1,26 @@
+/*
+ * Plantilla "Boda Editorial": CSS3 propio, sin Tailwind.
+ *
+ * Igual que las demás plantillas, este archivo sólo arma las partes:
+ *  - typography.css → fuentes y escala
+ *  - base.css       → paleta, contenedor y piezas comunes
+ *  - blocks/*.css   → un archivo por bloque, como las vistas
+ *
+ * Las clases van con el prefijo .te- y los colores salen de la paleta del
+ * evento (--color-brand*), igual que en "Boda Barco".
+ */
+
+@import url("./typography.css");
+@import url("./base.css");
+
+@import url("./blocks/banner.css");
+@import url("./blocks/itinerary.css");
+@import url("./blocks/story.css");
+@import url("./blocks/gallery.css");
+@import url("./blocks/gift-registry.css");
+@import url("./blocks/dress-code.css");
+@import url("./blocks/hotels.css");
+@import url("./blocks/transport.css");
+@import url("./blocks/faq.css");
+@import url("./blocks/sections.css");
+@import url("./blocks/rsvp.css");

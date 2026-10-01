@@ -1,0 +1,215 @@
+/*
+ * Bloque "Nuestra historia" de Boda Editorial.
+ *
+ * Archivo propio del bloque. Las variables de abajo son las perillas de su
+ * composición: la proporción de la banda ilustrada, cuánto sube el párrafo
+ * sobre ella y el tamaño, el giro y la posición de la foto que aparece al
+ * pasar por un año.
+ *
+ * Colores y tipografías salen SIEMPRE de las variables de la plantilla
+ * (--color-primary, --font-display, --font-secondary), nunca escritas a mano:
+ * así la paleta que elige la pareja alcanza también a este bloque.
+ */
+
+.te-story {
+    /* Banda ilustrada */
+    --te-story-band-ratio: 1280 / 497;
+
+    /* Párrafo: cuánto se monta sobre la banda y qué tan angosto queda */
+    --te-story-intro-width: 34rem;
+    --te-story-intro-pull: 4rem;
+
+    /*
+     * Foto que aparece al elegir un año.
+     *
+     * Cuelga justo debajo de su número, centrada en él: así se lee de inmediato
+     * a qué año pertenece y ninguna tapa a la de al lado.
+     *
+     * Se declara con alto explícito, no con proporción, porque la sección le
+     * reserva ese espacio abajo: si no, la foto se montaría sobre lo que sigue.
+     */
+    --te-story-photo-width: 15rem;
+    --te-story-photo-height: 20rem;
+    --te-story-photo-tilt: -4deg;
+    /* Cuánto sube por encima del año, para arrancar debajo del párrafo. */
+    --te-story-photo-rise: 4rem;
+    /* Separación entre el número y su foto. */
+    --te-story-photo-gap: 1rem;
+    --te-story-photo-speed: 320ms;
+
+    padding-block: clamp(2.5rem, 5vw, 4rem) clamp(3.5rem, 7vw, 6rem);
+    background: var(--te-paper);
+    /* La foto puede asomarse fuera de su año sin abrir scroll horizontal. */
+    overflow-x: clip;
+}
+
+.te-story__title {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--te-size-hero);
+    color: var(--color-primary);
+    margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+/* --- Banda ilustrada -------------------------------------------------------- */
+
+.te-story__band img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+}
+
+@media (min-width: 768px) {
+    .te-story__band img {
+        aspect-ratio: var(--te-story-band-ratio);
+        object-fit: contain;
+    }
+}
+
+/* --- Párrafo ---------------------------------------------------------------- */
+
+.te-story__intro {
+    max-width: var(--te-story-intro-width);
+    margin-inline: auto;
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-text);
+    line-height: var(--te-leading-normal);
+    color: var(--color-primary);
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .te-story__intro {
+        /* Sube sobre la banda, como en el diseño. */
+        margin-top: calc(var(--te-story-intro-pull) * -1);
+    }
+}
+
+/* --- Línea de años ---------------------------------------------------------- */
+
+.te-story__years {
+    position: relative;
+    display: grid;
+    grid-auto-flow: row;
+    gap: 1rem;
+    margin: clamp(2.5rem, 5vw, 4rem) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+@media (min-width: 768px) {
+    .te-story__years {
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(0, 1fr);
+        align-items: end;
+        gap: 0;
+    }
+}
+
+.te-story__year {
+    position: relative;
+    text-align: center;
+}
+
+/* story.js sólo le pone tabindex a los años que sí revelan algo. */
+.te-story__year[tabindex] {
+    cursor: pointer;
+}
+
+/* El ancla de la foto: mide lo que mide el número, y nada más. */
+.te-story__year-anchor {
+    position: relative;
+    display: inline-block;
+}
+
+.te-story__year-number {
+    display: inline-block;
+    padding: 0.5rem 0;
+    /* Por encima de su foto: el año que estás señalando no se tapa solo. */
+    position: relative;
+    z-index: 3;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--te-size-title);
+    line-height: 1;
+    color: var(--color-primary);
+    border-bottom: 1px solid transparent;
+    padding-bottom: 0.25rem;
+    transition: border-color var(--te-story-photo-speed) ease;
+}
+
+/* El año por el que se está pasando queda subrayado. */
+.te-story__year--active .te-story__year-number {
+    border-bottom-color: currentColor;
+}
+
+/* --- La foto de cada año ---------------------------------------------------- */
+
+/*
+ * En móvil no hay "pasar por encima", así que no hay animación: la foto de
+ * cada año se ve siempre, debajo de su número y en el flujo normal.
+ */
+.te-story__year-photo {
+    width: 100%;
+    max-width: var(--te-story-photo-width);
+    margin: 1rem auto 0;
+}
+
+.te-story__year-photo img {
+    display: block;
+    width: 100%;
+    height: var(--te-story-photo-height);
+    object-fit: cover;
+}
+
+@media (min-width: 768px) {
+
+    /*
+     * La fila de años le reserva abajo lo que la foto cuelga por debajo. Ese
+     * hueco existe siempre, con foto o sin ella, para que al aparecer no
+     * empuje lo que sigue.
+     */
+    .te-story__years {
+        margin-bottom: calc(var(--te-story-photo-height) - var(--te-story-photo-rise));
+    }
+
+    /*
+     * Centrada en su año y subida --rise, de modo que arranca debajo del
+     * párrafo y la fila de años le queda encima.
+     */
+    .te-story__year-photo {
+        position: absolute;
+        top: calc(var(--te-story-photo-rise) * -1);
+        left: 50%;
+        z-index: 2;
+        max-width: none;
+        width: var(--te-story-photo-width);
+        margin: 0;
+        pointer-events: none;
+
+        opacity: 0;
+        transform: translate(-50%, -0.75rem) rotate(0deg);
+        transition:
+            opacity var(--te-story-photo-speed) ease,
+            transform var(--te-story-photo-speed) ease;
+    }
+
+    .te-story__year--active .te-story__year-photo {
+        opacity: 1;
+        transform: translate(-50%, 0) rotate(var(--te-story-photo-tilt));
+    }
+}
+
+/* Quien pidió menos movimiento ve la foto aparecer, pero sin desplazarse. */
+@media (prefers-reduced-motion: reduce) {
+
+    .te-story__year-photo,
+    .te-story__year-number {
+        transition-duration: 1ms;
+    }
+
+    .te-story__year--active .te-story__year-photo {
+        transform: translate(-50%, 0) rotate(0deg);
+    }
+}

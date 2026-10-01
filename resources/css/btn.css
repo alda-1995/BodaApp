@@ -1,0 +1,36 @@
+.btn{
+    @apply h-[50px] px-6 md:px-8 inline-flex justify-center text-center items-center max-w-full cursor-pointer;
+}
+
+.btn-main{
+    @apply bg-base-yellow !px-8 text-black text-parrafo font-inter;
+}
+
+.btn-secondary{
+    @apply bg-[#E3E3E3] text-black text-parrafo font-inter;
+}
+
+.btn-cancel{
+    @apply text-[#3952F6] text-parrafo font-inter;
+}
+
+.btn-remove{
+    @apply bg-red-500 text-white text-parrafo font-inter text-center;
+}
+
+.btn-remove-text{
+    @apply text-red-500 text-parrafo font-inter text-center;
+}
+
+/* .btn-primary{
+    @apply bg-primary200 text-white rounded-md text-center;
+    box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.10);
+}
+
+.btn-secondary{
+    @apply bg-secondary text-black rounded-md text-center;
+}
+
+.btn-remove{
+    @apply bg-red-500 text-white rounded-md text-center;
+} */

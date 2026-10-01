@@ -1,0 +1,273 @@
+/*
+ * Bloque banner (portada): sobre animado en canvas, cuenta regresiva, nombre
+ * del invitado y la tarjeta con los datos de la boda.
+ */
+
+.tv-banner {
+    position: relative;
+}
+
+/* --- Nombre del invitado --------------------------------------------------- */
+
+.tv-banner__guest {
+    position: absolute;
+    top: 10%;
+    left: 0;
+    width: 100%;
+    z-index: 2;
+}
+
+@media (min-width: 1280px) {
+    .tv-banner__guest {
+        top: 5%;
+    }
+}
+
+.tv-banner__guest-label {
+    font-family: var(--font-main);
+    font-size: var(--text-parrafo);
+    letter-spacing: 0.14px;
+    color: var(--tv-muted);
+}
+
+.tv-banner__guest-name {
+    font-family: var(--font-main);
+    font-size: var(--text-size-subtitle);
+    color: var(--tv-muted);
+}
+
+/* --- Cuenta regresiva ------------------------------------------------------ */
+
+.tv-countdown {
+    position: absolute;
+    top: 2%;
+    right: 5%;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+}
+
+.tv-countdown__label {
+    font-family: var(--font-main);
+    font-size: var(--text-parrafo);
+    letter-spacing: 0.14px;
+    color: var(--tv-muted);
+}
+
+.tv-countdown__items {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+    .tv-countdown__items {
+        gap: 1rem;
+    }
+}
+
+.tv-countdown__item {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.tv-countdown__value {
+    padding-inline: 1rem;
+    border-radius: 20px;
+    background: #fff;
+    font-family: var(--font-main);
+    font-size: var(--text-size-heading);
+    color: var(--tv-ink);
+}
+
+.tv-countdown__unit {
+    margin-top: 0.5rem;
+    font-family: var(--font-main);
+    font-size: var(--text-parrafo);
+    letter-spacing: 0.14px;
+    color: var(--tv-muted);
+}
+
+/* --- Canvas del sobre ------------------------------------------------------ */
+
+.tv-banner__canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.tv-banner__canvas-inner {
+    position: relative;
+    z-index: 2;
+}
+
+.tv-banner__canvas canvas {
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+    /* En celular el sobre se ve de cerca; desde tablet, a tamaño real. */
+    transform: scale(2);
+}
+
+@media (min-width: 768px) {
+    .tv-banner__canvas canvas {
+        transform: scale(1);
+    }
+}
+
+.tv-scroll-hint {
+    position: absolute;
+    bottom: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: var(--font-main);
+    font-size: var(--text-parrafo);
+    letter-spacing: 0.14px;
+    color: var(--tv-muted);
+}
+
+@media (min-width: 768px) {
+    .tv-scroll-hint {
+        bottom: 5%;
+    }
+}
+
+/* --- Tarjeta de la invitación ---------------------------------------------- */
+
+/* Arranca oculta: la revela la animación del sobre (banner.js). */
+.tv-banner__card {
+    position: relative;
+    z-index: 10;
+    max-width: 36rem;
+    margin-inline: auto;
+    padding-top: 10vh;
+    opacity: 0;
+    transform: translateY(20%) scaleY(0.8);
+}
+
+.tv-banner__paper {
+    min-height: 500px;
+    padding: 2rem;
+    overflow: hidden;
+    background-position: top;
+    background-size: cover;
+    background-repeat: no-repeat;
+    box-shadow: 6px 17px 41px 10px rgba(0, 0, 0, 0.04);
+}
+
+@media (min-width: 768px) {
+    .tv-banner__paper {
+        padding: 2.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .tv-banner__paper {
+        padding: 3rem;
+    }
+}
+
+.tv-banner__inner {
+    padding-bottom: 5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.tv-banner__mark {
+    max-width: 100px;
+    margin: 0 auto 1.5rem;
+}
+
+.tv-banner__names {
+    margin-bottom: 1rem;
+    font-family: var(--font-antura);
+    font-size: var(--text-size-hero);
+    color: var(--tv-ink);
+}
+
+.tv-banner__names span {
+    display: inline-block;
+}
+
+.tv-banner__blessing {
+    margin-bottom: 1rem;
+    font-family: var(--font-main);
+    font-size: var(--text-parrafo);
+    letter-spacing: 0.14px;
+    color: var(--tv-muted);
+}
+
+.tv-banner__blessing--spaced {
+    margin-top: 1.5rem;
+}
+
+.tv-banner__parents {
+    margin-bottom: 1rem;
+    font-family: var(--font-antura);
+    font-size: var(--text-size-subtitle);
+    color: var(--tv-ink);
+}
+
+.tv-banner__date {
+    margin-bottom: 2rem;
+    font-family: var(--font-main);
+    font-size: var(--text-size-main);
+    text-transform: uppercase;
+    color: var(--tv-ink);
+}
+
+/* --- Momentos (ceremonia y fiesta) ----------------------------------------- */
+
+.tv-moment__time {
+    margin-bottom: 1rem;
+    font-family: var(--font-main);
+    font-size: var(--text-size-subtitle);
+    color: var(--tv-ink);
+}
+
+.tv-moment__time--spaced {
+    margin-top: 2rem;
+}
+
+.tv-moment__name {
+    margin-bottom: 1rem;
+    font-family: var(--font-main);
+    font-size: var(--text-parrafo);
+    letter-spacing: 0.14px;
+    color: var(--tv-ink);
+}
+
+.tv-moment__place {
+    margin-bottom: 1rem;
+    font-family: var(--font-antura);
+    font-size: var(--text-size-subtitle);
+    line-height: 2;
+    color: var(--tv-ink);
+}
+
+.tv-moment__location {
+    margin-bottom: 1rem;
+    font-family: var(--font-main);
+    font-size: var(--text-parrafo);
+    letter-spacing: 0.14px;
+    color: var(--tv-muted);
+}
+
+.tv-moment__map {
+    margin-bottom: 1.5rem;
+}
+
+.tv-moment__map--spaced {
+    margin-top: 1.5rem;
+    margin-bottom: 0;
+}

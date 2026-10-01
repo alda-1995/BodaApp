@@ -1,0 +1,353 @@
+/*
+ * Bloque "Confirmación de asistencia" de Boda Editorial.
+ *
+ * Archivo propio del bloque. Las variables de abajo son sus perillas: el velo
+ * sobre la foto de fondo, el ancho del formulario y el trazo de los campos,
+ * que en este diseño son una línea y no una caja.
+ *
+ * Colores y tipografías salen de las variables de la plantilla, nunca escritos
+ * a mano, para que la paleta que elige la pareja alcance también a este bloque.
+ */
+
+.te-rsvp {
+    /*
+     * Fondo. La imagen es opcional: el Blade define --te-rsvp-bg-image sólo si
+     * la pareja subió una, y si no queda el papel. En los dos casos va encima
+     * el mismo velo, así que es una sola declaración.
+     */
+    --te-rsvp-bg: var(--te-paper);
+    --te-rsvp-bg-image: none;
+    /*
+     * La plasta sobre la foto, con el valor del diseño. Es la perilla a mover
+     * si una pareja sube una imagen muy clara u oscura y el texto pierde
+     * contraste.
+     */
+    --te-rsvp-veil: rgba(252, 251, 247, 0.70);
+
+    /*
+     * Formulario, con las medidas del diseño (Figma, sección RSVP): la columna
+     * mide 484px, las dos mitades del nombre 230 con 18 de calle, el recado 52
+     * de alto y el botón 44 con esquinas de 20.
+     */
+    --te-rsvp-form-width: 30.25rem;
+    /* El trazo del diseño es oscuro, no el gris de las separaciones. */
+    --te-rsvp-field-line: var(--color-primary);
+    /* De la línea de un campo a la etiqueta del siguiente. */
+    --te-rsvp-field-gap: 0.95rem;
+    /* Entre las dos mitades del nombre. */
+    --te-rsvp-column-gap: 1.125rem;
+    /* Antes de un grupo: la pregunta de asistencia y el recado respiran más. */
+    --te-rsvp-group-gap: 1.75rem;
+    --te-rsvp-radio-size: 14px;
+
+    position: relative;
+    padding-block: clamp(3.5rem, 7vw, 6rem);
+    background:
+        linear-gradient(0deg, var(--te-rsvp-veil) 0%, var(--te-rsvp-veil) 100%),
+        var(--te-rsvp-bg-image) var(--te-rsvp-bg) center / cover no-repeat;
+}
+
+.te-rsvp__inner {
+    text-align: center;
+}
+
+/* Boska a 23px, sin espaciado extra: el aire se lo dan las versalitas. */
+.te-rsvp__kicker {
+    font-family: var(--font-display);
+    font-size: var(--te-size-subtitle);
+    text-transform: uppercase;
+    color: var(--color-primary);
+}
+
+.te-rsvp__title {
+    margin-top: 0.5rem;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: var(--te-size-hero);
+    color: var(--color-primary);
+}
+
+.te-rsvp__intro {
+    max-width: 18rem;
+    margin: 1rem auto 0;
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-text);
+    line-height: var(--te-leading-normal);
+    color: var(--color-primary);
+    text-wrap: balance;
+}
+
+/*
+ * Los avisos que reemplazan al formulario —plazo vencido, o confirmación sólo
+ * por invitación personal— son prosa, no el renglón de la fecha límite: se les
+ * da el ancho del formulario (484px en el diseño) para que no caigan en una
+ * tira de tres palabras por línea.
+ */
+.te-rsvp__intro--notice {
+    max-width: 30rem;
+}
+
+/* --- El formulario ---------------------------------------------------------- */
+
+.te-rsvp__form-wrap {
+    position: relative;
+    max-width: var(--te-rsvp-form-width);
+    margin: clamp(2rem, 4vw, 3rem) auto 0;
+    text-align: left;
+}
+
+.te-rsvp__form-wrap form {
+    display: grid;
+    gap: var(--te-rsvp-field-gap);
+}
+
+.te-rsvp__row {
+    display: grid;
+    gap: var(--te-rsvp-column-gap);
+}
+
+@media (min-width: 480px) {
+    .te-rsvp__row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* --- Los campos ------------------------------------------------------------- */
+
+.te-field {
+    display: grid;
+    gap: 0.35rem;
+    min-width: 0;
+    border: 0;
+    padding: 0;
+    margin: 0;
+}
+
+/* La etiqueta es la letra chica del diseño: 10px, sin espaciado extra. */
+.te-field > span,
+.te-field legend {
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-caption);
+    color: var(--te-muted);
+    padding: 0;
+}
+
+/* El campo es una línea, no una caja: es lo que le da el aire al diseño. */
+.te-field input[type="text"],
+.te-field input[type="tel"],
+.te-field input[type="email"],
+.te-field select,
+.te-field textarea {
+    width: 100%;
+    border: 0;
+    border-bottom: 1px solid var(--te-rsvp-field-line);
+    border-radius: 0;
+    /* 11px bajo el texto hasta la línea, como en el diseño. */
+    padding: 0 0 0.7rem;
+    background: none;
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-text);
+    color: var(--color-primary);
+}
+
+.te-field input::placeholder,
+.te-field textarea::placeholder {
+    color: var(--color-primary);
+    opacity: 0.85;
+}
+
+.te-field input:focus,
+.te-field select:focus,
+.te-field textarea:focus {
+    outline: none;
+    border-bottom-color: var(--color-primary);
+}
+
+.te-field input:disabled {
+    color: var(--te-muted);
+}
+
+/* El recado sí va en caja: es el único campo largo del formulario. */
+.te-field--boxed {
+    margin-top: var(--te-rsvp-group-gap);
+}
+
+.te-field--boxed textarea {
+    min-height: 52px;
+    border: 1px solid var(--te-rsvp-field-line);
+    padding: 0.75rem;
+}
+
+/* Su rótulo no es letra chica: va al tamaño del texto, en versalitas. */
+.te-field--boxed > span {
+    font-size: var(--te-size-text);
+    text-transform: uppercase;
+    color: var(--color-primary);
+}
+
+/* --- Asistencia ------------------------------------------------------------- */
+
+.te-field--options {
+    gap: 0.6rem;
+    margin-top: var(--te-rsvp-group-gap);
+}
+
+/* La pregunta pesa como un rótulo de sección, no como una etiqueta de campo. */
+.te-field--options legend {
+    margin-bottom: 0.4rem;
+    font-size: var(--te-size-text);
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--color-primary);
+}
+
+.te-radio {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-text);
+    color: var(--color-primary);
+    cursor: pointer;
+}
+
+/*
+ * El círculo del diseño es más fino y más chico que el del navegador, así que
+ * se dibuja a mano en vez de dejar el control nativo.
+ */
+.te-radio input[type="radio"] {
+    appearance: none;
+    flex: 0 0 auto;
+    width: var(--te-rsvp-radio-size);
+    height: var(--te-rsvp-radio-size);
+    margin: 0;
+    border: 0.75px solid var(--color-primary);
+    border-radius: 50%;
+    background: none;
+    cursor: pointer;
+}
+
+.te-radio input[type="radio"]:checked {
+    /* El punto va dentro, sin tocar el aro. */
+    background: radial-gradient(circle, var(--color-primary) 0 45%, transparent 46%);
+}
+
+.te-radio input[type="radio"]:focus-visible {
+    outline: 1px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* --- Enviar ----------------------------------------------------------------- */
+
+/* 44px de alto y esquinas de 20, como en el diseño. */
+.te-rsvp__submit {
+    justify-self: stretch;
+    min-height: 44px;
+    margin-top: var(--te-rsvp-group-gap);
+    padding: 0.5rem 1.5rem;
+    border: 1px solid var(--color-primary);
+    border-radius: 20px;
+    /* Relleno blanco: es lo único del formulario que tapa la foto. */
+    background: var(--te-white);
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-text);
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    cursor: pointer;
+    transition: background-color 200ms ease, color 200ms ease;
+}
+
+.te-rsvp__submit:hover,
+.te-rsvp__submit:focus-visible {
+    background: var(--color-primary);
+    color: var(--te-white);
+}
+
+/* --- Errores, espera y respuesta -------------------------------------------- */
+
+.te-rsvp__errors ul {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0;
+    padding-left: 1.1rem;
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-caption);
+    color: #a03a3a;
+}
+
+.te-rsvp__loading {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    background: var(--te-rsvp-veil);
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-caption);
+    color: var(--te-muted);
+}
+
+.te-rsvp__loading.is-visible {
+    display: flex;
+}
+
+.te-rsvp__spinner {
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 2px solid var(--te-line);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: te-rsvp-spin 900ms linear infinite;
+}
+
+@keyframes te-rsvp-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .te-rsvp__spinner {
+        animation-duration: 3s;
+    }
+}
+
+.te-rsvp__status {
+    display: none;
+    max-width: var(--te-rsvp-form-width);
+    margin: clamp(2rem, 4vw, 3rem) auto 0;
+    padding-inline: 1.5rem;
+}
+
+.te-rsvp__status.is-visible {
+    display: block;
+}
+
+.te-rsvp__note {
+    padding: clamp(1.5rem, 3vw, 2rem);
+    border: 1px solid var(--te-rsvp-field-line);
+    background: var(--te-white);
+    text-align: center;
+}
+
+.te-rsvp__note h3 {
+    font-family: var(--font-display);
+    font-size: var(--te-size-subtitle);
+    color: var(--color-primary);
+}
+
+.te-rsvp__note p {
+    margin-top: 0.75rem;
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-text);
+    color: var(--te-muted);
+}
+
+.te-rsvp__note--error p {
+    color: #a03a3a;
+}

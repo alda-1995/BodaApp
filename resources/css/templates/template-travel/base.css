@@ -1,0 +1,130 @@
+/*
+ * Base de la plantilla "Boda Barco": colores, contenedor y piezas que comparten
+ * todos sus bloques. Cada bloque tiene su propio archivo en ./blocks/.
+ */
+
+.tv {
+    --tv-ink: var(--color-brand, #4d3d7e);
+    --tv-muted: #8b8494;
+    --tv-footer: #625d74;
+    --tv-paper: #f3efee;
+    --tv-bg-second: linear-gradient(180deg, #fefdfb 0%, #f3efee 100%);
+    --tv-bg-accent: linear-gradient(180deg, #f3efee -47.39%, #fffff9 52.61%);
+    --tv-bg-purple: linear-gradient(180deg, #f3f0ee 0%, #fffff6 18.52%);
+
+    background: var(--tv-bg-accent);
+    font-family: var(--font-secondary);
+    color: var(--inv-text);
+}
+
+.tv h1,
+.tv h2,
+.tv h3,
+.tv p {
+    margin: 0;
+}
+
+/* Mismo contenedor del diseño original: sin ancho máximo, sólo respiro lateral. */
+.tv-container {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: 2rem;
+}
+
+@media (min-width: 640px) {
+    .tv-container {
+        padding-inline: 3rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .tv-container {
+        padding-inline: 4rem;
+    }
+}
+
+/* Caja centrada de contenido (max-w-xl del diseño original). */
+.tv-narrow {
+    max-width: 36rem;
+    margin-inline: auto;
+}
+
+.tv-center {
+    text-align: center;
+}
+
+.tv-section {
+    padding-block: clamp(3rem, 6vw, 6rem);
+    position: relative;
+}
+
+.tv-section--second {
+    background: var(--tv-bg-second);
+    overflow-x: hidden;
+}
+
+.tv-section--paper {
+    background: var(--tv-paper);
+}
+
+.tv-section--purple {
+    background: var(--tv-bg-purple);
+    padding-top: clamp(6rem, 12vw, 12rem);
+}
+
+.tv-heading {
+    font-family: var(--font-main);
+    color: var(--tv-ink);
+    font-size: var(--text-size-main);
+    text-transform: uppercase;
+    line-height: 1.3;
+}
+
+.tv-title{
+    font-family: var(--font-main);
+    color: var(--tv-ink);
+    font-size: var(--text-size-title);
+    line-height: 1.3;
+}
+
+.tv-subheading {
+    font-family: var(--font-main);
+    color: var(--tv-muted);
+    font-size: var(--text-size-title);
+    line-height: 1.4;
+}
+
+.tv-text {
+    font-family: var(--font-main);
+    color: var(--tv-muted);
+    font-size: var(--text-parrafo);
+    letter-spacing: 0.14px;
+    line-height: 1.6;
+}
+
+/* Botón con contorno del diseño original (.btn.btn-ouline-main). */
+.tv-link {
+    display: inline-flex;
+    align-items: center;
+    height: 44px;
+    padding-inline: 1.5rem;
+    border: 1px solid var(--tv-ink);
+    border-radius: 5.333px;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    color: var(--tv-ink);
+    font-family: var(--font-aboreto);
+    font-size: var(--text-size-small-heading);
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+.tv-link:hover {
+    background: var(--tv-ink);
+    color: #fff;
+}
+
+/* Interlineado amplio para los nombres de lugares. */
+.tv-line-max {
+    line-height: 2;
+}

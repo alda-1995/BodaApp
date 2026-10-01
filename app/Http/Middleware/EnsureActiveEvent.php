@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+/**
+ * Pantallas que sólo tienen sentido con una invitación comprada y vigente
+ * (invitados, notificaciones y configuración). Sin ella se manda al organizador
+ * a "Información del evento", donde se le invita a comprar una.
+ */
+class EnsureActiveEvent
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        $event = $request->user()?->currentEvent();
+
+        if (!$event?->isAvailable()) {
+            return redirect()->route('events.info')->with(
+                'error',
+                $event
+                    ? 'Tu invitación digital venció. Compra una nueva para volver a usar esta sección.'
+                    : 'Necesitas una invitación digital para usar esta sección.'
+            );
+        }
+
+        return $next($request);
+    }
+}

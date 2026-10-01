@@ -1,0 +1,108 @@
+/*
+ * Bloque "Preguntas frecuentes" de Boda Editorial.
+ *
+ * Archivo propio del bloque, con las medidas del diseño (Figma): barras de
+ * 931x84 con esquinas de 8, separadas 10, y 30 de aire a cada lado.
+ *
+ * Colores y tipografías salen de las variables de la plantilla, nunca escritos
+ * a mano, para que la paleta que elige la pareja alcance también a este bloque.
+ */
+
+.te-faq {
+    --te-faq-list-width: 58.1875rem;
+    --te-faq-row-bg: var(--te-paper);
+    --te-faq-row-radius: 8px;
+    --te-faq-row-gap: 10px;
+    --te-faq-row-padding: 1.875rem;
+    /* Alto mínimo de la barra cerrada. */
+    --te-faq-row-height: 84px;
+    --te-faq-sign-size: 24px;
+    --te-faq-speed: 250ms;
+
+    padding-block: clamp(3rem, 6vw, 5rem);
+    background: var(--te-white);
+}
+
+.te-faq__title {
+    font-family: var(--font-display);
+    font-size: var(--te-size-section);
+    text-transform: uppercase;
+    color: var(--color-primary);
+    text-align: center;
+    margin-bottom: clamp(2rem, 4vw, 3rem);
+}
+
+/* --- La lista --------------------------------------------------------------- */
+
+.te-faq__list {
+    display: grid;
+    gap: var(--te-faq-row-gap);
+    max-width: var(--te-faq-list-width);
+    margin-inline: auto;
+}
+
+.te-faq__item {
+    border-radius: var(--te-faq-row-radius);
+    background: var(--te-faq-row-bg);
+    /* La respuesta crece dentro: que no se salga por las esquinas. */
+    overflow: hidden;
+}
+
+/* --- La pregunta ------------------------------------------------------------ */
+
+.te-faq__question {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    width: 100%;
+    min-height: var(--te-faq-row-height);
+    padding: 1rem var(--te-faq-row-padding);
+    border: 0;
+    background: none;
+    font-family: var(--font-secondary);
+    font-style: italic;
+    font-size: var(--te-size-text);
+    line-height: var(--te-leading-normal);
+    color: var(--color-primary);
+    text-align: left;
+    cursor: pointer;
+}
+
+.te-faq__sign {
+    flex: 0 0 auto;
+    width: var(--te-faq-sign-size);
+    height: var(--te-faq-sign-size);
+    color: var(--color-primary);
+    transition: transform var(--te-faq-speed) ease;
+}
+
+/* Abierta, el signo gira y se lee como una equis. */
+.te-faq__sign.is-open {
+    transform: rotate(45deg);
+}
+
+/* --- La respuesta ----------------------------------------------------------- */
+
+/*
+ * El relleno va dentro y no en el contenedor que se colapsa: Alpine anima su
+ * altura, y con padding propio la barra cerrada no quedaría a cero.
+ */
+.te-faq__answer-inner {
+    padding: 0 var(--te-faq-row-padding) 1.5rem;
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-text);
+    line-height: var(--te-leading-normal);
+    color: var(--te-muted);
+}
+
+.te-faq__answer-inner a {
+    color: var(--color-primary);
+    text-underline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .te-faq__sign {
+        transition-duration: 1ms;
+    }
+}

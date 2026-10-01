@@ -1,0 +1,189 @@
+/*
+ * Bloque "Galería" de Boda Editorial.
+ *
+ * Archivo propio del bloque. Las variables de abajo son sus perillas: el ancho
+ * y el alto de cada foto, cuánto se encima la del centro sobre las de los
+ * lados, y qué tanto se achican y se apagan esas.
+ *
+ * Colores y tipografías salen de las variables de la plantilla, nunca escritos
+ * a mano, para que la paleta que elige la pareja alcance también a este bloque.
+ *
+ * El carrusel lo arma Swiper (gallery.js). Sin JS, .te-gallery__track se queda
+ * como una fila con scroll horizontal: se ven las fotos igual.
+ */
+
+.te-gallery {
+    /* Cada foto */
+    --te-gallery-slide-width: clamp(15rem, 28vw, 22rem);
+    --te-gallery-slide-height: clamp(20rem, 38vw, 30rem);
+
+    /*
+     * La del centro crece y por eso se encima sobre sus vecinas. Se hace así,
+     * y no acercándolas con márgenes negativos, porque eso encimaría también
+     * las laterales entre ellas.
+     */
+    --te-gallery-active-scale: 1.22;
+
+    /*
+     * La plasta que llevan encima las fotos de los lados y, si la hay, la
+     * imagen de fondo de la sección. La del centro va limpia.
+     *
+     * Son dos capas del mismo negro, como en el diseño: al superponerse dan
+     * un oscurecido más hondo que una sola.
+     */
+    --te-gallery-shade: rgba(0, 0, 0, 0.20);
+
+    /* Separación entre fotos cuando ninguna crece. */
+    --te-gallery-gap: 1rem;
+
+    /*
+     * Cuánto se sale la del centro por arriba y por abajo al crecer. Se calcula
+     * en vez de escribirse para que siga siendo correcto si cambias la escala o
+     * el alto: es lo que hay que dejarle libre arriba y abajo.
+     */
+    --te-gallery-grow: calc((var(--te-gallery-active-scale) - 1) / 2 * var(--te-gallery-slide-height));
+
+    --te-gallery-speed: 400ms;
+
+    /*
+     * El fondo de la sección. La imagen es opcional: el Blade define
+     * --te-gallery-bg-image sólo si la pareja subió una, y si no, queda el
+     * negro. En los dos casos van encima las mismas dos capas de plasta, así
+     * que es una sola declaración y no dos caminos distintos.
+     */
+    --te-gallery-bg: #000000;
+    --te-gallery-bg-image: none;
+
+    padding-block: clamp(3rem, 6vw, 5rem);
+    background:
+        linear-gradient(0deg, var(--te-gallery-shade) 0%, var(--te-gallery-shade) 100%),
+        linear-gradient(0deg, var(--te-gallery-shade) 0%, var(--te-gallery-shade) 100%),
+        var(--te-gallery-bg-image) var(--te-gallery-bg) 50% / cover no-repeat;
+    overflow-x: clip;
+}
+
+/* --- El carrusel ------------------------------------------------------------ */
+
+.te-gallery__carousel {
+    position: relative;
+    /* Lo que la foto del centro necesita para crecer sin salirse. */
+    padding-top: var(--te-gallery-grow);
+}
+
+/*
+ * La foto del centro crece por encima de su caja: si el carrusel recortara,
+ * le cortaría los bordes de arriba y abajo.
+ */
+.te-gallery__viewport {
+    overflow: visible;
+}
+
+/*
+ * Sin Swiper esto es una fila que se desplaza a mano. Cuando Swiper toma el
+ * control le pone su propio display y estas reglas dejan de aplicar.
+ */
+.te-gallery__track {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    padding-inline: 1.5rem;
+    scroll-snap-type: x mandatory;
+}
+
+.te-gallery__slide {
+    position: relative;
+    flex: 0 0 auto;
+    width: var(--te-gallery-slide-width);
+    margin: 0;
+    scroll-snap-align: center;
+}
+
+.te-gallery__slide img {
+    display: block;
+    width: 100%;
+    height: var(--te-gallery-slide-height);
+    object-fit: cover;
+}
+
+/*
+ * Con Swiper: las fotos se encima un poco y las de los lados se achican y se
+ * apagan, de modo que la del centro manda.
+ */
+.swiper-initialized .te-gallery__track {
+    display: flex;
+    gap: 0;
+    overflow: visible;
+    padding-inline: 0;
+}
+
+.swiper-initialized .te-gallery__slide {
+    margin-inline: calc(var(--te-gallery-gap) / 2);
+    transition: transform var(--te-gallery-speed) ease;
+}
+
+/* La plasta de las de los lados. */
+.swiper-initialized .te-gallery__slide::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(0deg, var(--te-gallery-shade) 0%, var(--te-gallery-shade) 100%),
+        linear-gradient(0deg, var(--te-gallery-shade) 0%, var(--te-gallery-shade) 100%);
+    transition: opacity var(--te-gallery-speed) ease;
+}
+
+/* La del centro crece sobre su caja, y al crecer tapa a las de al lado. */
+.swiper-initialized .te-gallery__slide.swiper-slide-active {
+    z-index: 2;
+    transform: scale(var(--te-gallery-active-scale));
+}
+
+/* Y va limpia: sin plasta encima. */
+.swiper-initialized .te-gallery__slide.swiper-slide-active::after {
+    opacity: 0;
+}
+
+/* --- Los puntos ------------------------------------------------------------- */
+
+/*
+ * Swiper le pone su propia clase, que la coloca en absoluto. Aquí manda el
+ * flujo: los puntos van debajo de las fotos y nunca encima de ellas.
+ */
+.te-gallery .te-gallery__dots {
+    position: relative;
+    /* Por encima de la foto del centro, que llega hasta aquí abajo. */
+    z-index: 3;
+    width: auto;
+}
+
+.te-gallery__dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    /* Libra lo que la foto del centro se sale por abajo, y luego respira. */
+    margin-top: calc(var(--te-gallery-grow) + clamp(1.5rem, 3vw, 2.5rem));
+}
+
+.te-gallery__dots .swiper-pagination-bullet {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    border: 0;
+    padding: 0;
+    background: var(--te-white);
+    opacity: 0.35;
+    cursor: pointer;
+    transition: opacity var(--te-gallery-speed) ease;
+}
+
+.te-gallery__dots .swiper-pagination-bullet-active {
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .swiper-initialized .te-gallery__slide,
+    .te-gallery__dots .swiper-pagination-bullet {
+        transition-duration: 1ms;
+    }
+}

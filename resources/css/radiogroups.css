@@ -1,0 +1,19 @@
+.radio-group{
+    @apply flex flex-col mb-4;
+}
+
+.radio-group label{
+    @apply font-main text-size-small-heading leading-normal text-accent mb-2;
+}
+
+.radio-group .radio-control{
+    @apply inline-flex items-center cursor-pointer;
+}
+
+.radio-group .radio-control .text-control{
+    @apply text-gray text-parrafo font-main;
+}
+
+.radio-group .radio-control .checkbox{
+    @apply w-5 h-5 mr-2 inline-block rounded-full border-2 border-gray;
+}

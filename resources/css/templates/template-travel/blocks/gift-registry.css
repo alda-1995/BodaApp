@@ -1,0 +1,93 @@
+/* Bloque Mesa de regalos de la plantilla "Boda Barco". */
+
+.tv-gifts {
+    background: var(--tv-bg-second);
+    padding-bottom: clamp(16rem, 30vw, 28rem);
+    overflow-x: hidden;
+}
+
+.tv-gifts__content {
+    position: relative;
+    z-index: 100;
+    max-width: 640px;
+    margin-inline: auto;
+    text-align: center;
+}
+
+.tv-gifts__option {
+    margin-top: 2rem;
+}
+
+.tv-gifts__type {
+    font-family: var(--font-main);
+    font-size: var(--text-size-subtitle);
+    color: var(--tv-muted);
+    margin-bottom: 1rem;
+}
+
+.tv-gifts__label {
+    font-family: var(--font-main);
+    color: var(--tv-muted);
+    font-size: var(--text-parrafo);
+}
+
+/* Dato que sólo se lee (el nombre del titular). */
+.tv-gifts__value {
+    font-family: var(--font-main);
+    font-size: var(--text-size-subtitle);
+    color: var(--tv-ink);
+    margin-bottom: 1rem;
+}
+
+.tv-copy {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.tv-copy__value {
+    flex: 1;
+    font-family: var(--font-main);
+    font-size: var(--text-size-subtitle);
+    color: var(--tv-ink);
+    word-break: break-word;
+}
+
+.tv-copy__button {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    cursor: pointer;
+    color: var(--tv-ink);
+    background: rgba(220, 211, 248, 0.5);
+}
+
+.tv-copy__done {
+    position: absolute;
+    right: 0;
+    top: -3rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    background: #16a34a;
+    color: #fff;
+    font-family: var(--font-aboreto);
+    font-size: 0.75rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.tv-flower {
+    position: absolute;
+    width: clamp(70px, 12vw, 150px);
+}
+
+.falling-flower-static img {
+    transform-origin: 50% 50%;
+}

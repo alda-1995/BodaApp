@@ -1,0 +1,193 @@
+/*
+ * Bloque "Transporte" de Boda Editorial.
+ *
+ * Archivo propio del bloque. Las variables de abajo son sus perillas: la
+ * proporción del mapa, dónde cae el título sobre él y el tamaño de la tarjeta
+ * de cada corrida.
+ *
+ * Colores y tipografías salen de las variables de la plantilla, nunca escritos
+ * a mano, para que la paleta que elige la pareja alcance también a este bloque.
+ */
+
+.te-transport {
+    /* Mapa ilustrado */
+    --te-transport-map-ratio: 16 / 9;
+
+    /* Dónde se apoya el título sobre el mapa. */
+    --te-transport-title-bottom: 12%;
+
+    /* Tarjeta de la corrida */
+    --te-transport-card-bg: var(--te-paper-soft);
+    --te-transport-card-width: 22rem;
+    --te-transport-card-padding: clamp(1.25rem, 2.5vw, 1.75rem);
+
+    /* Flechas */
+    --te-transport-nav-size: 2.5rem;
+
+    --te-transport-gap: clamp(1rem, 2vw, 1.5rem);
+
+    padding-block: clamp(3rem, 6vw, 5rem);
+    background: var(--te-white);
+}
+
+/* --- El mapa y su título ---------------------------------------------------- */
+
+.te-transport__map {
+    position: relative;
+}
+
+.te-transport__map img {
+    display: block;
+    width: 100%;
+    aspect-ratio: var(--te-transport-map-ratio);
+    object-fit: contain;
+}
+
+/*
+ * En móvil el título va debajo del mapa: encima se le montaría al dibujo, que
+ * ahí es mucho más chico.
+ */
+.te-transport__title {
+    margin-top: 1rem;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--te-size-title);
+    letter-spacing: 0.04em;
+    color: var(--color-primary);
+    text-align: center;
+}
+
+@media (min-width: 900px) {
+    .te-transport__title {
+        position: absolute;
+        left: 0;
+        bottom: var(--te-transport-title-bottom);
+        margin-top: 0;
+        text-align: left;
+    }
+}
+
+/* --- Las corridas ----------------------------------------------------------- */
+
+.te-transport__rides {
+    display: flex;
+    align-items: center;
+    gap: var(--te-transport-gap);
+    margin-top: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+@media (min-width: 900px) {
+
+    /* Alineadas a la izquierda, debajo del título. */
+    .te-transport__rides {
+        justify-content: flex-start;
+    }
+}
+
+.te-transport__viewport {
+    width: 100%;
+    max-width: var(--te-transport-card-width);
+    /*
+     * Swiper le pone margin-inline: auto a su contenedor. Dentro de esta fila,
+     * ese margen se come el espacio libre y manda las flechas a las orillas,
+     * lejos de la tarjeta. Aquí las tres piezas van juntas.
+     */
+    margin-inline: 0;
+}
+
+/*
+ * Sin Swiper esto es una fila que se recorre a mano. Cuando Swiper toma el
+ * control le pone su propio display y estas reglas dejan de aplicar.
+ */
+.te-transport__track {
+    display: flex;
+    gap: var(--te-transport-gap);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+}
+
+.te-transport__ride {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    padding: var(--te-transport-card-padding);
+    background: var(--te-transport-card-bg);
+}
+
+/*
+ * Cuando Swiper toma el control, el respaldo estorba y hay que apagarlo:
+ *
+ *  - el 'gap' no entra en su cuenta, así que cada paso se desfasa y la tarjeta
+ *    queda a medio camino;
+ *  - el 'overflow' del wrapper le pelea el desplazamiento, porque él mueve el
+ *    wrapper y recorta en el contenedor;
+ *  - el 'flex-basis: 100%' le gana al ancho que Swiper le pone a cada slide.
+ */
+.swiper-initialized .te-transport__track {
+    gap: 0;
+    overflow: visible;
+    scroll-snap-type: none;
+}
+
+.swiper-initialized .te-transport__ride {
+    flex: 0 0 auto;
+}
+
+.te-transport__time {
+    font-family: var(--font-display);
+    font-size: var(--te-size-text);
+    color: var(--color-primary);
+}
+
+.te-transport__route {
+    margin-top: 0.5rem;
+    font-family: var(--font-display);
+    font-size: var(--te-size-subtitle);
+    line-height: 1.3;
+    color: var(--color-primary);
+    text-wrap: balance;
+}
+
+.te-transport__detail {
+    margin-top: 0.65rem;
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-caption);
+    line-height: 1.6;
+    letter-spacing: 0.04em;
+    color: var(--te-muted);
+}
+
+/* --- Las flechas ------------------------------------------------------------ */
+
+.te-transport__nav {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--te-transport-nav-size);
+    height: var(--te-transport-nav-size);
+    border: 1px solid var(--color-primary);
+    border-radius: 50%;
+    background: none;
+    font-size: var(--te-size-text);
+    line-height: 1;
+    color: var(--color-primary);
+    cursor: pointer;
+    transition: opacity 200ms ease;
+}
+
+.te-transport__nav:hover,
+.te-transport__nav:focus-visible {
+    opacity: 0.7;
+}
+
+/* Swiper las apaga en los extremos cuando el carrusel no da la vuelta. */
+.te-transport__nav.swiper-button-disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .te-transport__nav {
+        transition-duration: 1ms;
+    }
+}

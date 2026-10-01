@@ -1,0 +1,78 @@
+/*
+ * Bloques de "Boda Editorial" que comparten la misma lógica de maqueta:
+ * columnas que se apilan en móvil y se abren en escritorio.
+ *
+ * El diseño trabaja a 1280px con dos columnas de 484px y calles de 100px; aquí
+ * eso se traduce a grid, que es lo que aguanta cualquier ancho.
+ */
+
+/* --- Piezas compartidas ---------------------------------------------------- */
+
+.te-link {
+    display: inline-block;
+    margin-top: 1rem;
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-text);
+    font-weight: 600;
+    color: var(--te-ink);
+    text-decoration: none;
+    border-bottom: 1px solid var(--te-ink);
+    padding-bottom: 2px;
+}
+
+.te-button {
+    margin-top: 1.5rem;
+    padding: 0.875rem 2rem;
+    border: 1px solid var(--te-ink);
+    background: var(--te-ink);
+    color: var(--te-paper);
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-text);
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.te-button:hover {
+    opacity: 0.85;
+}
+
+/* --- Pie ------------------------------------------------------------------------ */
+
+.te-footer {
+    padding-block: clamp(3.5rem, 7vw, 6rem);
+    background: var(--te-paper);
+}
+
+.te-footer__monogram {
+    width: 73px;
+    margin-inline: auto;
+}
+
+/* Boska Medium Italic a 64px en el diseño; aquí Playfair, que la sustituye. */
+.te-footer__names {
+    margin-top: 1.625rem;
+    font-family: var(--font-display);
+    font-size: var(--te-size-hero);
+    font-weight: 500;
+    font-style: italic;
+    line-height: var(--te-leading-tight);
+}
+
+/*
+ * Fecha y ciudad son el mismo renglón de datos y se ven igual: Inter 18 en la
+ * misma tinta que los nombres. Sin gris ni espaciado extra: el diseño los pone
+ * en negro y sin tracking, al revés que las versales de la portada.
+ */
+.te-footer__date,
+.te-footer__place {
+    font-size: var(--te-size-text);
+}
+
+.te-footer__date {
+    margin-top: 1.25rem;
+}
+
+.te-footer__place {
+    margin-top: 1rem;
+}

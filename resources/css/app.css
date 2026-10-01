@@ -1,0 +1,73 @@
+@import 'tailwindcss';
+@import './reset.css';
+@import './fonts.css';
+@import './btn.css';
+@import './inputs.css';
+@import './menu.css';
+@import './select.css';
+@import './radiogroups.css';
+@import './templates/template-travel/main.css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+
+   --color-base-gray: #929292;
+   --color-base-yellow: #FCFDCA;
+   --color-base-blue: #3952F6;
+   --color-base-redop: #EDD8D8;
+
+   --color-primary100: #C999C7;
+   --color-primary200: #363BAD;
+   --color-primary300: #D3D3FF;
+   --color-primary400: #EFE5DC;
+   --color-black: #252727;
+   --color-secondary: #f0f0f4;
+
+   --color-complement300: #373760;
+   --color-complement400: #D9D9D9;
+   --color-complement500: #2A172B;
+
+   --color-black: #0F1010;
+   --color-white: #FFFFFF;
+   --color-gray: #797979;
+
+   --color-main: #4D3D7E;
+   --color-accent: #8B8494;
+   --color-bgfooter: #625D74;
+}
+
+h1 {
+   line-height: 1.6;
+}
+
+h2,
+h3,
+h4,
+h5,
+p {
+   line-height: 1.4;
+}
+
+.line-max {
+   line-height: 2;
+}
+
+.container {
+   @apply px-8 sm:px-12 md:px-16 mx-auto;
+}
+
+.container-center {
+   @apply max-w-5xl mx-auto;
+}
+
+.main-wrap {
+   @apply pt-24 lg:pt-0 lg:pl-[240px];
+}
+
+.parrafo {
+   letter-spacing: 0.14px;
+}

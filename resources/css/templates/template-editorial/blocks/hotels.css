@@ -1,0 +1,92 @@
+/*
+ * Bloque "Hoteles recomendados" de Boda Editorial.
+ *
+ * Archivo propio del bloque. Las variables de abajo son sus perillas: el aire
+ * de la tarjeta, la proporción de la foto y la calle entre tarjetas.
+ *
+ * Colores y tipografías salen de las variables de la plantilla, nunca escritos
+ * a mano, para que la paleta que elige la pareja alcance también a este bloque.
+ */
+
+.te-hotels {
+    /* Tarjeta */
+    --te-hotels-card-bg: var(--te-white);
+    --te-hotels-card-padding: clamp(1.25rem, 2.5vw, 1.75rem);
+
+    /* Foto: el diseño la deja apaisada y despegada del borde de la tarjeta. */
+    --te-hotels-photo-ratio: 16 / 11;
+
+    /* Cuánto separa la foto del texto de abajo. */
+    --te-hotels-photo-gap: clamp(2rem, 4vw, 3.25rem);
+
+    --te-hotels-gap: clamp(1.5rem, 3vw, 2rem);
+
+    padding-block: clamp(3rem, 6vw, 5rem);
+    background: var(--te-paper);
+}
+
+.te-hotels__title {
+    max-width: 22rem;
+    margin: 0 auto;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--te-size-title);
+    line-height: 1.25;
+    letter-spacing: 0.04em;
+    color: var(--color-primary);
+    text-align: center;
+    text-wrap: balance;
+}
+
+/* --- Las tarjetas ----------------------------------------------------------- */
+
+.te-hotels__grid {
+    display: grid;
+    gap: var(--te-hotels-gap);
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+}
+
+@media (min-width: 768px) {
+    .te-hotels__grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.te-hotels__card {
+    display: flex;
+    flex-direction: column;
+    padding: var(--te-hotels-card-padding);
+    background: var(--te-hotels-card-bg);
+}
+
+.te-hotels__photo img {
+    display: block;
+    width: 100%;
+    aspect-ratio: var(--te-hotels-photo-ratio);
+    object-fit: cover;
+}
+
+/*
+ * El texto se empuja hacia abajo: con tarjetas de distinta altura —una sin
+ * dirección, otra con liga— los nombres siguen alineados entre sí.
+ */
+.te-hotels__body {
+    margin-top: var(--te-hotels-photo-gap);
+}
+
+.te-hotels__name {
+    font-family: var(--font-display);
+    font-size: var(--te-size-subtitle);
+    line-height: 1.3;
+    color: var(--color-primary);
+    text-wrap: balance;
+}
+
+.te-hotels__line {
+    margin-top: 0.65rem;
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-caption);
+    line-height: 1.6;
+    letter-spacing: 0.04em;
+    color: var(--te-muted);
+}

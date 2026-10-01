@@ -1,0 +1,98 @@
+/* Bloque Pie de la plantilla "Boda Barco". */
+
+.tv-footer {
+    position: relative;
+    padding-block: 3.5rem;
+    background: var(--tv-footer);
+    color: #fff;
+}
+
+.tv-footer__boat {
+    position: absolute;
+    top: 0;
+    left: 10%;
+    width: clamp(180px, 25vw, 220px);
+    transform: translateY(-50%);
+}
+
+.tv-footer__row {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .tv-footer__row {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .tv-footer__logo,
+    .tv-footer__nav {
+        width: 50%;
+    }
+}
+
+.tv-footer__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+@media (min-width: 768px) {
+    .tv-footer__nav {
+        flex-direction: row;
+    }
+}
+
+.link-footer {
+    color: #fff;
+    font-family: var(--font-main);
+    font-size: var(--text-parrafo);
+    text-decoration: none;
+}
+
+.tv-footer__message {
+    max-width: 640px;
+    margin-top: 2rem;
+    font-family: var(--font-main);
+    font-size: var(--text-size-title);
+}
+
+.tv-footer__top {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+#btn-scroll-top {
+    width: 5rem;
+    height: 5rem;
+    border: 0;
+    border-radius: 999px;
+    background: #fff;
+    color: #797979;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+}
+
+#btn-scroll-top:hover {
+    transform: translateY(-4px);
+}
+
+@keyframes tv-bounce-scroll {
+    0%,
+    100% {
+        transform: translateY(-4px);
+    }
+    50% {
+        transform: translateY(4px);
+    }
+}
+
+.scroll-indicator-animation {
+    animation: tv-bounce-scroll 1.5s ease-in-out infinite;
+}

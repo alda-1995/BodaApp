@@ -1,0 +1,108 @@
+.input-primary input, .input-primary textarea{
+    @apply mb-4 border rounded-md border-base-gray px-4 py-1 h-[50px] text-size-small-heading text-black font-inter;
+}
+
+.input-primary .label{
+    @apply block font-inter text-size-small-heading text-black mb-2;
+}
+
+.input-primary textarea{
+    @apply min-h-20 max-h-20;
+}
+
+.input-password{
+    @apply mb-4;
+}
+
+.input-password input{
+    @apply !w-full border rounded-md border-base-gray px-4 py-1 h-[50px] text-size-small-heading text-black font-inter;
+}
+
+.input-primary input[type="number"] {
+    @apply mb-4 border rounded-md border-base-gray px-4 py-1 h-[50px] text-size-small-heading text-black font-inter w-full;
+}
+
+.input-primary input[type="number"]::-webkit-outer-spin-button,
+.input-primary input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.input-primary input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.color-primary {
+    @apply space-x-3 mb-4;
+}
+
+.color-primary .label{
+    @apply block font-inter text-size-small-heading text-black mb-2;
+}
+
+.color-primary input[type="color"] {
+    @apply h-[50px] w-16 p-1 border rounded-md border-base-gray cursor-pointer bg-white disabled:opacity-50 mb-0;
+}
+
+.color-primary input[type="color"]::-webkit-color-swatch-wrapper {
+    @apply p-0;
+}
+.color-primary input[type="color"]::-webkit-color-swatch {
+    @apply border-0;
+}
+
+.color-primary .form-input {
+    @apply h-[50px] w-32 border rounded-md border-base-gray px-4 py-1 text-size-small-heading text-black uppercase mb-0;
+}
+
+.color-primary .inner-flex{
+    @apply flex gap-x-4;
+}
+
+/* .input-main {
+    @apply flex flex-col;
+}
+
+.input-main .label {
+    @apply font-secondary text-size-small-heading leading-normal mb-2;
+}
+
+.input-main input, .input-main textarea {
+    @apply flex w-full resize-none h-12 overflow-hidden focus:outline-0 focus:ring-0 border-none p-4 disabled:opacity-30 disabled:pointer-events-none;
+}
+
+.input-main textarea{
+    @apply min-h-[80px] max-h-[120px] resize-y;
+}
+
+.input-primary {
+    @apply max-w-full mb-4;
+}
+
+.input-primary .label {
+    @apply text-complement500;
+}
+
+.input-primary input, .input-primary textarea {
+    @apply rounded-xl text-black bg-gray-200 placeholder:text-[#6a7681];
+}
+
+.input-secondary{
+    @apply mb-4;
+}
+
+.input-secondary .label {
+    @apply text-accent font-main text-parrafo mb-2;
+}
+
+.input-secondary input, .input-secondary textarea {
+    @apply font-main text-accent text-parrafo rounded py-2 px-4 border border-solid border-accent;
+}
+
+.input-secondary input{
+    @apply disabled:bg-accent disabled:text-white disabled:opacity-100 placeholder:opacity-100;
+}
+
+.input-secondary .iti__selected-dial-code{
+    @apply font-main text-parrafo;
+} */

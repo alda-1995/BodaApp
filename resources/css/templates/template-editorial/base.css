@@ -1,0 +1,85 @@
+/*
+ * Base de la plantilla "Boda Editorial": paleta, contenedor y piezas comunes.
+ *
+ * El diseño es monocromático: papel crudo, tinta casi negra y una escala de
+ * grises. La paleta del evento entra por --color-brand, así que una pareja
+ * puede teñir la tinta sin romper el aire editorial.
+ */
+
+.te {
+    /*
+     * El diseño es monocromático a propósito: la tinta se queda casi negra y la
+     * paleta del evento entra sólo como acento, para no teñir los titulares.
+     */
+    --color-primary: #2A1520;
+    --te-ink: #1e1e1e;
+    --te-accent: var(--color-brand, #1e1e1e);
+    --te-paper: #fcfbf7;
+    --te-paper-soft: #f4f4f4;
+    --te-paper-warm: #efefe9;
+    --te-line: #e9e6e6;
+    --te-muted: #6e6c6d;
+    --te-soft: #949091;
+    --te-white: #ffffff;
+
+    background: var(--te-paper);
+    color: var(--te-ink);
+    font-family: var(--font-secondary);
+}
+
+/* El diseño trabaja sobre 1280px con 100px de margen: 8% a cada lado. */
+.te-container {
+    width: 100%;
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .te-container {
+        padding-inline: 4rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .te-container {
+        padding-inline: 6.25rem;
+    }
+}
+
+.te-section {
+    position: relative;
+    padding-block: clamp(3.5rem, 7vw, 6rem);
+}
+
+.te-center {
+    text-align: center;
+}
+
+/* Títulos de sección: versalitas espaciadas, como en el diseño. */
+.te-eyebrow {
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-caption);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--te-muted);
+}
+
+.te-heading {
+    font-family: var(--font-display);
+    font-size: var(--te-size-section);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.te-text {
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-text);
+    color: var(--te-muted);
+}
+
+.te-rule {
+    height: 1px;
+    border: 0;
+    background: var(--te-line);
+}

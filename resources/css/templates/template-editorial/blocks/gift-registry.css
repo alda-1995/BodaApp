@@ -1,0 +1,286 @@
+/*
+ * Bloque "Mesa de regalos" de Boda Editorial.
+ *
+ * Archivo propio del bloque. Las variables de abajo son sus perillas: el ancho
+ * de la columna de tiendas, el tamaño de sus ilustraciones y el giro de la
+ * tarjeta de cuentas, que en el diseño se ve como dos tarjetas encimadas.
+ *
+ * Colores y tipografías salen de las variables de la plantilla, nunca escritos
+ * a mano, para que la paleta que elige la pareja alcance también a este bloque.
+ */
+
+.te-gifts {
+    /* Columna de tiendas */
+    --te-gifts-icon-size: 5rem;
+    --te-gifts-store-gap: 1.5rem;
+
+    /*
+     * Tarjeta de cuentas, con las medidas del diseño (nodo "gifts" de Figma):
+     * 423x236 con esquinas de 22px, trazo de 1px y relleno blanco. La de atrás
+     * es la misma, girada -5.13° sobre el mismo centro.
+     */
+    --te-gifts-card-radius: 22px;
+    --te-gifts-card-ratio: 423 / 236;
+    --te-gifts-card-padding: clamp(1.75rem, 3vw, 2.5rem);
+    --te-gifts-card-line: var(--color-primary);
+    --te-gifts-card-tilt: -5.13deg;
+
+    --te-gifts-speed: 200ms;
+
+    padding-block: clamp(3rem, 6vw, 5rem);
+    background: var(--te-paper);
+}
+
+.te-gifts__title {
+    font-family: var(--font-display);
+    font-size: var(--te-size-section);
+    letter-spacing: 0.12em;
+    color: var(--color-primary);
+    text-align: center;
+}
+
+.te-gifts__message {
+    max-width: 30rem;
+    margin: 1rem auto 0;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--te-size-text);
+    line-height: var(--te-leading-normal);
+    color: var(--color-primary);
+    text-align: center;
+    text-wrap: balance;
+}
+
+/* --- Las dos columnas ------------------------------------------------------- */
+
+.te-gifts__columns {
+    display: grid;
+    gap: clamp(2.5rem, 5vw, 4rem);
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+    align-items: center;
+}
+
+@media (min-width: 900px) {
+    .te-gifts__columns {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* Con una sola clase de opción, se centra en vez de irse a un costado. */
+    .te-gifts__columns--single {
+        grid-template-columns: minmax(0, 34rem);
+        justify-content: center;
+    }
+}
+
+/* --- Tiendas ---------------------------------------------------------------- */
+
+.te-gifts__stores {
+    display: grid;
+    gap: clamp(1.75rem, 3vw, 2.5rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.te-gifts__store {
+    display: flex;
+    align-items: center;
+    gap: var(--te-gifts-store-gap);
+}
+
+.te-gifts__store-icon {
+    flex: 0 0 auto;
+    width: var(--te-gifts-icon-size);
+    height: var(--te-gifts-icon-size);
+    object-fit: contain;
+}
+
+.te-gifts__store-body {
+    min-width: 0;
+}
+
+.te-gifts__store-head {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.te-gifts__store-name {
+    font-family: var(--font-display);
+    font-size: var(--te-size-subtitle);
+    color: var(--color-primary);
+}
+
+.te-gifts__store-link {
+    font-family: var(--font-secondary);
+    /* Un punto más que las versalitas: la flecha se pierde a 10px. */
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color var(--te-gifts-speed) ease;
+}
+
+.te-gifts__store-link:hover,
+.te-gifts__store-link:focus-visible {
+    border-bottom-color: currentColor;
+}
+
+.te-gifts__store-detail {
+    margin-top: 0.35rem;
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-text);
+    color: var(--te-muted);
+}
+
+/* --- Cuentas ---------------------------------------------------------------- */
+
+/*
+ * Crea su propio contexto de apilado. Sin esto, la tarjeta de atrás —que es un
+ * ::before con z-index negativo— se iría por debajo del fondo de la sección y
+ * no se vería ninguna.
+ */
+.te-gifts__accounts {
+    position: relative;
+    z-index: 0;
+    display: grid;
+    gap: clamp(2rem, 4vw, 3rem);
+}
+
+/*
+ * La tarjeta del diseño son dos: la de atrás es este ::before girado, así que
+ * no hace falta ninguna imagen y el giro se ajusta con --te-gifts-card-tilt.
+ */
+.te-gifts__card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--te-gifts-card-padding);
+    border: 1px solid var(--te-gifts-card-line);
+    border-radius: var(--te-gifts-card-radius);
+    background: var(--te-white);
+}
+
+@media (min-width: 900px) {
+    .te-gifts__card {
+        aspect-ratio: var(--te-gifts-card-ratio);
+    }
+}
+
+.te-gifts__card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border: 1px solid var(--te-gifts-card-line);
+    border-radius: var(--te-gifts-card-radius);
+    transform: rotate(var(--te-gifts-card-tilt));
+}
+
+.te-gifts__card-title {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--te-size-subtitle);
+    color: var(--color-primary);
+}
+
+.te-gifts__card-data {
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.te-gifts__card-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding-block: 0.15rem;
+}
+
+.te-gifts__card-value {
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-text);
+    color: var(--color-primary);
+    overflow-wrap: anywhere;
+}
+
+.te-gifts__card-link {
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-text);
+    color: var(--color-primary);
+    overflow-wrap: anywhere;
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+}
+
+/* --- Dato copiable ---------------------------------------------------------- */
+
+/*
+ * Se usa donde el superadmin marcó el dato como copiable. Vive aquí y no en el
+ * bloque porque cualquier otro de esta plantilla puede necesitarlo.
+ */
+.te-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+}
+
+.te-copy__value {
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-text);
+    color: var(--color-primary);
+    overflow-wrap: anywhere;
+}
+
+.te-copy__button {
+    flex: 0 0 auto;
+    display: inline-flex;
+    border: 0;
+    padding: 0;
+    background: none;
+    color: var(--te-muted);
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity var(--te-gifts-speed) ease;
+}
+
+.te-copy__button:hover,
+.te-copy__button:focus-visible {
+    opacity: 1;
+    color: var(--color-primary);
+}
+
+/* El aviso no empuja nada: aparece encima, al lado del icono. */
+.te-copy__done {
+    position: absolute;
+    left: 100%;
+    margin-left: 0.5rem;
+    white-space: nowrap;
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-caption);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--te-muted);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--te-gifts-speed) ease;
+}
+
+.te-copy__done--visible {
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .te-copy__button,
+    .te-copy__done,
+    .te-gifts__store-link {
+        transition-duration: 1ms;
+    }
+}

@@ -1,0 +1,141 @@
+/*
+ * Bloque "Código de vestimenta" de Boda Editorial.
+ *
+ * Archivo propio del bloque. Son dos mitades: la foto de borde a borde en la
+ * izquierda y las indicaciones en la derecha. Por eso este bloque NO usa
+ * .te-container: el contenedor centraría la foto y le dejaría margen, y aquí
+ * tiene que llegar al filo. El margen lo pone la columna de texto, ella sola.
+ *
+ * Colores y tipografías salen de las variables de la plantilla, nunca escritos
+ * a mano, para que la paleta que elige la pareja alcance también a este bloque.
+ */
+
+.te-dress {
+    /* Proporción de la foto cuando manda ella: en móvil, apilada. */
+    --te-dress-photo-ratio: 3 / 4;
+
+    /* Aire de la columna de texto, que es la que respira por las dos. */
+    --te-dress-body-padding: clamp(2.5rem, 6vw, 5rem) clamp(1.5rem, 5vw, 5rem);
+
+    /* Círculos de color */
+    --te-dress-swatch-size: 1.75rem;
+
+    background: var(--te-white);
+}
+
+.te-dress__columns {
+    display: grid;
+}
+
+@media (min-width: 900px) {
+    .te-dress__columns {
+        /* Mitad y mitad, y las dos con la misma altura. */
+        grid-template-columns: 1fr 1fr;
+        align-items: stretch;
+    }
+}
+
+/* --- La foto ---------------------------------------------------------------- */
+
+.te-dress__photo > img {
+    display: block;
+    width: 100%;
+    aspect-ratio: var(--te-dress-photo-ratio);
+    object-fit: cover;
+}
+
+@media (min-width: 900px) {
+
+    /* Llena su mitad: la altura la marca la columna de texto o ella misma. */
+    .te-dress__photo > img {
+        height: 100%;
+        aspect-ratio: auto;
+    }
+}
+
+/* --- Las indicaciones ------------------------------------------------------- */
+
+.te-dress__body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--te-dress-body-padding);
+    text-align: center;
+}
+
+.te-dress__kicker {
+    font-family: var(--font-display);
+    font-size: var(--te-size-subtitle);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-primary);
+}
+
+.te-dress__type {
+    margin-top: 0.75rem;
+    font-family: var(--font-display);
+    font-size: var(--te-size-hero);
+    color: var(--color-primary);
+}
+
+.te-dress__notes {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: clamp(1.5rem, 3vw, 2.25rem);
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-text);
+    color: var(--color-primary);
+}
+
+/* La nota de la novia va enmarcada, como una nota al margen. */
+.te-dress__warning {
+    max-width: 26rem;
+    margin: clamp(1.5rem, 3vw, 2.25rem) auto 0;
+    padding: 0.85rem 1.25rem;
+    border: 1px solid var(--te-line);
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-caption);
+    line-height: 1.6;
+    letter-spacing: 0.04em;
+    color: var(--te-muted);
+}
+
+.te-dress__palette-text {
+    max-width: 24rem;
+    margin: clamp(1.5rem, 3vw, 2.25rem) auto 0;
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-text);
+    color: var(--color-primary);
+    text-wrap: balance;
+}
+
+/* --- Los colores ------------------------------------------------------------ */
+
+.te-dress__swatches {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: clamp(1rem, 2.5vw, 1.75rem);
+    margin: clamp(1.25rem, 2.5vw, 1.75rem) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.te-dress__swatch {
+    display: grid;
+    justify-items: center;
+    gap: 0.5rem;
+}
+
+.te-dress__swatch-dot {
+    width: var(--te-dress-swatch-size);
+    height: var(--te-dress-swatch-size);
+    border-radius: 50%;
+}
+
+.te-dress__swatch-name {
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-caption);
+    letter-spacing: 0.08em;
+    color: var(--te-muted);
+}

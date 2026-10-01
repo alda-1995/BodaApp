@@ -1,0 +1,183 @@
+/*
+ * Bloque "Ceremonia & Recepción" de Boda Editorial.
+ *
+ * Archivo propio del bloque: toda su composición está aquí, para ajustarlo sin
+ * tocar el resto de la plantilla. Las variables de abajo son las perillas.
+ *
+ * La estructura son celdas en dos columnas. Cada celda lleva su tarjeta y, la
+ * que toque, la foto como HERMANA de la tarjeta: por eso la foto puede ser más
+ * ancha que ella, salirse hacia la derecha y quedar encima. Nada de esto se
+ * cae si falta una pieza: una sola tarjeta, tres, o la pura foto.
+ */
+
+.te-itinerary {
+    /* Tarjeta */
+    --te-itinerary-card-bg: var(--te-paper-soft);
+    --te-itinerary-card-padding: clamp(2rem, 4vw, 3rem);
+    --te-itinerary-card-ratio: 484 / 592;
+
+    /* Rejilla: calle entre columnas y cuánto bajan las pares */
+    --te-itinerary-gap: clamp(2.5rem, 6vw, 6.25rem);
+    --te-itinerary-offset: 5rem;
+
+    /* Foto */
+    --te-itinerary-photo-ratio: 462 / 463;
+    /* Cuánto se sale hacia la derecha, más allá del ancho de su tarjeta. */
+    --te-itinerary-photo-pull: 3.5rem;
+    /* Cuánto la monta sobre la tarjeta de abajo. */
+    --te-itinerary-photo-overlap: 8.75rem;
+
+    background: var(--te-white);
+    padding: 3rem 0;
+    /* La foto se sale a la derecha: que no genere scroll horizontal. */
+    overflow-x: clip;
+}
+
+@media (min-width: 1024px) {
+    .te-itinerary {
+        padding: 5rem 0;
+    }
+}
+
+.te-itinerary__title {
+    color: var(--color-primary);
+    font-size: var(--te-size-title);
+    text-align: center;
+    max-width: 500px;
+    margin: 0 auto;
+    margin-bottom: 2rem;
+}
+
+/* --- La rejilla ------------------------------------------------------------ */
+
+.te-itinerary__grid {
+    display: grid;
+    gap: var(--te-itinerary-gap);
+}
+
+@media (min-width: 900px) {
+    .te-itinerary__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+    }
+
+    /* Las celdas pares bajan, como en el diseño. */
+    .te-itinerary__cell--lowered {
+        margin-top: var(--te-itinerary-offset);
+    }
+}
+
+/* --- La foto --------------------------------------------------------------- */
+
+.te-itinerary__photo {
+    position: relative;
+    /* Encima de la tarjeta, que se monta por debajo de ella. */
+    z-index: 2;
+    margin: 0;
+}
+
+.te-itinerary__photo img {
+    display: block;
+    width: 100%;
+    aspect-ratio: var(--te-itinerary-photo-ratio);
+    object-fit: cover;
+    object-position: center;
+}
+
+@media (min-width: 900px) {
+    .te-itinerary__photo {
+        /* Más ancha que su tarjeta y pegada a la derecha: así queda corrida
+           hacia afuera en vez de alineada con ella. */
+        width: calc(80%);
+        margin-left: auto;
+        margin-right: calc(var(--te-itinerary-photo-pull) * -1);
+        /* Sube la tarjeta que viene abajo para que quede montada. */
+        margin-bottom: calc(var(--te-itinerary-photo-overlap) * -1);
+    }
+
+    /* Sola no se monta sobre nada ni se sale de su columna. */
+    .te-itinerary__photo--alone {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 0;
+    }
+}
+
+/* --- La tarjeta ------------------------------------------------------------ */
+
+.te-itinerary__card {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: var(--te-itinerary-card-padding);
+    background: var(--te-itinerary-card-bg);
+    text-align: center;
+}
+
+@media (min-width: 900px) {
+    .te-itinerary__card {
+        aspect-ratio: var(--te-itinerary-card-ratio);
+    }
+
+    /*
+     * La que lleva foto encima: su contenido arranca por debajo de ella, así
+     * que la proporción la manda el contenido y no al revés.
+     */
+    .te-itinerary__card--under-photo {
+        aspect-ratio: auto;
+        padding-top: calc(var(--te-itinerary-card-padding) + var(--te-itinerary-photo-overlap));
+    }
+}
+
+.te-itinerary__kicker {
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-text);
+    letter-spacing: 0.1em;
+    color: var(--te-ink);
+}
+
+.te-itinerary__name {
+    font-family: var(--font-display);
+    font-size: var(--te-size-title);
+    line-height: 1.25;
+    color: var(--color-primary);
+    text-wrap: balance;
+}
+
+.te-itinerary__time {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--te-size-subtitle);
+    color: var(--te-ink);
+}
+
+.te-itinerary__place {
+    font-family: var(--font-display);
+    font-size: var(--te-size-section);
+    line-height: 1.3;
+    color: var(--te-ink);
+    text-wrap: balance;
+}
+
+.te-itinerary__address {
+    font-family: var(--font-display);
+    font-size: var(--te-size-subtitle);
+    color: var(--te-muted);
+    text-wrap: balance;
+}
+
+.te-itinerary__map {
+    margin-top: 0.75rem;
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-text);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--te-ink);
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 2px;
+}

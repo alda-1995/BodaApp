@@ -1,0 +1,24 @@
+/*
+ * Plantilla "Boda Barco": CSS3 propio, sin Tailwind.
+ *
+ * Este archivo sólo arma la plantilla; el contenido vive por partes:
+ *  - typography.css → fuentes y escala tipográfica
+ *  - base.css       → colores, contenedor y piezas comunes
+ *  - blocks/*.css   → un archivo por bloque, igual que las vistas
+ *
+ * Todas las clases van con el prefijo .tv- para no chocar con otras plantillas,
+ * y los colores salen de la paleta del evento (--color-brand*).
+ */
+
+@import url("./typography.css");
+@import url("./base.css");
+
+@import url("./blocks/banner.css");
+@import url("./blocks/story.css");
+@import url("./blocks/timeline.css");
+@import url("./blocks/gift-registry.css");
+@import url("./blocks/dress-code.css");
+@import url("./blocks/contact-form.css");
+@import url("./blocks/gallery.css");
+@import url("./blocks/faq.css");
+@import url("./blocks/footer.css");

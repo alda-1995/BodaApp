@@ -1,0 +1,11 @@
+.select-main .label{
+    @apply block font-inter text-size-small-heading text-black mb-2;
+}
+
+.select-main select{
+    @apply w-full border rounded-md border-base-gray px-4 py-1 h-[50px] text-size-small-heading text-black font-inter appearance-none;
+}
+
+.select-main .select-container{
+    @apply mb-4;
+}

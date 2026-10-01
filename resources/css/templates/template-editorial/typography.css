@@ -1,0 +1,49 @@
+/*
+ * Tipografía de la plantilla "Boda Editorial".
+ *
+ * El diseño usa Boska Variable para los títulos, que es de pago (Fontshare).
+ * Mientras se licencia, va Playfair Display: serif de display con contraste
+ * alto y proporciones parecidas. Para cambiarla basta tocar --font-display
+ * y la hoja de fuentes que declara la estrategia; nada más la menciona.
+ *
+ * Inter sí es la del diseño y está en Google Fonts, así que no se sustituye.
+ */
+
+.te {
+    --font-display: "Playfair Display", "Boska", Georgia, serif;
+    --font-secondary: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+    /*
+     * Escala del diseño (1280px) llevada a clamp para que respire en móvil:
+     * 64 / 45 / 32 / 23 / 18 / 10 px.
+     */
+    --te-size-hero: clamp(2.5rem, 5vw, 4rem);
+    --te-size-title: clamp(1.75rem, 3.5vw, 2.8125rem);
+    --te-size-section: clamp(1.5rem, 2.5vw, 2rem);
+    --te-size-subtitle: clamp(1.125rem, 1.8vw, 1.4375rem);
+    --te-size-text: 1.125rem;
+    --te-size-caption: 0.625rem;
+
+    --te-leading-tight: 1.3;
+    --te-leading-normal: 1.55;
+}
+
+:where(.te) h1,
+:where(.te) h2,
+:where(.te) h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    line-height: var(--te-leading-tight);
+}
+
+:where(.te) p,
+:where(.te) li,
+:where(.te) label,
+:where(.te) input,
+:where(.te) textarea,
+:where(.te) select,
+:where(.te) button {
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-text);
+    line-height: var(--te-leading-normal);
+}

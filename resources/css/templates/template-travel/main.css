@@ -1,0 +1,126 @@
+@import '../../../fonts/antura/stylesheet.css';
+
+.bg-green-success{
+    background: linear-gradient(0deg, rgba(158, 185, 144, 1) 0%, rgba(158, 185, 144, 1) 100%);
+    background-blend-mode: plus-darker, normal;
+}
+
+.bg-error-message{
+    background: linear-gradient(0deg, #8B8494 0%, #8B8494 100%);
+}
+
+.bg-gradient-purple{
+    background: linear-gradient(180deg, #F3F0EE 0%, #FFFFF6 18.52%);
+}
+
+.bg-background-main {
+    background: linear-gradient(180deg, #F3EFEE 0%, #FFFFF9 100%);
+}
+
+.bg-background-second {
+    background: linear-gradient(180deg, #FEFDFB 0%, #F3EFEE 100%);
+}
+
+.bg-background-accent {
+    background: linear-gradient(180deg, #F3EFEE -47.39%, #FFFFF9 52.61%);
+}
+
+.box-shadow-card {
+    box-shadow: 6px 17px 41px 10px rgba(0, 0, 0, 0.04);
+}
+
+.btn {
+    @apply h-[44px] px-6 inline-flex items-center;
+}
+
+.btn-ouline-main {
+    border-radius: 5.333px;
+    background: rgba(255, 255, 255, 0.10);
+    box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.10);
+    @apply border border-main uppercase text-main;
+}
+
+.card-travel {
+    perspective: 800px;
+    width: fit-content;
+    height: fit-content;
+}
+
+/* Estilos de la tapa de la caja */
+.box-top {
+    transform-style: preserve-3d;
+    transition: transform 0.6s ease-in-out;
+    /* El punto de origen para la rotación se mantiene en la parte superior */
+    transform-origin: top center;
+}
+
+/* Efecto al pasar el ratón por el contenedor principal */
+.card-travel:hover .box-top {
+    transform:
+        translateY(-50px)
+        /* Mueve la tapa 50px hacia arriba */
+        translateX(50px)
+        /* Mueve la tapa 50px hacia la derecha */
+        translateZ(50px);
+}
+
+.bg-clipboard {
+    background: rgba(220, 211, 248, 0.50);
+}
+
+.link-footer {
+    @apply text-white text-parrafo font-main;
+}
+
+.falling-flower-static img {
+    /* Esto ayuda a que la rotación se vea bien si es necesario */
+    transform-origin: 50% 50%;
+}
+
+
+@keyframes bounce-scroll {
+    0% {
+        transform: translateY(-4px);
+    }
+    50% {
+        transform: translateY(4px);
+    }
+    100% {
+        transform: translateY(-4px);
+    }
+}
+
+.scroll-indicator-animation{
+    animation: bounce-scroll 1.5s ease-in-out infinite;
+}
+
+.mask-container-title {
+   -webkit-mask-repeat: no-repeat;
+   mask-repeat: no-repeat;
+   -webkit-mask-size: cover;
+   mask-size: cover;
+   -webkit-mask-position: top;
+   mask-position: top;
+}
+
+.mask-container-footer {
+   -webkit-mask-repeat: no-repeat;
+   mask-repeat: no-repeat;
+   -webkit-mask-size: contain;
+   mask-size: contain;
+   -webkit-mask-position: top;
+   mask-position: top;
+}
+
+.mask-container-calendar {
+   -webkit-mask-repeat: no-repeat;
+   mask-repeat: no-repeat;
+   -webkit-mask-size: cover;
+   mask-size: cover;
+   -webkit-mask-position: top;
+   mask-position: top;
+}
+
+.item-name{
+   @apply absolute top-[10%] xl:top-[5%] left-0 w-full;
+}

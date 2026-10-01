@@ -1,0 +1,98 @@
+/* Bloque Galería de la plantilla "Boda Barco". */
+
+.tv-gallery {
+    position: relative;
+    padding-block: 4rem;
+    background: var(--tv-paper);
+}
+
+.tv-gallery__intro {
+    max-width: 32rem;
+    margin-inline: auto;
+    text-align: center;
+}
+
+.tv-gallery__title {
+    margin-bottom: 1rem;
+}
+
+.tv-gallery__subtitle {
+    font-family: var(--font-main);
+    font-size: var(--text-size-subtitle);
+    color: var(--tv-muted);
+    line-height: 1.4;
+}
+
+/* Marco de papel: la imagen de fondo cubre la caja. */
+.tv-gallery__frame {
+    margin-top: 2rem;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    overflow: hidden;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+@media (min-width: 768px) {
+    .tv-gallery__frame {
+        margin-top: 2.5rem;
+        padding-inline: 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .tv-gallery__frame {
+        margin-top: 3rem;
+    }
+}
+
+.tv-gallery__frame .swiper-slide img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    object-position: center;
+}
+
+@media (min-width: 768px) {
+    .tv-gallery__frame .swiper-slide img {
+        height: 300px;
+    }
+}
+
+.tv-gallery__nav {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (min-width: 768px) {
+    .tv-gallery__nav {
+        margin-top: 2rem;
+        gap: 1.5rem;
+    }
+}
+
+/*
+ * Las flechas son .swiper-button-*, así que Swiper les pone su propia flecha,
+ * su tamaño y las manda a flotar sobre el carrusel. Aquí se desarma todo eso
+ * para dejar sólo las imágenes de la plantilla.
+ */
+.tv-gallery__arrow {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    color: inherit;
+    cursor: pointer;
+}
+
+.tv-gallery__arrow::after {
+    content: none;
+}
+
+.tv-gallery__arrow img {
+    max-width: 100%;
+}

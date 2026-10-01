@@ -1,0 +1,68 @@
+@theme {
+   --color-complement100: #EEF;
+   --color-complement200: #8787C4;
+   --color-complement300: #373760;
+   --color-complement400: #725872;
+   --color-complement500: #2A172B;
+   --color-complement600: #232366;
+   --color-complement700: #6750A4;
+   
+   --color-gray: #797979;
+
+   --color-greenme: #0CCE63;
+   --color-redme: #FF3819;
+   --color-violet: #FCFCFC;
+}
+
+#card-w-animated {
+   transform: scaleX(0);
+   transform-origin: center center;
+   opacity: 0;
+}
+
+footer{
+   border-top: 1px solid rgba(0, 0, 0, 0.11);
+}
+
+.border-opacity{
+   border: 1px solid rgba(121, 121, 121, 0.50);
+}
+
+.bg-gradient-plane{
+   background: linear-gradient(180deg, #D3D3FF 0%, #EFE5DC 100%);
+}
+
+.nube1, .nubecenter, .nube3, .avion-plane, #cursor-progress {
+  will-change: transform;
+}
+
+.card-travel .data-close {
+  @apply opacity-0 transition-opacity duration-300;
+}
+
+.card-travel .data-open {
+  @apply opacity-100 transition-opacity duration-300;
+}
+
+.card-travel.swiper-slide-active .data-open{
+    @apply opacity-0
+}
+
+.card-travel.swiper-slide-active .data-close{
+    @apply opacity-100;
+}
+
+#suggestions {
+    @apply max-h-[240px] min-h-[100px] w-[200px] overflow-y-auto bg-white list-none rounded absolute z-50 bottom-0 left-0 translate-y-[110%];
+}
+
+#suggestions li {
+    cursor: pointer;
+    @apply text-size-small-heading font-secondary cursor-pointer py-4 px-3 hover:bg-primary100 hover:text-white;
+}
+
+#suggestions.loading::before {
+    content: '';
+    border-color: #C999C7 transparent transparent #C999C7;
+    @apply block animate-spin absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-2 rounded-full w-4 h-4;
+}
