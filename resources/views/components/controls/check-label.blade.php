@@ -7,16 +7,20 @@
     'required' => false,
     'disabled' => false,
     'autofocus' => false,
+    'dotName' => '',
 ])
 
 @php
     $id = $id ?? $name;
-    $hasError = filled($name) ? $errors->has($name) : false;
+    // Dentro de un repeater el name viaja como 'faqs[0][visible]', pero old() y
+    // @error se consultan con 'faqs.0.visible'.
+    $errorKey = $dotName ?: $name;
+    $hasError = filled($errorKey) ? $errors->has($errorKey) : false;
 
     $defaultChecked = filter_var($checked, FILTER_VALIDATE_BOOLEAN);
 
-    if (filled($name) && session()->hasOldInput()) {
-        $isChecked = filter_var(old($name), FILTER_VALIDATE_BOOLEAN);
+    if (filled($errorKey) && session()->hasOldInput()) {
+        $isChecked = filter_var(old($errorKey), FILTER_VALIDATE_BOOLEAN);
     } else {
         $isChecked = $defaultChecked;
     }
@@ -70,8 +74,8 @@
         @endif
     </label>
 
-    @if(filled($name))
-        @error($name)
+    @if(filled($errorKey))
+        @error($errorKey)
             <span class="error text-red-500 text-size-small-heading font-inter mb-4 block">{{ $message }}</span>
         @enderror
     @endif

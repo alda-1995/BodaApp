@@ -9,13 +9,17 @@
     'variant' => 'primary',
     'format' => 'd/m/Y H:i',
     'dateFormat' => 'Y-m-d H:i:s',
+    'dotName' => '',
 ])
 
 @php
     $id = $id ?? $name;
-    $hasError = $errors->has($name);
+    // Dentro de un repeater el name viaja como 'events[0][date]', pero old() y
+    // @error se consultan con 'events.0.date'.
+    $errorKey = $dotName ?: $name;
+    $hasError = $errors->has($errorKey);
 
-    $rawValue = old($name, $value);
+    $rawValue = old($errorKey, $value);
     
     if ($rawValue instanceof \DateTimeInterface) {
         $rawValue = $rawValue->format('Y-m-d H:i:s');
@@ -97,7 +101,7 @@
         @if ($disabled) disabled @endif
     />
 
-    @error($name)
+    @error($errorKey)
         <span class="error text-red-500 text-size-small-heading font-inter mb-4 block">{{ $message }}</span>
     @enderror
 </div>

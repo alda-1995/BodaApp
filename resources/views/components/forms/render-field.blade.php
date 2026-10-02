@@ -211,7 +211,8 @@
         @case('boolean')
         @case('checkbox')
             <x-controls.check-label
-                :name="$name" 
+                :dot-name="$dotName"
+                :name="$name"
                 :label="$label"
                 :checked="$finalValue"
                 class="w-full justify-between"
@@ -246,9 +247,10 @@
 
         @case('datetime')
             <x-controls.inputs.flatpickr-date-time
+                :dot-name="$dotName"
                 :label="$label"
                 :name="$name"
-                :value="old($dotName, $finalValue)"
+                :value="$finalValue"
                 :placeholder="$placeholder"
                 :required="$required"
                 class="w-full"
@@ -257,11 +259,12 @@
 
         @default
             <x-controls.inputs.input
+                :dot-name="$dotName"
                 :type="$normalizedType"
                 :label="$label"
                 :name="$name"
                 :placeholder="$placeholder"
-                :value="old($dotName, $finalValue)"
+                :value="$finalValue"
                 :required="$required"
                 class="w-full"
             />

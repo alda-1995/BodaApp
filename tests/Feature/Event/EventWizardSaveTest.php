@@ -197,6 +197,42 @@ class EventWizardSaveTest extends TestCase
             ->assertSessionHasErrors('dress_code_type');
     }
 
+    /**
+     * Dentro de un repeater el input viaja como 'events[0][name]', pero old() y
+     * @error se consultan con 'events.0.name'. Si el control no traduce, el
+     * mensaje existe en la sesión y aun así no se dibuja debajo del campo.
+     */
+    public function test_el_error_de_un_subcampo_del_repeater_se_dibuja_en_el_paso(): void
+    {
+        $respuesta = $this->saveStep('itinerary', ['events' => [
+            $this->itineraryRow('', 'no soy una url'),
+        ]]);
+
+        $respuesta->assertSessionHasErrors(['events.0.name', 'events.0.location_maps']);
+
+        $mensajeNombre = session('errors')->first('events.0.name');
+        $mensajeMaps = session('errors')->first('events.0.location_maps');
+
+        $paso = $this->actingAs($this->organizer)
+            ->get(route('events.wizard.edit', ['event' => $this->event->slug, 'step' => 'itinerary']))
+            ->assertOk();
+
+        // No basta con assertSee: el resumen de errores de arriba ya los lista.
+        // Lo que se comprueba es el <span class="error"> que va bajo el control.
+        $html = $paso->getContent();
+
+        foreach ([$mensajeNombre, $mensajeMaps] as $mensaje) {
+            $this->assertMatchesRegularExpression(
+                '/<span class="error[^"]*">\s*' . preg_quote(e($mensaje), '/') . '\s*<\/span>/',
+                $html,
+                "El mensaje «{$mensaje}» no se dibuja debajo de su control.",
+            );
+        }
+
+        // El valor escrito tampoco se pierde: old() usa la misma notación.
+        $paso->assertSee('value="no soy una url"', false);
+    }
+
     public function test_vaciar_un_campo_opcional_lo_guarda_como_null(): void
     {
         $this->saveStep('dress_code', ['dress_code_type' => 'Formal', 'color_or_theme' => 'Tonos tierra', 'reference_image' => null]);

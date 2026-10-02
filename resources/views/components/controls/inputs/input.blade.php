@@ -10,11 +10,15 @@
     'placeholder' => '',
     'variant' => 'primary',
     'autocomplete' => 'on',
+    'dotName' => '',
 ])
 
 @php
     $id = $id ?? $name;
-    $hasError = filled($name) ? $errors->has($name) : false;
+    // Dentro de un repeater el name viaja como 'faqs[0][question]', pero old() y
+    // @error se consultan con 'faqs.0.question'.
+    $errorKey = $dotName ?: $name;
+    $hasError = filled($errorKey) ? $errors->has($errorKey) : false;
 @endphp
 
 <div class="flex flex-col gap-1.5 w-full">
@@ -31,7 +35,7 @@
         :type="$type"
         :id="$id"
         :name="$name"
-        :value="filled($name) ? old($name, $value) : $value"
+        :value="filled($errorKey) ? old($errorKey, $value) : $value"
         :placeholder="$placeholder"
         :autocomplete="$autocomplete"
         :required="$required"
@@ -42,8 +46,8 @@
         {{ $attributes }}
     />
 
-    @if(filled($name))
-        @error($name)
+    @if(filled($errorKey))
+        @error($errorKey)
             <span class="error text-red-500 text-size-small-heading font-inter mb-4 block">{{ $message }}</span>
         @enderror
     @endif
