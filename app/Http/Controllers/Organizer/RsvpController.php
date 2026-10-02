@@ -41,7 +41,7 @@ class RsvpController extends Controller
             'search' => $search,
             'invitations' => $invitations,
             'stats' => $this->report->statsFor($event),
-            'question' => $this->report->questionLabel($invitations),
+            'questions' => $this->report->questionLabels($event, $invitations),
         ]);
     }
 

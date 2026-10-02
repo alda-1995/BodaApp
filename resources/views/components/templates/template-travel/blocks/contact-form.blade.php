@@ -178,10 +178,15 @@
                                 </label>
                             @endif
 
-                            @foreach ($section->get('custom_questions', []) as $question)
+                            @foreach ($section->get('custom_questions', []) as $pregunta)
                                 <label class="tv-field" data-rsvp-when-attending>
-                                    <span class="tv-field__label">{{ $question }}</span>
-                                    <textarea name="answers[{{ $question }}]" rows="2"></textarea>
+                                    <span class="tv-field__label">{{ $pregunta['question'] }}</span>
+
+                                    @if ($pregunta['description'])
+                                        <small class="tv-field__hint">{{ $pregunta['description'] }}</small>
+                                    @endif
+
+                                    <textarea name="answers[{{ $pregunta['question'] }}]" rows="2"></textarea>
                                 </label>
                             @endforeach
 

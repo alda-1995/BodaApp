@@ -66,11 +66,55 @@
 
     // Expresión Alpine que decide si el campo es visible según su dependencia.
     $visibleExpr = "typeof item !== 'undefined' && {$jsValuesArray}.includes(String(item['{$dependsOnField}'] ?? ''))";
+
+    /*
+    | La expresión de arriba mira 'item', que es la fila de un repetidor, así
+    | que sólo sirve para un campo que depende de otro de SU MISMA fila.
+    |
+    | Un campo de primer nivel no tiene fila: depende de otro campo del paso, y
+    | ése vive suelto en el formulario. Para esos se mira el control hermano.
+    */
+    $dependeDeOtroCampoDelPaso = $hasDependency && !$isRepeater;
 @endphp
 
 <div
     class="flex flex-col"
-    @if($hasDependency)
+    @if($dependeDeOtroCampoDelPaso)
+        {{--
+            Depende de otro campo del paso. Se lee el control hermano dentro del
+            mismo formulario y se escucha su cambio, para que aparezca y
+            desaparezca sin recargar.
+
+            El selector pide el checkbox a propósito: los interruptores llevan
+            además un <input type="hidden"> con el mismo nombre, para que al
+            desmarcarlos viaje un 0, y ése es el que saldría primero.
+        --}}
+        {{--
+            Va en el init() de x-data y no en x-init: Alpine sólo trata un
+            x-init como cuerpo de función si la expresión EMPIEZA con 'const',
+            y aquí empezaría con el salto de línea de la indentación, así que lo
+            descartaba sin avisar y el campo se quedaba siempre visible.
+        --}}
+        x-data="{
+            aplica: true,
+            init() {
+                const origen = this.$el.closest('form')?.querySelector(
+                    'input[type=checkbox][name=&quot;{{ $dependsOnField }}&quot;], select[name=&quot;{{ $dependsOnField }}&quot;], input[type=radio][name=&quot;{{ $dependsOnField }}&quot;]:checked'
+                );
+
+                if (!origen) return;
+
+                const leer = () => {
+                    const valor = origen.type === 'checkbox' ? (origen.checked ? origen.value : '0') : origen.value;
+                    this.aplica = {{ $jsValuesArray }}.includes(String(valor));
+                };
+
+                leer();
+                origen.addEventListener('change', leer);
+            }
+        }"
+        x-show="aplica"
+    @elseif($hasDependency)
         x-show="{{ $visibleExpr }}"
         {{--
             x-show sólo esconde: el campo sigue en el DOM y seguiría viajando en

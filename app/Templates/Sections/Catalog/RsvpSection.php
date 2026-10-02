@@ -106,17 +106,41 @@ class RsvpSection extends Section
                 ->default('Esperamos contar con tu asistencia, agradecemos tu confirmación antes de la fecha indicada.')
                 ->placeholder('Escribe un mensaje de bienvenida...')
                 ->required(),
-            'ask_dietary_requirements' => BooleanField::make('ask_dietary_requirements', 'Preguntar por restricciones alimenticias')
+            /*
+            | Este interruptor manda sobre todo lo que se le pregunta al
+            | invitado además de si asiste. Apagado, el formulario queda con lo
+            | mínimo: nombre, contacto y si viene.
+            |
+            | La llave conserva el nombre viejo —'ask_dietary_requirements'— a
+            | propósito: es la que ya está guardada en las bodas existentes, y
+            | renombrarla las dejaría sin su respuesta.
+            */
+            'ask_dietary_requirements' => BooleanField::make('ask_dietary_requirements', 'Hacerle preguntas a los invitados')
+                ->help('Las que agregues abajo aparecerán en su formulario de confirmación.')
                 ->default(true),
-            'enable_open_confirmation_link' => BooleanField::make('enable_open_confirmation_link', 'Habilitar link abierto de confirmación (para invitados sin invitación personalizada)')
-                ->default(true),
+            /*
+            | Va pegado a su interruptor: aparece y desaparece con él, así que
+            | ponerlo en otro lugar del paso haría que algo saltara lejos de
+            | donde el organizador acaba de hacer clic.
+            */
             'custom_questions' => RepeaterField::make('custom_questions', 'Preguntas personalizadas (opcionales)')
                 ->sortable()
+                ->dependsOn('ask_dietary_requirements', true)
                 ->schema([
                     'question' => InlineTextField::make('question', 'Pregunta')
-                        ->placeholder('Ej. ¿Con qué canción te pararías a bailar?')
+                        ->placeholder('Ej. ¿Tienes alguna restricción alimentaria?')
                         ->required(),
+                    /*
+                    | Va bajo la pregunta en la invitación, para decirle al
+                    | invitado qué se espera que conteste. Es opcional: una
+                    | pregunta clara no necesita explicación.
+                    */
+                    'description' => InlineTextField::make('description', 'Aclaración (opcional)')
+                        ->placeholder('Ej. Sin gluten, alergias, vegetariano...')
+                        ->nullable(),
                 ]),
+            'enable_open_confirmation_link' => BooleanField::make('enable_open_confirmation_link', 'Habilitar link abierto de confirmación (para invitados sin invitación personalizada)')
+                ->default(true),
             'thank_you_message' => TextareaField::make('thank_you_message', 'Mensaje de agradecimiento tras confirmar')
                 ->default('¡Gracias por confirmar! Nos hace muy felices contar contigo en este día tan especial.')
                 ->placeholder('Escribe un mensaje de agradecimiento...')
@@ -130,17 +154,34 @@ class RsvpSection extends Section
             ? Carbon::parse($values['rsvp_deadline'])
             : null;
 
-        $questions = collect($this->rows($values, 'custom_questions'))
-            ->map(fn (array $row) => (string) ($row['question'] ?? ''))
-            ->filter()
-            ->values()
-            ->all();
+        $preguntar = $this->boolean($values, 'ask_dietary_requirements', true);
+
+        /*
+        | Con las preguntas apagadas no se pinta ninguna, aunque queden guardadas
+        | de antes: así el organizador puede apagarlas y volverlas a encender sin
+        | tener que escribirlas otra vez.
+        */
+        /*
+        | Cada pregunta viaja con su aclaración. La llave de la respuesta sigue
+        | siendo el texto de la pregunta, así que lo ya contestado no se mueve
+        | de sitio.
+        */
+        $questions = $preguntar
+            ? collect($this->rows($values, 'custom_questions'))
+                ->map(fn (array $row) => [
+                    'question' => trim((string) ($row['question'] ?? '')),
+                    'description' => trim((string) ($row['description'] ?? '')) ?: null,
+                ])
+                ->filter(fn (array $row) => $row['question'] !== '')
+                ->values()
+                ->all()
+            : [];
 
         return [
             'deadline' => $deadline,
             'welcome_message' => $this->text($values, 'welcome_message'),
             'thank_you_message' => $this->text($values, 'thank_you_message'),
-            'ask_dietary_requirements' => $this->boolean($values, 'ask_dietary_requirements', true),
+            'ask_dietary_requirements' => $preguntar,
             'open_link_enabled' => $this->boolean($values, 'enable_open_confirmation_link', true),
             'allow_children' => $this->boolean($values, 'allow_children', true),
             'open_link_max_passes' => (int) ($values['open_link_max_passes'] ?? EventSettingsService::DEFAULT_OPEN_LINK_MAX_PASSES),
@@ -191,7 +232,16 @@ class RsvpSection extends Section
             'open_link_enabled' => true,
             'allow_children' => true,
             'open_link_max_passes' => EventSettingsService::DEFAULT_OPEN_LINK_MAX_PASSES,
-            'custom_questions' => ['¿Con qué canción te pararías a bailar?'],
+            'custom_questions' => [
+                [
+                    'question' => '¿Alguna restricción alimentaria?',
+                    'description' => 'Sin gluten, alergias, vegetariano...',
+                ],
+                [
+                    'question' => '¿Con qué canción te pararías a bailar?',
+                    'description' => null,
+                ],
+            ],
             'closed' => false,
             'calendar' => [
                 'title' => 'Boda de Sofía y Alejandro',

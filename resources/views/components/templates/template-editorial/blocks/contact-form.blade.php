@@ -114,17 +114,21 @@
                         <input type="hidden" name="passes" value="1">
                     @endif
 
-                    @if ($section->get('ask_dietary_requirements'))
+                    {{--
+                        Las preguntas las escribe el organizador, incluida la de
+                        alimentos: antes iba aquí fija y no todas las bodas la
+                        quieren ni la preguntan igual. Si quiere preguntarla, la
+                        agrega como una más en su wizard.
+                    --}}
+                    @foreach ($section->get('custom_questions', []) as $pregunta)
                         <label class="te-field" data-rsvp-when-attending>
-                            <span>¿Alguna restricción alimentaria?</span>
-                            <input type="text" name="dietary_restrictions" placeholder="Sin gluten, alergias...">
-                        </label>
-                    @endif
+                            <span>{{ $pregunta['question'] }}</span>
 
-                    @foreach ($section->get('custom_questions', []) as $question)
-                        <label class="te-field" data-rsvp-when-attending>
-                            <span>{{ $question }}</span>
-                            <textarea name="answers[{{ $question }}]" rows="2"></textarea>
+                            @if ($pregunta['description'])
+                                <small class="te-field__hint">{{ $pregunta['description'] }}</small>
+                            @endif
+
+                            <textarea name="answers[{{ $pregunta['question'] }}]" rows="2"></textarea>
                         </label>
                     @endforeach
 

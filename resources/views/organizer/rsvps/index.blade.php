@@ -14,8 +14,18 @@
         ['label' => 'Pendientes de responder', 'value' => $stats['pending']],
     ];
 
-    // Cada boda pone su propia pregunta (la canción, por ejemplo); si nadie la
-    // ha respondido todavía, la columna no tiene por qué aparecer.
+    /*
+     * Una columna por cada pregunta de esta boda, en el orden en que el
+     * organizador las puso. Antes se enseñaba una sola y salía de la primera
+     * respuesta guardada, así que la columna cambiaba según quién contestara
+     * antes.
+     */
+    $preguntas = collect($questions)->map(fn (string $pregunta) => [
+        'label' => Str::limit($pregunta, 40),
+        'width' => 'w-[220px]',
+        'render' => fn($invitation) => e($invitation->rsvp?->answers[$pregunta] ?? $empty),
+    ])->all();
+
     $columns = array_values(array_filter([
         [
             'label' => 'Invitado',
@@ -36,18 +46,20 @@
                 default => 'Sin responder',
             },
         ],
-        [
-            'label' => 'Restricciones',
-            'width' => 'w-[200px]',
-            'render' => fn($invitation) => e($invitation->rsvp?->dietary_restrictions ?: $empty),
-        ],
-        $question
+        /*
+         * Las restricciones ya no se preguntan con un campo aparte: ahora son
+         * una pregunta más que escribe el organizador. La columna se queda sólo
+         * si alguien la contestó cuando sí existía, para no esconder lo que ya
+         * está guardado; en una boda nueva no aparece vacía.
+         */
+        $invitations->contains(fn($invitation) => filled($invitation->rsvp?->dietary_restrictions))
             ? [
-                'label' => Str::limit($question, 40),
-                'width' => 'w-[220px]',
-                'render' => fn($invitation) => e($invitation->rsvp?->answers[$question] ?? $empty),
+                'label' => 'Restricciones',
+                'width' => 'w-[200px]',
+                'render' => fn($invitation) => e($invitation->rsvp?->dietary_restrictions ?: $empty),
             ]
             : null,
+        ...$preguntas,
         [
             'label' => 'Contacto',
             'width' => 'w-[180px]',

@@ -133,6 +133,18 @@
     padding: 0;
 }
 
+/*
+ * La aclaración que el organizador le pone a su pregunta. Va bajo la etiqueta y
+ * más apagada que ella: explica, no pregunta.
+ */
+.te-field__hint {
+    margin-top: -0.15rem;
+    font-family: var(--font-secondary);
+    font-size: var(--te-size-caption);
+    line-height: 1.5;
+    color: var(--te-soft);
+}
+
 /* El campo es una línea, no una caja: es lo que le da el aire al diseño. */
 .te-field input[type="text"],
 .te-field input[type="tel"],
