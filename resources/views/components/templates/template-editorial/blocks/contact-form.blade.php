@@ -140,7 +140,8 @@
                     --}}
                     <label class="te-field te-field--boxed">
                         <span>Mensaje para los novios</span>
-                        <textarea name="answers[Mensaje para los novios]" rows="2"></textarea>
+                        <textarea name="answers[Mensaje para los novios]" rows="2"
+                            placeholder="Escríbeles unas palabras (opcional)"></textarea>
                     </label>
 
                     <div class="te-rsvp__errors" data-rsvp-errors></div>
