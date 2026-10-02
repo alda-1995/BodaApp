@@ -136,6 +136,27 @@ class EventWizardService
             ? $files->where('section', $stepKey)
             : $event->files()->where('section', $stepKey)->get();
 
+        /*
+        | Por su posición y no por el orden en que se subieron.
+        |
+        | Arr::set conserva el orden en que se van metiendo las claves, y la fila
+        | se lee después con array_values: si los archivos llegan 1, 2, 0, la
+        | galería se pinta en ese orden y no en el guardado. Reordenar las fotos
+        | se veía bien en pantalla y al recargar volvían a su sitio viejo, porque
+        | el cambio sí se guardaba —el field_name queda como 'photos.0.image'—
+        | pero se leía mal.
+        |
+        | Los números se rellenan con ceros para que 'photos.10' vaya después de
+        | 'photos.9' y no entre 'photos.1' y 'photos.2'.
+        */
+        $stepFiles = $stepFiles
+            ->sortBy(fn ($file) => preg_replace_callback(
+                '/\d+/',
+                fn (array $numero) => str_pad($numero[0], 6, '0', STR_PAD_LEFT),
+                (string) $file->field_name,
+            ))
+            ->values();
+
         foreach ($stepFiles as $file) {
             Arr::set($savedValues, $file->field_name, [
                 'uuid' => $file->uuid,

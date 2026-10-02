@@ -49,6 +49,23 @@
         <p class="text-xs text-red-600 font-medium">{{ $message }}</p>
     @enderror
 
+    {{--
+        Plegar todas de una vez: con varias filas abiertas el paso es larguísimo y
+        esto lo deja en una lista que se lee de un vistazo. Sólo aparece cuando hay
+        más de una fila; con una sola, su propio botón basta.
+
+        No va en las filas compactas (preguntas frecuentes, preguntas del
+        formulario): ésas ya nacen resumidas y se abren una a una para editarlas,
+        así que no hay nada que plegar.
+    --}}
+    @unless($bareRows)
+    <div class="flex justify-end" x-show="count > 1" x-cloak>
+        <button type="button" @click="alternarTodas()"
+            x-text="todasPlegadas ? 'Expandir todas' : 'Colapsar todas'"
+            class="text-[#3952F6] font-inter text-parrafo cursor-pointer">Colapsar todas</button>
+    </div>
+    @endunless
+
     {{-- 1. Filas cargadas en Servidor (old() o Base de Datos) --}}
     <div x-ref="container" class="space-y-4">
         @foreach ($items as $index => $item)
@@ -61,34 +78,10 @@
                     :item-data="$itemData" :defaults="$rowDefaults" :sortable="$sortable" :label="$label"
                     :open="$errors->has($dotBase . '.' . $index . '.*')" />
             @else
-                <div x-data="repeaterRow({{ json_encode(array_merge($rowDefaults, $itemData)) }})"
-                    class="group-item relative p-4 rounded-lg border border-[#EBEBEB]">
-                    <div class="flex justify-between items-center pb-2 border-b border-gray-100">
-                        <span class="flex items-center gap-2">
-                            <x-forms.row-handle :sortable="$sortable" />
-                            <span class="item-number text-xs font-bold text-gray-400 uppercase tracking-wider">
-                                #{{ $loop->iteration }}
-                            </span>
-                        </span>
-                        <button type="button" @click="removeItem($event)"
-                            class="item-remove-btn text-red-500 cursor-pointer text-size-small-heading font-inter transition-colors">
-                            Eliminar
-                        </button>
-                    </div>
-
-                    <div class="grid grid-cols-1">
-                        @foreach ($schema as $subIndex => $subField)
-                            @php
-                                $subKey = $subKeys[$subIndex] ?? $subIndex;
-                                $subPrefix = "{$name}[{$index}][{$subKey}]";
-                            @endphp
-                            <div>
-                                <x-forms.render-field :field="$subField" :name="$subPrefix" :value="$itemData[$subKey] ?? null"
-                                    :is-repeater="true" />
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
+                {{-- Abierta: el formulario es lo primero que hay que ver. --}}
+                <x-forms.block-row :schema="$schema" :sub-keys="$subKeys" :name="$name" :index="$index"
+                    :item-data="$itemData" :defaults="$rowDefaults" :sortable="$sortable" :label="$label"
+                    :number="$loop->iteration" :open="true" />
             @endif
         @endforeach
     </div>
@@ -100,39 +93,25 @@
             <x-forms.inline-row :schema="$schema" :sub-keys="$subKeys" :name="$name" index="__INDEX__"
                 :defaults="$rowDefaults" :sortable="$sortable" :label="$label" :open="true" :focus="true" />
         @else
-            <div x-data="repeaterRow({{ json_encode($rowDefaults) }})"
-                class="group-item relative p-4 rounded-lg border border-[#EBEBEB]">
-                <div class="flex justify-between items-center pb-2 border-b border-gray-100">
-                    <span class="flex items-center gap-2">
-                        <x-forms.row-handle :sortable="$sortable" />
-                        <span class="item-number text-xs font-bold text-gray-400 uppercase tracking-wider">
-                            #__INDEX_NUMBER__
-                        </span>
-                    </span>
-                    <button type="button" @click="removeItem($event)"
-                        class="item-remove-btn text-red-500 cursor-pointer text-size-small-heading font-inter transition-colors">
-                        Eliminar
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-1">
-                    @foreach ($schema as $subIndex => $subField)
-                        @php
-                            $subKey = $subKeys[$subIndex] ?? $subIndex;
-                            $subPrefix = "{$name}[__INDEX__][{$subKey}]";
-                        @endphp
-                        <div>
-                            <x-forms.render-field :field="$subField" :name="$subPrefix" :value="null"
-                                :is-repeater="true" />
-                        </div>
-                    @endforeach
-                </div>
-            </div>
+            {{-- Una fila recién agregada nace abierta y con foco: vacía no tendría nada que mostrar. --}}
+            <x-forms.block-row :schema="$schema" :sub-keys="$subKeys" :name="$name" index="__INDEX__"
+                :defaults="$rowDefaults" :sortable="$sortable" :label="$label"
+                :open="true" :focus="true" />
         @endif
     </template>
 
-    <div class="flex items-center justify-between pb-3 border-b border-gray-200">
-        <x-controls.button type="button" @click="addItem" variant="secondary">+ Agregar {{ strtolower($label) ?: 'elemento' }}</x-controls.button>
+    {{--
+        Al llegar al tope el botón se apaga de verdad —antes seguía viéndose igual
+        y el clic no hacía nada— y al lado se dice cuántos van, para que el tope no
+        aparezca de sorpresa.
+    --}}
+    <div class="flex items-center gap-4 pb-3 border-b border-gray-200">
+        <x-controls.button type="button" variant="secondary"
+            x-on:click="addItem()"
+            x-bind:disabled="count >= max">+ Agregar {{ strtolower($label) ?: 'elemento' }}</x-controls.button>
+
+        <span class="font-inter text-size-small-heading text-[#8C8C8C]"
+            x-text="count >= max ? `Llegaste al máximo de ${max}` : `${count} de ${max}`"></span>
     </div>
 </div>
 
@@ -167,6 +146,43 @@
                 this.editing = false;
             },
 
+            /**
+             * Lo que se lee de la fila cuando está cerrada.
+             *
+             * Se arma con lo que el organizador escribió, no con nombres de campo:
+             * para reconocer una fila entre varias sirve su contenido. Se dejan
+             * fuera las URL y los identificadores de archivo, que no dicen nada.
+             */
+            resumen() {
+                const valores = Object.values(this.editing ? this.snapshot : this.item)
+                    .filter(valor => typeof valor === 'string')
+                    .map(valor => valor.trim())
+                    .filter(valor => valor !== '' && !/^(https?:\/\/|\/storage\/)/.test(valor))
+                    .filter(valor => !/^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(valor));
+
+                return valores.slice(0, 3).join(' · ');
+            },
+
+            /**
+             * La foto de la fila, para verla cerrada sin tener que abrirla.
+             *
+             * Se reconoce por la firma del control de imagen: deja un '<campo>_url'
+             * junto a su '<campo>_uuid'. Así no se confunde con una liga que el
+             * organizador escribió a mano, que es texto y no una foto.
+             */
+            miniatura() {
+                const datos = this.editing ? this.snapshot : this.item;
+
+                for (const [clave, valor] of Object.entries(datos)) {
+                    if (!clave.endsWith('_url') || typeof valor !== 'string' || valor.trim() === '') continue;
+                    if (!(clave.replace(/_url$/, '_uuid') in datos)) continue;
+
+                    return valor;
+                }
+
+                return null;
+            },
+
             cancelEdit() {
                 Object.assign(this.item, this.snapshot);
                 this.editing = false;
@@ -191,6 +207,14 @@
                             }
                         }
                     });
+
+                    /*
+                     * El snapshot se arma antes de esta lectura, así que le faltan
+                     * las claves que sólo existen en el HTML —la URL y el uuid de
+                     * una imagen—. Sin esto, una fila abierta no encontraba su
+                     * foto para la miniatura ni su texto para el resumen.
+                     */
+                    this.snapshot = { ...this.item };
                 });
             },
 
@@ -204,6 +228,10 @@
             max: config.max || 100,
             sortable: config.sortable === true,
             dragging: null,
+            // Cuántas filas hay ahora. Es estado y no una cuenta del DOM porque de
+            // él dependen el botón de agregar y el aviso del tope.
+            count: 0,
+            todasPlegadas: false,
 
             init() {
                 this.updateIndexes();
@@ -214,69 +242,92 @@
             },
 
             /**
-             * Arrastre nativo HTML5, delegado en el contenedor para que las filas
-             * añadidas después queden cubiertas sin volver a enganchar listeners.
+             * Arrastre con eventos de puntero, delegado en el contenedor para que
+             * las filas añadidas después queden cubiertas sin reenganchar nada.
              *
-             * Las filas sólo son draggable mientras se sujeta el handle: así el
-             * texto de los inputs se sigue pudiendo seleccionar con el ratón.
+             * No se usa el arrastre nativo HTML5 porque en pantalla táctil no
+             * existe: en un celular o una tablet el tirador no hacía nada. Con
+             * punteros vale lo mismo para el ratón, el dedo y el lápiz.
+             *
+             * Sólo arranca desde el tirador, así el texto de los campos se sigue
+             * pudiendo seleccionar con el ratón.
              */
             enableSorting() {
                 const container = this.$refs.container;
 
-                container.addEventListener('pointerdown', event => {
-                    const handle = event.target.closest('[data-drag-handle]');
-                    const item = event.target.closest('.group-item');
-                    if (handle && item) item.setAttribute('draggable', 'true');
+                container.addEventListener('pointerdown', evento => {
+                    const tirador = evento.target.closest('[data-drag-handle]');
+                    const fila = evento.target.closest('.group-item');
+
+                    if (!tirador || !fila || evento.button !== 0) return;
+
+                    evento.preventDefault();
+                    this.dragging = fila;
+                    fila.classList.add('opacity-60');
+                    // Capturar el puntero mantiene los eventos aunque el cursor
+                    // se salga del tirador, que es lo que pasa al arrastrar.
+                    tirador.setPointerCapture(evento.pointerId);
                 });
 
-                container.addEventListener('pointerup', () => this.clearDraggable());
-
-                container.addEventListener('dragstart', event => {
-                    const item = event.target.closest('.group-item');
-                    if (!item) return;
-
-                    this.dragging = item;
-                    item.classList.add('opacity-50');
-                    event.dataTransfer.effectAllowed = 'move';
-                    // Firefox exige datos en el dataTransfer para iniciar el arrastre.
-                    event.dataTransfer.setData('text/plain', '');
-                });
-
-                container.addEventListener('dragover', event => {
+                container.addEventListener('pointermove', evento => {
                     if (!this.dragging) return;
-                    event.preventDefault();
 
-                    const target = event.target.closest('.group-item');
-                    if (!target || target === this.dragging) return;
+                    evento.preventDefault();
 
-                    const box = target.getBoundingClientRect();
-                    const insertAfter = event.clientY > box.top + box.height / 2;
+                    const debajo = document.elementFromPoint(evento.clientX, evento.clientY);
+                    const destino = debajo?.closest?.('.group-item');
 
-                    container.insertBefore(
-                        this.dragging,
-                        insertAfter ? target.nextSibling : target
-                    );
+                    if (!destino || destino === this.dragging || !container.contains(destino)) return;
+
+                    const caja = destino.getBoundingClientRect();
+                    const porDebajo = evento.clientY > caja.top + caja.height / 2;
+
+                    container.insertBefore(this.dragging, porDebajo ? destino.nextSibling : destino);
                 });
 
-                container.addEventListener('drop', event => event.preventDefault());
+                const soltar = () => {
+                    if (!this.dragging) return;
 
-                container.addEventListener('dragend', () => {
-                    if (this.dragging) this.dragging.classList.remove('opacity-50');
+                    this.dragging.classList.remove('opacity-60');
                     this.dragging = null;
-                    this.clearDraggable();
                     // El orden del DOM es el orden del array enviado: al reindexar
                     // los name, la nueva posición queda persistida sin campo extra.
                     this.updateIndexes();
+                };
+
+                container.addEventListener('pointerup', soltar);
+                container.addEventListener('pointercancel', soltar);
+            },
+
+            /**
+             * Agrega una fila.
+             *
+             * Sin referencia va al final, que es lo de siempre. Con una fila de
+             * referencia se inserta antes o después de ella, para poder meter un
+             * elemento en medio de la lista sin tener que arrastrarlo luego.
+             *
+             * Los índices de los name se recalculan al final, así que da igual en
+             * qué posición entre: el orden del DOM es el orden que se guarda.
+             */
+            /**
+             * Pliega o despliega todas las filas de una vez.
+             *
+             * Se le escribe el estado a cada fila en vez de llamar a su startEdit(),
+             * que además mueve el foco: desplegando diez filas, el foco acabaría en
+             * la última y la pantalla saltaría hasta allá.
+             */
+            alternarTodas() {
+                const plegar = !this.todasPlegadas;
+
+                this.$refs.container.querySelectorAll('.group-item').forEach(fila => {
+                    const datos = window.Alpine?.$data(fila);
+                    if (datos) datos.editing = !plegar;
                 });
+
+                this.todasPlegadas = plegar;
             },
 
-            clearDraggable() {
-                this.$refs.container
-                    .querySelectorAll('.group-item[draggable]')
-                    .forEach(item => item.removeAttribute('draggable'));
-            },
-
-            addItem() {
+            addItem(referencia = null, posicion = 'after') {
                 const container = this.$refs.container;
                 const template = this.$refs.template;
                 const currentItems = container.querySelectorAll('.group-item').length;
@@ -295,7 +346,13 @@
                 tempDiv.innerHTML = content.trim();
                 const newItem = tempDiv.firstElementChild;
 
-                container.appendChild(newItem);
+                const vecina = referencia?.closest?.('.group-item');
+
+                if (vecina && container.contains(vecina)) {
+                    container.insertBefore(newItem, posicion === 'before' ? vecina : vecina.nextSibling);
+                } else {
+                    container.appendChild(newItem);
+                }
 
                 if (window.Alpine) {
                     Alpine.initTree(newItem);
@@ -321,6 +378,8 @@
             updateIndexes() {
                 const container = this.$refs.container;
                 const items = container.querySelectorAll('.group-item');
+
+                this.count = items.length;
 
                 items.forEach((item, index) => {
                     const numberSpan = item.querySelector('.item-number');

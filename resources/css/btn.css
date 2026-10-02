@@ -2,6 +2,12 @@
     @apply h-[50px] px-6 md:px-8 inline-flex justify-center text-center items-center max-w-full cursor-pointer;
 }
 
+/* Un botón apagado tiene que verse apagado: antes seguía igual y sólo no hacía nada. */
+.btn:disabled,
+.btn[aria-disabled="true"]{
+    @apply opacity-40 cursor-not-allowed pointer-events-none;
+}
+
 .btn-main{
     @apply bg-base-yellow !px-8 text-black text-parrafo font-inter;
 }

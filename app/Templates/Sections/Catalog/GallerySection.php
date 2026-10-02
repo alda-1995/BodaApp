@@ -40,6 +40,8 @@ class GallerySection extends Section
             'allow_guest_uploads' => BooleanField::make('allow_guest_uploads', 'Permitir que los invitados suban fotos desde el sitio')
                 ->default(true),
             'photos' => RepeaterField::make('photos', 'Fotos de la pareja')
+                // El orden de la galería es el de esta lista, así que se arrastra.
+                ->sortable()
                 ->schema([
                     'image' => ImageUploadField::make('image', 'Imagen')
                         ->maxSize(5120)
