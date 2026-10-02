@@ -114,6 +114,32 @@ class EventSettingsTest extends TestCase
         $this->assertFalse($this->event->fresh()->features['rsvp']['allow_children']);
     }
 
+    public function test_guarda_el_permiso_de_subir_fotos_junto_a_la_galeria(): void
+    {
+        // Se ajusta en Configuración pero se guarda donde vive la galería.
+        $this->save(['allow_guest_uploads' => '1'])->assertSessionHasNoErrors();
+
+        $this->assertTrue($this->event->fresh()->features['gallery']['allow_guest_uploads']);
+    }
+
+    public function test_desmarcar_subir_fotos_se_guarda_como_no(): void
+    {
+        $this->save(['allow_guest_uploads' => null])->assertSessionHasNoErrors();
+
+        $this->assertFalse($this->event->fresh()->features['gallery']['allow_guest_uploads']);
+    }
+
+    public function test_no_borra_las_fotos_que_el_wizard_guardo_en_la_galeria(): void
+    {
+        $this->event->update(['features' => ['gallery' => ['photos' => [['caption' => 'La pedida']]]]]);
+
+        $this->save(['allow_guest_uploads' => null])->assertSessionHasNoErrors();
+
+        $gallery = $this->event->fresh()->features['gallery'];
+        $this->assertSame([['caption' => 'La pedida']], $gallery['photos']);
+        $this->assertFalse($gallery['allow_guest_uploads']);
+    }
+
     public function test_no_borra_lo_que_el_wizard_guardo_en_confirmacion(): void
     {
         $this->event->update(['features' => ['rsvp' => ['welcome_message' => 'Bienvenidos']]]);

@@ -36,6 +36,7 @@ class EventSettingsService
         [$partner1, $partner2] = $event->urlNames();
         $theme = $event->getFeature('theme', []);
         $rsvp = $event->getFeature('rsvp', []);
+        $gallery = $event->getFeature('gallery', []);
 
         return [
             'name' => $user->name,
@@ -48,6 +49,8 @@ class EventSettingsService
             'secondary_color' => $event->theme_colors['secondary'],
             'allow_children' => (bool) ($rsvp['allow_children'] ?? true),
             'open_link_max_passes' => (int) ($rsvp['open_link_max_passes'] ?? self::DEFAULT_OPEN_LINK_MAX_PASSES),
+            // Se ajusta aquí pero vive con la galería, que es de quien es el dato.
+            'allow_guest_uploads' => (bool) ($gallery['allow_guest_uploads'] ?? true),
         ];
     }
 
@@ -72,6 +75,10 @@ class EventSettingsService
             $features['rsvp'] = array_merge($features['rsvp'] ?? [], [
                 'allow_children' => $data['allow_children'],
                 'open_link_max_passes' => $data['open_link_max_passes'],
+            ]);
+            // Igual que arriba: se mezcla para no pisar las fotos del wizard.
+            $features['gallery'] = array_merge($features['gallery'] ?? [], [
+                'allow_guest_uploads' => $data['allow_guest_uploads'],
             ]);
 
             $event->update(['features' => $features]);

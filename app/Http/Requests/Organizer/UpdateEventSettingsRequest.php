@@ -22,6 +22,7 @@ class UpdateEventSettingsRequest extends FormRequest
         $this->merge([
             'custom_colors' => $this->boolean('custom_colors'),
             'allow_children' => $this->boolean('allow_children'),
+            'allow_guest_uploads' => $this->boolean('allow_guest_uploads'),
             // La dirección se normaliza igual que al generarla: "Ana y Luis" → "ana-y-luis".
             'custom_url' => Str::slug((string) $this->input('custom_url')) ?: null,
         ]);
@@ -60,6 +61,7 @@ class UpdateEventSettingsRequest extends FormRequest
 
             'allow_children' => ['boolean'],
             'open_link_max_passes' => ['required', 'integer', 'min:0', 'max:20'],
+            'allow_guest_uploads' => ['boolean'],
         ];
     }
 

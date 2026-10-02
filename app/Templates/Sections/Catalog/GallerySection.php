@@ -4,7 +4,6 @@ namespace App\Templates\Sections\Catalog;
 
 use App\Templates\Sections\Section;
 
-use App\FormBuilder\Controls\BooleanField;
 use App\FormBuilder\Controls\ImageUploadField;
 use App\FormBuilder\Controls\RepeaterField;
 use App\FormBuilder\Controls\TextareaField;
@@ -37,8 +36,6 @@ class GallerySection extends Section
                 ->default('')
                 ->placeholder('Escribe un mensaje para tus invitados...')
                 ->required(),
-            'allow_guest_uploads' => BooleanField::make('allow_guest_uploads', 'Permitir que los invitados suban fotos desde el sitio')
-                ->default(true),
             'photos' => RepeaterField::make('photos', 'Fotos de la pareja')
                 // El orden de la galería es el de esta lista, así que se arrastra.
                 ->sortable()

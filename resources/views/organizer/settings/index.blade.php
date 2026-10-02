@@ -223,6 +223,20 @@
                             <x-controls.inputs.input type="number" min="0" max="20"
                                 label="Máximo de acompañantes por invitado (link abierto)"
                                 name="open_link_max_passes" :value="$values['open_link_max_passes']" />
+
+                            {{-- Se ajustaba en el paso de la galería; vale para toda la boda. --}}
+                            <label class="mb-1 flex cursor-pointer items-center gap-3">
+                                <input type="checkbox" name="allow_guest_uploads" value="1" class="peer sr-only"
+                                    @checked($value('allow_guest_uploads')) />
+                                <span class="{{ $circle }}" aria-hidden="true">
+                                    <svg class="size-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                </span>
+                                <span class="text-size-small-heading text-black">Permitir que los invitados suban fotos</span>
+                            </label>
+                            <p class="{{ $hint }}">
+                                Todavía no hace nada: la pantalla para que los invitados compartan sus fotos
+                                está por construirse.
+                            </p>
                         </section>
 
                         {{-- Coadministradores --}}
