@@ -106,3 +106,34 @@
 .input-secondary .iti__selected-dial-code{
     @apply font-main text-parrafo;
 } */
+/*
+ * Separación entre los campos del wizard.
+ *
+ * La pone la lista y no cada control. Antes el hueco salía de lo que trajera
+ * dentro el campo —el párrafo de ayuda, la raíz del repetidor, la caja de la
+ * imagen— así que un campo con ayuda quedaba a 16px del siguiente y uno sin
+ * ayuda, pegado. Aquí se apaga lo que traiga cada uno y manda una sola medida.
+ */
+.campo-wizard {
+    margin-bottom: 1.25rem;
+}
+
+/*
+ * Ni el control ni lo que lo acompaña separan por su cuenta: de eso se encarga
+ * el campo. Se apaga en los dos niveles porque unos componentes lo traen en su
+ * raíz (imagen, repetidor, interruptor) y otros en el control mismo.
+ */
+.campo-wizard > *,
+.campo-wizard > * > :is(input, textarea, select) {
+    margin-bottom: 0;
+}
+
+/*
+ * El texto de ayuda venía con un margen superior NEGATIVO para compensar el
+ * margen del control que tenía encima. Sin ese margen, el tirón lo montaba
+ * sobre el campo —se leía encima del recuadro de la imagen—, así que aquí se
+ * le da una separación propia, la misma que hay entre etiqueta y control.
+ */
+.campo-wizard > p {
+    margin-top: 0.375rem;
+}

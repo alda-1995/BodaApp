@@ -77,8 +77,14 @@
     $dependeDeOtroCampoDelPaso = $hasDependency && !$isRepeater;
 @endphp
 
+{{--
+    'campo-wizard' es lo que separa un campo del siguiente. El espacio vive ahí
+    y no dentro de cada control: antes lo ponía quien lo trajera —el párrafo de
+    ayuda, la raíz del repetidor, la caja de la imagen— y un campo sin ayuda
+    quedaba pegado al de abajo.
+--}}
 <div
-    class="flex flex-col"
+    class="flex flex-col campo-wizard"
     @if($dependeDeOtroCampoDelPaso)
         {{--
             Depende de otro campo del paso. Se lee el control hermano dentro del

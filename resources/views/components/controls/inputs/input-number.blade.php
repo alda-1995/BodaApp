@@ -26,13 +26,21 @@
     $palette = $variants[$variant] ?? '';
 @endphp
 
-<label {{ $attributes->merge(['class' => "flex flex-col $palette"]) }}>
+{{--
+    La etiqueta va como en los demás controles: el texto y el asterisco dentro
+    de UN solo span. Si van sueltos, el 'justify-between' los manda a cada
+    extremo y el asterisco aparece despegado, al otro lado del campo.
+
+    El 'gap-1.5' es la separación entre la etiqueta y el campo que usan los
+    demás; sin él este quedaba más apretado que el resto del formulario.
+--}}
+<label {{ $attributes->merge(['class' => "flex flex-col gap-1.5 w-full $palette"]) }}>
     @if(filled($label))
         <span class="font-inter text-size-small-heading text-black flex items-center justify-between">
-            {{ $label }}
-            @if($required)
-                <span class="text-red-500">*</span>
-            @endif
+            <span>
+                {{ $label }}
+                @if($required) <span class="text-red-500">*</span> @endif
+            </span>
         </span>
     @endif
 

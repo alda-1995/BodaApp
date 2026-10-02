@@ -33,11 +33,12 @@
     class="flex flex-col gap-1.5 mb-4 w-full"
 >
     @if($label)
-        <label for="{{ $name }}" class="block text-sm font-medium text-gray-700">
-            {{ $label }}
-            @if($required)
-                <span class="text-red-500">*</span>
-            @endif
+        {{-- La misma etiqueta que el resto del formulario: traía otro tamaño y otro gris. --}}
+        <label for="{{ $name }}" class="font-inter text-size-small-heading text-black flex items-center justify-between">
+            <span>
+                {{ $label }}
+                @if($required) <span class="text-red-500">*</span> @endif
+            </span>
         </label>
     @endif
 

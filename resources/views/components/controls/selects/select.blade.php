@@ -31,13 +31,14 @@
     $palette = $variants[$variant] ?? $variants['main'];
 @endphp
 
-<div {{ $attributes->merge(['class' => "flex flex-col $palette"]) }} @if($idParent) id="{{ $idParent }}" @endif>
+<div {{ $attributes->merge(['class' => "flex flex-col gap-1.5 $palette"]) }} @if($idParent) id="{{ $idParent }}" @endif>
     @if(filled($label))
-        <label for="{{ $fieldId }}" class="label">
-            {{ $label }}
-            @if($required)
-                <span class="text-red-500">*</span>
-            @endif
+        {{-- La misma etiqueta que el resto del formulario, no la clase suelta '.label'. --}}
+        <label for="{{ $fieldId }}" class="font-inter text-size-small-heading text-black flex items-center justify-between">
+            <span>
+                {{ $label }}
+                @if($required) <span class="text-red-500">*</span> @endif
+            </span>
         </label>
     @endif
 
