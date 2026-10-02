@@ -174,6 +174,29 @@ class EventWizardSaveTest extends TestCase
         $this->assertSame('Formal', $features['dress_code']['dress_code_type']);
     }
 
+    public function test_el_tipo_de_vestimenta_acepta_texto_libre(): void
+    {
+        // Ya no es una lista cerrada: el organizador escribe lo que quiera.
+        $this->saveStep('dress_code', [
+            'dress_code_type' => 'Cocktail con sombrero',
+            'reference_image' => null,
+        ])->assertSessionHasNoErrors();
+
+        $this->assertSame(
+            'Cocktail con sombrero',
+            $this->event->fresh()->features['dress_code']['dress_code_type'],
+        );
+    }
+
+    public function test_el_tipo_de_vestimenta_sigue_siendo_obligatorio_y_acotado(): void
+    {
+        $this->saveStep('dress_code', ['dress_code_type' => '', 'reference_image' => null])
+            ->assertSessionHasErrors('dress_code_type');
+
+        $this->saveStep('dress_code', ['dress_code_type' => str_repeat('a', 81), 'reference_image' => null])
+            ->assertSessionHasErrors('dress_code_type');
+    }
+
     public function test_vaciar_un_campo_opcional_lo_guarda_como_null(): void
     {
         $this->saveStep('dress_code', ['dress_code_type' => 'Formal', 'color_or_theme' => 'Tonos tierra', 'reference_image' => null]);

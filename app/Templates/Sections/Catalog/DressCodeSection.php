@@ -5,7 +5,6 @@ namespace App\Templates\Sections\Catalog;
 use App\Templates\Sections\Section;
 
 use App\FormBuilder\Controls\ImageUploadField;
-use App\FormBuilder\Controls\SelectField;
 use App\FormBuilder\Controls\TextareaField;
 use App\FormBuilder\Controls\TextField;
 use App\Templates\BlockType;
@@ -33,18 +32,13 @@ class DressCodeSection extends Section
     public function fields(): array
     {
         return [
-            'dress_code_type' => SelectField::make('dress_code_type', 'Tipo de vestimenta')
-                ->placeholder('Elige una opción')
-                ->options([
-                    'Formal' => 'Formal',
-                    'Rigurosa Etiqueta' => 'Rigurosa Etiqueta',
-                    'Etiqueta' => 'Etiqueta',
-                    'Semicasual' => 'Semicasual',
-                    'Casual' => 'Casual',
-                    'Playa / Guayabera' => 'Playa / Guayabera',
-                ])
-                ->default('Formal')
-                ->required(),
+            'dress_code_type' => TextField::make('dress_code_type', 'Tipo de vestimenta')
+                ->placeholder('Ej. Formal, Etiqueta, Semicasual, Playa / Guayabera')
+                ->rules(['string', 'max:80'])
+                ->required()
+                ->messages([
+                    'max' => 'El tipo de vestimenta no debe pasar de :max caracteres.',
+                ]),
             'color_or_theme' => TextField::make('color_or_theme', 'Color o tema (opcional)')
                 ->placeholder('Ej. Tonos tierra, Pastel, etc.')
                 ->nullable(),
