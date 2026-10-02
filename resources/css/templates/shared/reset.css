@@ -80,6 +80,15 @@ select {
     color: inherit;
 }
 
+/*
+ * El tirador para estirar el textarea no va: deja al invitado deformar el
+ * formulario de una invitación que está cuidada al pixel. El alto lo pone cada
+ * plantilla con 'rows' y, si el texto se pasa, el campo se desplaza por dentro.
+ */
+textarea {
+    resize: none;
+}
+
 button {
     background: none;
     border: 0;

@@ -42,7 +42,7 @@
         @keydown.escape.prevent="cancelEdit()"
         placeholder="{{ $placeholder }}"
         @class([
-            'w-full resize-y rounded-md border px-3 py-2 bg-white font-inter text-size-small-heading outline-none focus:border-black',
+            'w-full resize-none rounded-md border px-3 py-2 bg-white font-inter text-size-small-heading outline-none focus:border-black',
             'border-red-500 text-red-900' => $hasError,
             'border-base-gray text-black' => !$hasError,
         ])

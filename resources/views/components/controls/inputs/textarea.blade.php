@@ -18,7 +18,7 @@
     $hasError = $errors->has($errorKey);
     $content = old($errorKey, $value);
 
-    $inputBase = 'mb-4 border rounded-md px-4 py-3 text-size-small-heading font-inter transition-colors duration-200 focus:outline-none disabled:bg-gray-100 disabled:cursor-not-allowed resize-y';
+    $inputBase = 'mb-4 border rounded-md px-4 py-3 text-size-small-heading font-inter transition-colors duration-200 focus:outline-none disabled:bg-gray-100 disabled:cursor-not-allowed resize-none';
 
     $variants = [
         'primary' => 'border-base-gray text-black focus:border-main focus:ring-1 focus:ring-main',
