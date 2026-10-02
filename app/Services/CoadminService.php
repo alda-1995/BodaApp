@@ -92,6 +92,10 @@ class CoadminService
                 'password' => Hash::make($password),
             ]);
 
+            // La contraseña la escribió la persona, no es una generada por la
+            // compra: si después compra su propia boda no hay que pedírsela.
+            $user->forceFill(['password_changed_at' => now()])->save();
+
             $user->roles()->syncWithoutDetaching([Role::named('organizer')->id]);
             $this->accept($invitation, $user);
 

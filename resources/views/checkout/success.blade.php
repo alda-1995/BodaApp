@@ -8,11 +8,15 @@
                 <template x-if="status === 'completed'">
                     <div class="flex flex-col">
                         <h2 class="text-size-subtitle text-center font-inter mb-4">¡Tu compra fue exitosa!</h2>
-                        <p class="text-parrafo text-[#737373]">Estás a solo 2 pasos de comenzar: define tu contraseña
-                            para acceder y completa la información de tu evento.</p>
+
+                        {{-- Quien ya tenía cuenta no crea contraseña: sólo entra. --}}
+                        <p class="text-parrafo text-[#737373]" x-show="needsPassword">Estás a solo 2 pasos de comenzar:
+                            define tu contraseña para acceder y completa la información de tu evento.</p>
+                        <p class="text-parrafo text-[#737373]" x-show="!needsPassword" x-cloak>Tu invitación ya está en
+                            tu cuenta. Entra con la contraseña que ya usas y completa la información de tu evento.</p>
 
                         <x-controls.button class="mt-6 md:mt-8" ::href="redirectUrl">
-                            Crear mi contraseña
+                            <span x-text="needsPassword ? 'Crear mi contraseña' : 'Entrar a mi cuenta'">Crear mi contraseña</span>
                         </x-controls.button>
                     </div>
                 </template>
@@ -72,6 +76,7 @@
             return {
                 status: 'pending',
                 redirectUrl: '',
+                needsPassword: true,
                 errorMessage: '',
                 attempts: 0,
                 maxAttempts: 12,
@@ -116,6 +121,7 @@
                             this.stopPolling();
                             this.status = 'completed';
                             this.redirectUrl = data.redirect_url ?? '/';
+                            this.needsPassword = data.needs_password ?? false;
                         } else if (data.status === 'failed' || data.status === 'expired') {
                             this.stopPolling();
                             this.status = data.status;

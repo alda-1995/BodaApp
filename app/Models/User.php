@@ -34,7 +34,6 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
-        'password_changed_at' => 'datetime',
     ];
 
     /**

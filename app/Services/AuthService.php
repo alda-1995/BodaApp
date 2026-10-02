@@ -144,6 +144,9 @@ class AuthService
             ],
             function ($user, $password) use ($emailDriver, &$notificationSent) {
                 $user->password = Hash::make($password);
+                // La persona acaba de elegir su contraseña: deja de necesitar el
+                // onboarding de la compra (ver CheckoutController::checkStatus).
+                $user->password_changed_at = now();
                 $user->setRememberToken(Str::random(60));
                 $user->save();
 

@@ -11,7 +11,7 @@
                         <h2 class="font-inter text-size-main text-black mb-4">Iniciar sesión</h2>
                         @csrf
                         <x-controls.input type="email" name="email" placeholder="Correo electrónico"
-                            value="{{ old('email') }}" required autofocus />
+                            value="{{ old('email', request('email')) }}" required autofocus />
                         <x-controls.password type="password" name="password" placeholder="Contraseña"
                             value="{{ old('password') }}" required autofocus />
                         <div class="block mt-8">
