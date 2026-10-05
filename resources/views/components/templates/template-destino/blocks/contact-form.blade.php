@@ -12,6 +12,14 @@
     | el formulario para que el servidor los rechace al enviarlo.
     */
     $soloPersonal = !$context->hasPersonalInvitation() && !$section->get('open_link_enabled', true);
+
+    /*
+    | Quien ya respondió desde su invitación personal no vuelve a ver el
+    | formulario: se le da las gracias y ya. Sólo lo sabemos de quien llegó por
+    | su liga —la liga abierta no identifica a nadie—, así que para los demás
+    | esto siempre es falso y el formulario se pinta igual que antes.
+    */
+    $yaConfirmo = (bool) ($guest->has_confirmed ?? false);
 @endphp
 
 {{--
@@ -35,7 +43,13 @@
         </div>
 
         <div class="td-rsvp__main">
-            @if ($section->get('closed'))
+            {{--
+                El agradecimiento va primero: a quien ya confirmó no se le dice
+                que la fecha límite pasó, porque respondió a tiempo. Lo pinta la
+                capa de abajo, que el servidor deja ya encendida.
+            --}}
+            @if ($yaConfirmo)
+            @elseif ($section->get('closed'))
                 <p class="td-rsvp__notice">
                     La fecha límite para confirmar ya pasó. Escríbele a los novios para avisarles.
                 </p>
@@ -151,7 +165,8 @@
         <img class="td-rsvp__photo" src="{{ $fondo }}" alt="" loading="lazy">
     @endif
 
-    <div class="td-rsvp__status" data-rsvp-status="confirmed">
+    {{-- Encendida de entrada si este invitado ya había respondido. --}}
+    <div @class(['td-rsvp__status', 'is-visible' => $yaConfirmo]) data-rsvp-status="confirmed">
         <div class="td-rsvp__note">
             <h3>Gracias por confirmar</h3>
             <p>{{ $section->get('thank_you_message') }}</p>
