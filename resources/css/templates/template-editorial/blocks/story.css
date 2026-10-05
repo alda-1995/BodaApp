@@ -74,8 +74,8 @@
 .te-story__intro {
     max-width: var(--te-story-intro-width);
     margin-inline: auto;
-    font-family: var(--font-secondary);
-    font-size: var(--te-size-text);
+    font-family: var(--font-display);
+    font-size: var(--text-size-subtitle);
     line-height: var(--te-leading-normal);
     color: var(--color-primary);
     text-align: center;

@@ -134,7 +134,7 @@
 
 .te-transport__time {
     font-family: var(--font-display);
-    font-size: var(--te-size-text);
+    font-size: var(--te-size-subtitle);
     color: var(--color-primary);
 }
 
@@ -150,9 +150,8 @@
 .te-transport__detail {
     margin-top: 0.65rem;
     font-family: var(--font-secondary);
-    font-size: var(--te-size-caption);
-    line-height: 1.6;
-    letter-spacing: 0.04em;
+    font-size: var(--te-size-text);
+    line-height: 1.4;
     color: var(--te-muted);
 }
 

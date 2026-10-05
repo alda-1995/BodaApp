@@ -41,7 +41,7 @@
 
 .te-footer {
     padding-block: clamp(3.5rem, 7vw, 6rem);
-    background: var(--te-paper);
+    background: var(--te-white);
 }
 
 .te-footer__monogram {

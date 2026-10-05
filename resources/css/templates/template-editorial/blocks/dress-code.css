@@ -65,8 +65,7 @@
 
 .te-dress__kicker {
     font-family: var(--font-display);
-    font-size: var(--te-size-subtitle);
-    letter-spacing: 0.16em;
+    font-size: var(--te-size-section);
     text-transform: uppercase;
     color: var(--color-primary);
 }
@@ -95,8 +94,8 @@
     border: 1px solid var(--te-line);
     font-family: var(--font-secondary);
     font-size: var(--te-size-caption);
-    line-height: 1.6;
-    letter-spacing: 0.04em;
+    font-style: italic;
+    line-height: 1.4;
     color: var(--te-muted);
 }
 
