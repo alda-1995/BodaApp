@@ -1,16 +1,18 @@
 /*
  * Tipografía de la plantilla "Boda Editorial".
  *
- * El diseño usa Boska Variable para los títulos, que es de pago (Fontshare).
- * Mientras se licencia, va Playfair Display: serif de display con contraste
- * alto y proporciones parecidas. Para cambiarla basta tocar --font-display
- * y la hoja de fuentes que declara la estrategia; nada más la menciona.
+ * Boska es la del diseño para los títulos y ya está licenciada: vive en el
+ * proyecto (resources/fonts/boska), no en Google Fonts. Inter, la del cuerpo,
+ * sí sale de Google y la declara la estrategia (EditorialWeddingStrategy::fonts()).
  *
- * Inter sí es la del diseño y está en Google Fonts, así que no se sustituye.
+ * Para cambiar la de títulos basta con --font-display; nada más la menciona.
  */
 
+/* Fuente propia (archivos locales del proyecto). */
+@import url("../../../fonts/boska/stylesheet.css");
+
 .te {
-    --font-display: "Playfair Display", "Boska", Georgia, serif;
+    --font-display: "Boska", Georgia, serif;
     --font-secondary: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
 
     /*

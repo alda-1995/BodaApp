@@ -1,0 +1,116 @@
+/*
+ * Boska (Fontshare), la tipografía de display de "Boda Editorial".
+ *
+ * Pesos declarados en número y no con 'normal'/'bold': así se ve de un vistazo
+ * que no hay dos caras compitiendo por el mismo par (peso, estilo). Cuando dos
+ * @font-face comparten ese par, el navegador se queda con la última y la otra
+ * no se usa nunca.
+ */
+
+@font-face {
+    font-family: 'Boska';
+    src: url('Boska-Extralight.woff2') format('woff2'),
+        url('Boska-Extralight.woff') format('woff');
+    font-weight: 200;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Boska';
+    src: url('Boska-ExtralightItalic.woff2') format('woff2'),
+        url('Boska-ExtralightItalic.woff') format('woff');
+    font-weight: 200;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Boska';
+    src: url('Boska-Light.woff2') format('woff2'),
+        url('Boska-Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Boska';
+    src: url('Boska-LightItalic.woff2') format('woff2'),
+        url('Boska-LightItalic.woff') format('woff');
+    font-weight: 300;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Boska';
+    src: url('Boska-Regular.woff2') format('woff2'),
+        url('Boska-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Boska';
+    src: url('Boska-Italic.woff2') format('woff2'),
+        url('Boska-Italic.woff') format('woff');
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Boska';
+    src: url('Boska-Medium.woff2') format('woff2'),
+        url('Boska-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Boska';
+    src: url('Boska-MediumItalic.woff2') format('woff2'),
+        url('Boska-MediumItalic.woff') format('woff');
+    font-weight: 500;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Boska';
+    src: url('Boska-Bold.woff2') format('woff2'),
+        url('Boska-Bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Boska';
+    src: url('Boska-BoldItalic.woff2') format('woff2'),
+        url('Boska-BoldItalic.woff') format('woff');
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Boska';
+    src: url('Boska-Black.woff2') format('woff2'),
+        url('Boska-Black.woff') format('woff');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Boska';
+    src: url('Boska-BlackItalic.woff2') format('woff2'),
+        url('Boska-BlackItalic.woff') format('woff');
+    font-weight: 900;
+    font-style: italic;
+    font-display: swap;
+}

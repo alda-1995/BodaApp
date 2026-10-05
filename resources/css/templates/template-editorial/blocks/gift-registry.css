@@ -185,6 +185,8 @@
 .te-gifts__card-title {
     font-family: var(--font-display);
     font-style: italic;
+    /* El diseño usa aquí la itálica ligera de Boska, no la normal. */
+    font-weight: 300;
     font-size: var(--te-size-subtitle);
     color: var(--color-primary);
 }

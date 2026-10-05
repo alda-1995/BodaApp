@@ -239,13 +239,17 @@ class EditorialWeddingStrategy extends DefaultTemplateStrategy
     }
 
     /**
-     * Inter es la del diseño. Playfair Display está en lugar de Boska, que es
-     * de pago: cuando se licencie se cambia aquí y en --font-display.
+     * Sólo Inter: es la del cuerpo y vive en Google Fonts. La de los títulos
+     * es Boska, que ya está licenciada y se sirve desde el propio proyecto
+     * (ver resources/css/templates/template-editorial/typography.css).
+     *
+     * La itálica se pide explícitamente (ital,wght): el diseño la usa y sin
+     * ella el navegador la inventa inclinando la redonda.
      */
     public function fonts(): array
     {
         return [
-            'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@400;600&display=swap',
+            'https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;1,400&display=swap',
         ];
     }
 

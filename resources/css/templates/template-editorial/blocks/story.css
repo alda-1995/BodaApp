@@ -46,6 +46,8 @@
 .te-story__title {
     font-family: var(--font-display);
     font-style: italic;
+    /* Como el título de RSVP y el del pie: la itálica media de Boska. */
+    font-weight: 500;
     font-size: var(--te-size-hero);
     color: var(--color-primary);
     margin-bottom: clamp(1.5rem, 3vw, 2.5rem);

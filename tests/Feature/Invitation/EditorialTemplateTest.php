@@ -264,10 +264,41 @@ class EditorialTemplateTest extends TestCase
 
         $this->assertStringContainsString('templates/template-editorial/template.css', $html);
         $this->assertStringContainsString('templates/template-editorial/index.js', $html);
-        // Playfair Display sustituye a Boska mientras se licencia.
-        $this->assertStringContainsString('family=Playfair+Display', $html);
+        // De Google sólo viene Inter, la del cuerpo. Boska, la de los títulos,
+        // ya está licenciada y se sirve desde el propio proyecto.
+        $this->assertStringContainsString('family=Inter', $html);
+        $this->assertStringNotContainsString('Playfair', $html);
         // Y no arrastra el CSS ni el JS de la otra plantilla.
         $this->assertStringNotContainsString('templates/template-travel/', $html);
+    }
+
+    /**
+     * Boska no viaja en el HTML: la sirve el CSS de la plantilla. Lo que se
+     * fija aquí es que siga cableada, porque es una fuente licenciada y si
+     * alguien la desconecta la invitación cae en Georgia sin avisar.
+     */
+    public function test_boska_se_sirve_desde_el_proyecto(): void
+    {
+        $tipografia = file_get_contents(resource_path('css/templates/template-editorial/typography.css'));
+
+        $this->assertStringContainsString('fonts/boska/stylesheet.css', $tipografia);
+        $this->assertMatchesRegularExpression('/--font-display:\s*"Boska"/', $tipografia);
+
+        $caras = file_get_contents(resource_path('fonts/boska/stylesheet.css'));
+
+        // Cada par (peso, estilo) una sola vez: si dos caras lo comparten, el
+        // navegador se queda con la última y la otra no se usa nunca.
+        preg_match_all('/font-weight:\s*(\S+);\s*font-style:\s*(\S+);/', $caras, $pares);
+        $declarados = array_map(null, $pares[1], $pares[2]);
+
+        $this->assertCount(12, $declarados, 'Boska trae 12 caras.');
+        $this->assertSame($declarados, array_unique($declarados, SORT_REGULAR));
+
+        // Y los archivos que nombra existen.
+        preg_match_all("/url\('([^']+)'\)/", $caras, $archivos);
+        foreach (array_unique($archivos[1]) as $archivo) {
+            $this->assertFileExists(resource_path('fonts/boska/' . $archivo));
+        }
     }
 
     public function test_el_pie_cierra_con_monograma_nombres_fecha_y_ciudad(): void
