@@ -60,6 +60,17 @@ final class TemplateContext
         return $fecha === null ? null : mb_strtoupper($fecha);
     }
 
+    /**
+     * La fecha en números: "24 — 10 — 2026".
+     *
+     * La usa "Boda Destino", que escribe la fecha como un boleto. El separador
+     * se pide porque su portada la pone con raya larga y su pie con guion.
+     */
+    public function formattedDateNumeric(string $separator = ' — '): ?string
+    {
+        return $this->eventDate?->isoFormat("DD[{$separator}]MM[{$separator}]YYYY");
+    }
+
     /** La hora corta ("3:30 pm"); en español saldría "3:30 p. m.". */
     public function formattedTime(): ?string
     {

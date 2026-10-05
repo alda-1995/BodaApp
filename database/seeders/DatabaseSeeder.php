@@ -15,5 +15,6 @@ class DatabaseSeeder extends Seeder
         $this->call(RolesAndAdminSeeder::class);
         $this->call(GiftRegistryOptionsSeeder::class);
         $this->call(ColorPalettesSeeder::class);
+        $this->call(TemplatesSeeder::class);
     }
 }

@@ -1,0 +1,64 @@
+/*
+ * Galería: una tira de fotos que baja en escalera sobre negro.
+ *
+ * El escalón sale del índice que pone el Blade (--td-card-index), así que la
+ * diagonal se mantiene con las fotos que haya. Se recorre con scroll y no con
+ * un carrusel: funciona sin JS y en móvil es el gesto natural.
+ */
+
+.td-gallery {
+    background: var(--td-black);
+    padding-block: clamp(3rem, 6vw, 5rem);
+    overflow: hidden;
+}
+
+.td-gallery__strip {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0 1.5rem;
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* La barra de scroll rompería el negro a sangre; el gesto se queda igual. */
+.td-gallery__strip {
+    scrollbar-width: none;
+}
+
+.td-gallery__strip::-webkit-scrollbar {
+    display: none;
+}
+
+.td-gallery__item {
+    flex: 0 0 auto;
+    width: clamp(9rem, 20vw, 16.5rem);
+    scroll-snap-align: center;
+}
+
+@media (min-width: 768px) {
+    .td-gallery__strip {
+        justify-content: center;
+        padding-inline: 4rem;
+    }
+
+    /* La escalera: cada foto baja un escalón respecto a la anterior. */
+    .td-gallery__item {
+        margin-top: calc(var(--td-card-index) * 3rem);
+    }
+}
+
+.td-gallery__link {
+    display: block;
+    cursor: zoom-in;
+}
+
+.td-gallery__item img {
+    width: 100%;
+    aspect-ratio: 265 / 352;
+    object-fit: cover;
+    display: block;
+}

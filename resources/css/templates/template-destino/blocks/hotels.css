@@ -1,0 +1,91 @@
+/*
+ * Hospedaje: la foto ancha y, encima, la tarjeta de cada hotel.
+ *
+ * La tarjeta se monta sobre la foto y la desborda por abajo, que es lo que le
+ * da el aire del diseño. En móvil eso no cabe, así que ahí va debajo.
+ */
+
+.td-hotels {
+    background: var(--td-paper);
+    padding-block: clamp(3rem, 6vw, 5rem);
+}
+
+.td-hotels__title {
+    font-size: var(--td-size-title);
+    font-weight: 400;
+    text-align: center;
+    margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.td-hotels__stage {
+    position: relative;
+}
+
+.td-hotels__photo {
+    width: 100%;
+    aspect-ratio: 1002 / 431;
+    object-fit: cover;
+    display: block;
+}
+
+.td-hotels__cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.td-hotels__card {
+    flex: 1 1 18rem;
+    max-width: 26rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: clamp(2rem, 4vw, 3rem) 2rem;
+    background: var(--td-mint);
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .td-hotels__cards {
+        /* Montada sobre la foto: sube la mitad de su alto y la desborda. */
+        position: relative;
+        margin-top: -14rem;
+        margin-bottom: -4rem;
+    }
+}
+
+.td-hotels__name {
+    font-family: var(--font-display);
+    font-size: var(--td-size-hero);
+    font-weight: 500;
+    line-height: var(--td-leading-tight);
+}
+
+.td-hotels__link {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border: 1px solid var(--td-ink);
+    border-radius: 0.5rem;
+    color: var(--td-ink);
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.td-hotels__link:hover,
+.td-hotels__link:focus-visible {
+    background: var(--td-ink);
+    color: var(--td-white);
+}
+
+.td-hotels__rate {
+    font-size: var(--td-size-lead);
+    font-style: italic;
+    font-weight: 500;
+    max-width: 22ch;
+}

@@ -5,6 +5,7 @@ namespace App\Services\Template;
 use App\Contracts\Template\TemplateStrategy;
 use App\Models\Template;
 use App\Strategies\DefaultTemplateStrategy;
+use App\Strategies\DestinationWeddingStrategy;
 use App\Strategies\EditorialWeddingStrategy;
 use App\Strategies\EmeraldWeddingStrategy;
 use Illuminate\Support\Facades\File;
@@ -20,6 +21,7 @@ class TemplateDiscoveryService
     protected array $strategiesMap = [
         'build-templates.template-travel.index' => EmeraldWeddingStrategy::class,
         'build-templates.template-editorial.index' => EditorialWeddingStrategy::class,
+        'build-templates.template-destino.index' => DestinationWeddingStrategy::class,
     ];
 
     /** La estrategia de una plantilla concreta. */

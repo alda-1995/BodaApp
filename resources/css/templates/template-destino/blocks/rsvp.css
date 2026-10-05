@@ -1,0 +1,273 @@
+/*
+ * Confirmación de asistencia.
+ *
+ * Dos columnas sobre blanco: el rótulo a la izquierda y el formulario a la
+ * derecha. Los campos son una línea y no una caja, como en el diseño, salvo el
+ * recado, que sí va enmarcado.
+ *
+ * Las capas de "gracias" y de error las enciende rsvp.js con .is-visible: el
+ * mismo contrato que usan las otras plantillas.
+ */
+
+.td-rsvp {
+    --td-rsvp-field-gap: 1.25rem;
+    --td-rsvp-column-gap: 1.25rem;
+
+    position: relative;
+    background: var(--td-white);
+    padding-top: clamp(3rem, 6vw, 5rem);
+}
+
+.td-rsvp__columns {
+    display: grid;
+    gap: clamp(1.5rem, 4vw, 3rem);
+    padding-bottom: clamp(3rem, 6vw, 5rem);
+}
+
+@media (min-width: 900px) {
+    .td-rsvp__columns {
+        grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+        align-items: start;
+    }
+}
+
+.td-rsvp__title {
+    font-size: var(--td-size-title);
+    font-weight: 600;
+}
+
+.td-rsvp__kicker {
+    font-size: var(--td-size-lead);
+}
+
+.td-rsvp__deadline {
+    font-size: var(--td-size-lead);
+    margin-bottom: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.td-rsvp__notice {
+    font-size: var(--td-size-lead);
+    max-width: 46ch;
+}
+
+.td-rsvp__form-wrap {
+    position: relative;
+    max-width: 34rem;
+}
+
+.td-rsvp form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--td-rsvp-field-gap);
+}
+
+.td-rsvp__row {
+    display: grid;
+    gap: var(--td-rsvp-column-gap);
+}
+
+@media (min-width: 600px) {
+    .td-rsvp__row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* --- Campos --- */
+
+.td-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.td-field > span,
+.td-field legend {
+    font-size: var(--td-size-caption);
+    color: var(--td-muted);
+    padding: 0;
+}
+
+.td-field__hint {
+    font-size: var(--td-size-caption);
+    font-style: italic;
+    color: var(--td-muted);
+}
+
+.td-field input,
+.td-field select,
+.td-field textarea {
+    width: 100%;
+    padding: 0.25rem 0;
+    border: 0;
+    border-bottom: 1px solid var(--td-ink);
+    border-radius: 0;
+    background: none;
+    color: var(--td-ink);
+    font-size: var(--td-size-text);
+}
+
+.td-field input::placeholder,
+.td-field textarea::placeholder {
+    color: var(--td-ink);
+    opacity: 0.85;
+}
+
+.td-field input:focus,
+.td-field select:focus,
+.td-field textarea:focus {
+    outline: none;
+    border-bottom-width: 2px;
+}
+
+/* El recado sí va enmarcado. */
+.td-field--boxed textarea {
+    padding: 0.75rem;
+    border: 1px solid var(--td-ink);
+}
+
+.td-field--options {
+    gap: 0.5rem;
+}
+
+.td-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+/*
+ * El diseño dibuja la elección como un cuadro, no como un círculo, aunque por
+ * dentro siga siendo un radio: sólo se puede elegir una.
+ */
+.td-check input {
+    appearance: none;
+    width: 1.0625rem;
+    height: 1.0625rem;
+    margin: 0;
+    border: 1px solid var(--td-ink);
+    background: var(--td-white);
+    cursor: pointer;
+}
+
+.td-check input:checked {
+    background: var(--td-ink);
+    box-shadow: inset 0 0 0 3px var(--td-white);
+}
+
+.td-check span {
+    font-size: var(--td-size-text);
+}
+
+.td-rsvp__submit {
+    align-self: stretch;
+    margin-top: 0.75rem;
+    padding: 0.9rem 1.5rem;
+    border: 0;
+    background: var(--td-black);
+    color: var(--td-white);
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.td-rsvp__submit:hover,
+.td-rsvp__submit:focus-visible {
+    opacity: 0.88;
+}
+
+.td-rsvp__errors:empty {
+    display: none;
+}
+
+.td-rsvp__errors ul {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0;
+    padding-left: 1.1rem;
+    font-size: var(--td-size-caption);
+    color: #a03a3a;
+}
+
+/* --- Capas de estado --- */
+
+.td-rsvp__loading {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    background: rgba(255, 255, 255, 0.85);
+    font-size: var(--td-size-caption);
+    color: var(--td-muted);
+}
+
+.td-rsvp__loading.is-visible {
+    display: flex;
+}
+
+.td-rsvp__spinner {
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 2px solid var(--td-line);
+    border-top-color: var(--td-ink);
+    border-radius: 50%;
+    animation: td-rsvp-spin 900ms linear infinite;
+}
+
+@keyframes td-rsvp-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .td-rsvp__spinner {
+        animation-duration: 3s;
+    }
+}
+
+.td-rsvp__status {
+    display: none;
+    max-width: 34rem;
+    margin: 0 auto clamp(2rem, 4vw, 3rem);
+    padding-inline: 1.5rem;
+}
+
+.td-rsvp__status.is-visible {
+    display: block;
+}
+
+.td-rsvp__note {
+    padding: clamp(1.5rem, 3vw, 2rem);
+    border: 1px solid var(--td-ink);
+    background: var(--td-white);
+    text-align: center;
+}
+
+.td-rsvp__note h3 {
+    font-size: var(--td-size-section);
+}
+
+.td-rsvp__note p {
+    margin-top: 0.75rem;
+    font-size: var(--td-size-text);
+    color: var(--td-muted);
+}
+
+.td-rsvp__note--error p {
+    color: #a03a3a;
+}
+
+/* La banda ancha que cierra la sección. */
+.td-rsvp__photo {
+    width: 100%;
+    aspect-ratio: 1280 / 419;
+    object-fit: cover;
+    display: block;
+}

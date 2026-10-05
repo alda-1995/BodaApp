@@ -13,6 +13,7 @@ namespace App\Templates;
 final class BlockType
 {
     public const BANNER = 'banner';
+    public const DESTINATION = 'destination';
     public const STORY = 'story';
     public const TIMELINE = 'timeline';
     public const DRESS_CODE = 'dress-code';
@@ -32,6 +33,7 @@ final class BlockType
     {
         return [
             self::BANNER => 'Banner / portada',
+            self::DESTINATION => 'Destino y cuenta regresiva',
             self::STORY => 'Historia',
             self::TIMELINE => 'Itinerario',
             self::DRESS_CODE => 'Código de vestimenta',

@@ -1,0 +1,41 @@
+/*
+ * Cierre: el monograma sobre su propia marca de agua, y la fecha.
+ *
+ * La marca de agua es el mismo archivo, enorme y casi borrado. Va en
+ * aria-hidden desde el Blade porque no añade nada que leer.
+ */
+
+.td-footer {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding-block: clamp(4rem, 9vw, 7rem);
+    background: var(--td-paper);
+    overflow: hidden;
+}
+
+.td-footer__watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: clamp(18rem, 42vw, 34rem);
+    height: auto;
+    opacity: 0.12;
+    pointer-events: none;
+}
+
+.td-footer__monogram {
+    position: relative;
+    width: clamp(2.75rem, 5vw, 3.5rem);
+    height: auto;
+}
+
+.td-footer__date {
+    position: relative;
+    font-size: var(--td-size-section);
+    letter-spacing: 0.06em;
+}

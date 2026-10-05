@@ -1,0 +1,158 @@
+/*
+ * Destino y cuenta regresiva.
+ *
+ * Tres franjas seguidas: la ciudad sobre papel, la cuenta sobre negro y el
+ * "save the date" otra vez sobre papel. El salto de color es lo que separa las
+ * franjas, así que ninguna lleva borde.
+ */
+
+.td-destination {
+    background: var(--td-paper);
+}
+
+.td-destination__head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-block: clamp(3rem, 6vw, 5rem);
+}
+
+@media (min-width: 768px) {
+    .td-destination__head {
+        flex-direction: row;
+        align-items: baseline;
+        gap: 4rem;
+    }
+}
+
+.td-destination__eyebrow {
+    font-size: var(--td-size-section);
+    color: var(--td-ink);
+}
+
+.td-destination__city {
+    font-size: var(--td-size-hero);
+    font-weight: 500;
+}
+
+/* --- La cuenta regresiva --- */
+
+.td-countdown {
+    display: grid;
+    /* Días, horas, minutos y segundos. En móvil se parten en dos filas. */
+    grid-template-columns: repeat(2, 1fr);
+    background: var(--td-black);
+    color: var(--td-white);
+    padding-block: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.td-countdown__unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding-inline: 0.5rem;
+}
+
+/*
+ * Las líneas que separan las cifras, como en el diseño. En móvil van en dos
+ * filas, así que la del tercer bloque sobra —empieza renglón— y en su lugar
+ * se separan las dos filas.
+ */
+.td-countdown__unit + .td-countdown__unit {
+    border-left: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.td-countdown__unit:nth-child(3) {
+    border-left: 0;
+}
+
+.td-countdown__unit:nth-child(n + 3) {
+    padding-top: 1.25rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+@media (min-width: 640px) {
+    .td-countdown {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .td-countdown__unit:nth-child(3) {
+        border-left: 1px solid rgba(255, 255, 255, 0.35);
+    }
+
+    .td-countdown__unit:nth-child(n + 3) {
+        padding-top: 0;
+        border-top: 0;
+    }
+}
+
+.td-countdown__value {
+    font-family: var(--font-display);
+    font-size: var(--td-size-title);
+    font-weight: 600;
+    line-height: 1;
+    /* Que los números no bailen al cambiar: todos ocupan lo mismo. */
+    font-variant-numeric: tabular-nums;
+    color: var(--td-white);
+}
+
+.td-countdown__label {
+    font-size: var(--td-size-section);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--td-white);
+}
+
+/* --- Save the date --- */
+
+.td-destination__foot {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding-block: clamp(2.5rem, 5vw, 4rem);
+}
+
+@media (min-width: 768px) {
+    .td-destination__foot {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 4rem;
+    }
+}
+
+.td-destination__save {
+    font-size: var(--td-size-section);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.td-destination__trip {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.td-destination__route {
+    font-size: var(--td-size-lead);
+    letter-spacing: 0.04em;
+}
+
+.td-destination__calendar {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border: 1px solid var(--td-ink);
+    border-radius: 0.5rem;
+    background: transparent;
+    color: var(--td-ink);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.td-destination__calendar:hover,
+.td-destination__calendar:focus-visible {
+    background: var(--td-ink);
+    color: var(--td-white);
+}

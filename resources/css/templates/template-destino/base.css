@@ -1,0 +1,116 @@
+/*
+ * Base de la plantilla "Boda Destino": paleta, contenedor y piezas comunes.
+ *
+ * El diseño alterna tres fondos —papel cálido, verde agua y negro— y la tinta
+ * casi siempre es negra. La paleta del evento entra por --color-brand como
+ * acento, así que una pareja puede teñir los detalles sin romper el contraste
+ * de las franjas, que es lo que le da el ritmo a la página.
+ */
+
+.td {
+    --color-primary: #000000;
+    --td-ink: #000000;
+    --td-accent: var(--color-brand, #000000);
+    --td-paper: #f3efe6;
+    --td-mint: #e9f1f1;
+    --td-white: #ffffff;
+    --td-black: #000000;
+    --td-line: #d9d9d9;
+    --td-muted: #6b6b6b;
+
+    background: var(--td-paper);
+    color: var(--td-ink);
+    font-family: var(--font-secondary);
+}
+
+/* El diseño trabaja sobre 1280px con 100px de margen: 8% a cada lado. */
+.td-container {
+    width: 100%;
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .td-container {
+        padding-inline: 4rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .td-container {
+        padding-inline: 6.25rem;
+    }
+}
+
+.td-section {
+    position: relative;
+    padding-block: clamp(3.5rem, 7vw, 6.5rem);
+}
+
+.td-center {
+    text-align: center;
+}
+
+/* Rótulo pequeño en versales: el diseño lo usa para nombrar cada sección. */
+.td-eyebrow {
+    font-family: var(--font-secondary);
+    font-size: var(--td-size-text);
+    letter-spacing: 0.02em;
+    color: var(--td-ink);
+}
+
+/* Botón de contorno, como "Añadir al calendario" y "Reserva tu estancia". */
+.td-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border: 1px solid var(--td-ink);
+    border-radius: 0.5rem;
+    background: transparent;
+    color: var(--td-ink);
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.td-button:hover,
+.td-button:focus-visible {
+    background: var(--td-ink);
+    color: var(--td-white);
+}
+
+/* Un dato que se copia (CLABE, cuenta, número de mesa). */
+.td-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.td-copy__button {
+    display: inline-flex;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--td-muted);
+    cursor: pointer;
+}
+
+.td-copy__button:hover {
+    color: var(--td-ink);
+}
+
+.td-copy__done {
+    font-size: var(--td-size-caption);
+    color: var(--td-muted);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.td-copy__done.is-visible {
+    opacity: 1;
+}
+
+[x-cloak] {
+    display: none !important;
+}

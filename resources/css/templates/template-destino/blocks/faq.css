@@ -1,0 +1,92 @@
+/*
+ * Preguntas frecuentes: la lista a la izquierda sobre blanco, la respuesta a
+ * la derecha sobre verde agua.
+ *
+ * El verde llega al borde de la pantalla, así que el margen lo ponen las
+ * columnas y no un contenedor común.
+ */
+
+.td-faq {
+    background: var(--td-white);
+}
+
+.td-faq__columns {
+    display: grid;
+}
+
+@media (min-width: 900px) {
+    .td-faq__columns {
+        grid-template-columns: 1fr 1fr;
+        align-items: stretch;
+    }
+}
+
+.td-faq__aside {
+    padding: clamp(3rem, 6vw, 5rem) 1.5rem;
+}
+
+@media (min-width: 1024px) {
+    .td-faq__aside {
+        padding-inline: 6.25rem 3rem;
+    }
+}
+
+.td-faq__title {
+    font-size: var(--td-size-section);
+    font-weight: 600;
+    margin-bottom: clamp(1.5rem, 3vw, 2rem);
+}
+
+.td-faq__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    max-width: 24rem;
+}
+
+.td-faq__question {
+    width: 100%;
+    padding: 0.9rem 1.25rem;
+    border: 0;
+    border-radius: 0.5rem;
+    background: var(--td-paper);
+    color: var(--td-ink);
+    font-size: var(--td-size-text);
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.td-faq__question:hover {
+    background: #e8e2d6;
+}
+
+/* La elegida se tiñe del verde del panel: así se ve a cuál responde. */
+.td-faq__question.is-active {
+    background: var(--td-mint);
+}
+
+.td-faq__panel {
+    display: flex;
+    align-items: center;
+    padding: clamp(2.5rem, 5vw, 4rem) 1.5rem;
+    background: var(--td-mint);
+}
+
+@media (min-width: 1024px) {
+    .td-faq__panel {
+        padding-inline: 6.25rem;
+    }
+}
+
+.td-faq__answer {
+    font-size: var(--td-size-lead);
+    max-width: 34ch;
+}
+
+.td-faq__answer a {
+    color: var(--td-ink);
+}

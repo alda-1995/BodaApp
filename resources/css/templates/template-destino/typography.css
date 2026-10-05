@@ -1,0 +1,55 @@
+/*
+ * Tipografía de la plantilla "Boda Destino".
+ *
+ * Dos familias, las dos del diseño y las dos en Google Fonts: Bricolage
+ * Grotesque para los titulares y DM Sans para el cuerpo. Las declara su
+ * estrategia (DestinationWeddingStrategy::fonts()); aquí sólo se nombran y se
+ * fija la escala.
+ *
+ * Para cambiar la tipografía de la plantilla basta con tocar este archivo.
+ */
+
+.td {
+    --font-display: "Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
+    --font-secondary: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+    /*
+     * Escala del diseño (1280px) llevada a clamp para que respire en móvil:
+     * 61 / 39 / 25 / 21 / 17 / 13 px.
+     */
+    --td-size-hero: clamp(2.5rem, 4.8vw, 3.8125rem);
+    --td-size-title: clamp(1.75rem, 3vw, 2.4375rem);
+    --td-size-section: clamp(1.25rem, 2vw, 1.5625rem);
+    --td-size-lead: clamp(1.0625rem, 1.6vw, 1.3125rem);
+    --td-size-text: 1.0625rem;
+    --td-size-caption: 0.8125rem;
+
+    --td-leading-tight: 1.1;
+    --td-leading-normal: 1.5;
+}
+
+:where(.td) h1,
+:where(.td) h2,
+:where(.td) h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    line-height: var(--td-leading-tight);
+    margin: 0;
+}
+
+:where(.td) p,
+:where(.td) li,
+:where(.td) label,
+:where(.td) input,
+:where(.td) textarea,
+:where(.td) select,
+:where(.td) button,
+:where(.td) a {
+    font-family: var(--font-secondary);
+    font-size: var(--td-size-text);
+    line-height: var(--td-leading-normal);
+}
+
+:where(.td) p {
+    margin: 0;
+}

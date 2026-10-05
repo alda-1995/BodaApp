@@ -1,0 +1,108 @@
+/*
+ * Ceremonia y recepción: la foto a la izquierda de borde a borde, los momentos
+ * a la derecha.
+ *
+ * No usa .td-container: la foto tiene que llegar al borde de la pantalla, así
+ * que el margen lo pone la columna de texto y no un contenedor común.
+ */
+
+.td-timeline {
+    display: grid;
+    background: var(--td-white);
+}
+
+@media (min-width: 900px) {
+    .td-timeline {
+        grid-template-columns: 1fr 1fr;
+        align-items: stretch;
+    }
+}
+
+.td-timeline__media {
+    position: relative;
+    min-height: clamp(20rem, 50vw, 50rem);
+}
+
+.td-timeline__photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* El clima y la hora local, en blanco sobre la foto. */
+.td-timeline__facts {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: var(--td-white);
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45);
+}
+
+.td-timeline__weather {
+    font-size: var(--td-size-lead);
+    font-style: italic;
+    color: var(--td-white);
+}
+
+.td-timeline__zone {
+    font-size: var(--td-size-section);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--td-white);
+}
+
+.td-timeline__body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(2rem, 4vw, 3.5rem);
+    padding: clamp(3rem, 6vw, 5rem) 1.5rem;
+    text-align: center;
+}
+
+.td-timeline__title {
+    font-size: var(--td-size-title);
+    font-weight: 400;
+    max-width: 12ch;
+}
+
+.td-timeline__list {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(2rem, 4vw, 3.5rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.td-timeline__time {
+    font-family: var(--font-display);
+    font-size: var(--td-size-title);
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+}
+
+.td-timeline__place {
+    font-size: var(--td-size-lead);
+    font-style: italic;
+    font-weight: 500;
+}
+
+.td-timeline__detail {
+    font-size: var(--td-size-text);
+    color: var(--td-muted);
+}
+
+.td-timeline__map {
+    display: inline-block;
+    margin-top: 0.5rem;
+    color: var(--td-ink);
+    font-weight: 500;
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+}

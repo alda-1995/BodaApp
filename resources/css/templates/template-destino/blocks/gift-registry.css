@@ -1,0 +1,96 @@
+/*
+ * Mesa de regalos: tarjetas blancas escalonadas sobre el verde agua.
+ *
+ * El escalón sale del índice que pone el Blade (--td-card-index): la primera
+ * arriba, la siguiente más abajo. Se apaga en móvil, donde las tarjetas se
+ * apilan y un escalón sólo dejaría huecos.
+ */
+
+.td-gifts {
+    background: var(--td-mint);
+    padding-block: clamp(3rem, 6vw, 5.5rem);
+}
+
+.td-gifts__title {
+    font-size: var(--td-size-title);
+    font-weight: 400;
+    margin-bottom: 0.75rem;
+}
+
+.td-gifts__message {
+    font-size: var(--td-size-text);
+    margin-bottom: clamp(2rem, 4vw, 3.5rem);
+}
+
+.td-gifts__cards {
+    display: grid;
+    gap: 1.5rem;
+    margin: 0;
+    padding-block: 0;
+    list-style: none;
+}
+
+@media (min-width: 768px) {
+    .td-gifts__cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+    }
+
+    /* El escalón: una tarjeta sí y otra no baja un poco. */
+    .td-gifts__card:nth-child(even) {
+        margin-top: 3rem;
+    }
+}
+
+.td-gifts__card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    background: var(--td-white);
+    border-bottom: 2px solid var(--td-ink);
+}
+
+.td-gifts__card-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.td-gifts__card-title {
+    font-family: var(--font-display);
+    font-size: var(--td-size-section);
+    font-weight: 500;
+}
+
+.td-gifts__card-tag {
+    font-size: var(--td-size-text);
+    color: var(--td-muted);
+}
+
+.td-gifts__card-line {
+    font-size: var(--td-size-text);
+}
+
+/*
+ * En el diseño el número de cuenta va en itálica. No se marca por posición
+ * —el orden de los datos lo decide el superadmin— sino por lo que es: el dato
+ * copiable, que es justo la clave o la cuenta.
+ */
+.td-gifts__card-line .td-copy__value {
+    font-style: italic;
+}
+
+.td-gifts__card-link {
+    align-self: flex-end;
+    margin-top: auto;
+    padding-top: 1rem;
+    color: var(--td-ink);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.td-gifts__card-link:hover {
+    text-decoration: underline;
+}
