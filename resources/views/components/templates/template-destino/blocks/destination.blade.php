@@ -64,24 +64,27 @@
         </div>
     @endif
 
-    <div class="td-destination__foot td-container">
-        <p class="td-destination__save">Save the date</p>
-
-        <div class="td-destination__trip">
-            @if ($ruta)
-                <p class="td-destination__route">{{ $ruta }}</p>
-            @endif
-
-            @if ($fecha)
-                {{--
-                    Al calendario se va con un .ics que arma el navegador: así no
-                    hace falta una ruta en el servidor ni mandar a nadie fuera.
-                --}}
-                <button type="button" class="td-destination__calendar" data-calendar
-                    data-inicio="{{ $fecha->toIso8601String() }}"
-                    data-titulo="Boda de {{ $context->coupleNames(' y ') }}"
-                    data-lugar="{{ $section->get('city') }}">Añadir al calendario</button>
-            @endif
+    <div class="td-destination__foot">
+        <div class="td-container">
+            <div class="td-destination__inner">
+                <p class="td-destination__save">Save the date</p>
+                <div class="td-destination__trip">
+                    @if ($ruta)
+                        <p class="td-destination__route">{{ $ruta }}</p>
+                    @endif
+        
+                    @if ($fecha)
+                        {{--
+                            Al calendario se va con un .ics que arma el navegador: así no
+                            hace falta una ruta en el servidor ni mandar a nadie fuera.
+                        --}}
+                        <button type="button" class="td-destination__calendar" data-calendar
+                            data-inicio="{{ $fecha->toIso8601String() }}"
+                            data-titulo="Boda de {{ $context->coupleNames(' y ') }}"
+                            data-lugar="{{ $section->get('city') }}">Añadir al calendario</button>
+                    @endif
+                </div>
+            </div>
         </div>
     </div>
 </section>

@@ -20,14 +20,15 @@
 @media (min-width: 768px) {
     .td-destination__head {
         flex-direction: row;
-        align-items: baseline;
         gap: 4rem;
     }
 }
 
 .td-destination__eyebrow {
+    font-family: var(--font-display);
     font-size: var(--td-size-section);
     color: var(--td-ink);
+    font-weight: 300;
 }
 
 .td-destination__city {
@@ -98,15 +99,20 @@
 }
 
 .td-countdown__label {
+    font-family: var(--font-display);
     font-size: var(--td-size-section);
+    font-weight: 300;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
     color: var(--td-white);
 }
 
 /* --- Save the date --- */
 
 .td-destination__foot {
+    background-color: var(--td-white);
+}
+
+.td-destination__inner{
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
@@ -114,7 +120,7 @@
 }
 
 @media (min-width: 768px) {
-    .td-destination__foot {
+    .td-destination__inner {
         flex-direction: row;
         align-items: flex-start;
         gap: 4rem;
@@ -147,12 +153,13 @@
 
 .td-destination__calendar {
     display: inline-block;
-    padding: 0.75rem 1.5rem;
+    padding: 0.625rem 1.25rem;
     border: 1px solid var(--td-ink);
-    border-radius: 0.5rem;
+    border-radius: 5px;
     background: transparent;
     color: var(--td-ink);
-    font-weight: 500;
+    font-size: var(--td-size-text);
+    font-weight: 600;
     cursor: pointer;
     transition: background-color 0.2s ease, color 0.2s ease;
 }
