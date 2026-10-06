@@ -56,8 +56,9 @@ class LandingPageTest extends TestCase
 
         $html->assertSee('Boda Destino')
             ->assertSee('$1,499')
-            // La vigencia es un argumento de venta, y es la que diga el panel.
-            ->assertSee('30 días')
+            // La vigencia no se promete en la página.
+            ->assertDontSee('30 días')
+            ->assertDontSee('días después de la boda')
             // Ver antes de comprar, y comprar.
             ->assertSee(route('templates.preview', $template->slug))
             ->assertSee(route('checkout.checkout-preview', $template->slug));

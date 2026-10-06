@@ -4,18 +4,32 @@
             <div class="rounded-xl bg-white p-6 md:p-8 lg:p-10 flex flex-col max-w-2xl mx-auto">
                 <p class="font-inter text-size-small-heading text-[#8C8C8C] mb-4">Paso 1 de 3 · Resumen → Pago → Confirmación</p>
                 <h2 class="font-inter text-size-subtitle mb-4">Resumen de tu compra</h2>
-                <div class="bg-[#FAFAFA] p-4 rounded-lg flex gap-4">
-                    <div class="h-[58px] w-[98px] bg-[#EBEBEB] rounded-md">
-                    </div>
-                    <div class="flex flex-col">
-                        <h3 class="font-inter text-size-heading">Alfonso y Elena</h3>
-                        <p class="font-inter text-size-small-heading text-[#8C8C8C]">Categoría: Elegante</p>
-                    </div>
+
+                {{--
+                    Lo que se lleva, con los datos de SU plantilla: el nombre y
+                    el precio salen de la base, no escritos aquí. Antes esta
+                    tarjeta decía siempre lo mismo —"Alfonso y Elena", "Categoría:
+                    Elegante"— comprara quien comprara lo que comprara.
+                --}}
+                <div class="bg-[#FAFAFA] p-4 rounded-lg">
+                    <h3 class="font-inter text-size-heading">{{ $template->name }}</h3>
+                    <p class="font-inter text-size-small-heading text-[#8C8C8C] mt-1">
+                        Invitación digital con confirmación de asistencia, lista de invitados,
+                        itinerario, mesa de regalos y galería.
+                    </p>
                 </div>
+
                 <div class="mt-6 flex justify-between gap-x-8 md:gap-x-12 pb-4 border-b border-b-[#EBEBEB]">
-                    <p class="font-inter text-[#737373] text-parrafo">Template</p>
-                    <p class="font-inter text-parrafo">${{ number_format($template->price, 2) }}</p>
+                    <p class="font-inter text-[#737373] text-parrafo">{{ $template->name }}</p>
+                    <p class="font-inter text-parrafo">${{ number_format($template->price, 2) }} MXN</p>
                 </div>
+
+                {{-- Un pago único: conviene decirlo antes de pedir la tarjeta. --}}
+                <div class="mt-4 flex justify-between gap-x-8 md:gap-x-12">
+                    <p class="font-inter text-parrafo">Total</p>
+                    <p class="font-inter text-size-heading">${{ number_format($template->price, 2) }} MXN</p>
+                </div>
+                <p class="font-inter text-size-small-heading text-[#8C8C8C] mt-1">Pago único, sin mensualidades.</p>
                 <div class="mt-4">
                     <x-controls.button class="w-full" href="{{ route('checkout.detail-payment', $template->slug) }}">Continuar al pago</x-controls.button>
                     {{-- Demo con datos de ejemplo, antes de decidir la compra. --}}

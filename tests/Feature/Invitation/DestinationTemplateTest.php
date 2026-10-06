@@ -110,16 +110,35 @@ class DestinationTemplateTest extends TestCase
         );
     }
 
-    public function test_los_codigos_de_aeropuerto_se_guardan_como_se_escriban(): void
+    /**
+     * Las versales son del diseño y las pone el CSS. Aquí se guarda lo que se
+     * escribió, porque en la ruta cabe tanto un código de aeropuerto como el
+     * nombre de una ciudad, y ése no se grita.
+     */
+    public function test_la_ruta_se_guarda_como_se_escribio(): void
     {
         $datos = (new DestinationSection())->data(
-            ['city' => 'Mérida', 'origin_code' => ' mex ', 'destination_code' => 'mid'],
+            ['city' => 'Mérida', 'origin_code' => ' Ciudad de México ', 'destination_code' => 'Mérida'],
             [],
         );
 
-        $this->assertSame('MEX', $datos['origin_code']);
-        $this->assertSame('MID', $datos['destination_code']);
-        $this->assertSame('MEX → MID', $datos['route']);
+        $this->assertSame('Ciudad de México', $datos['origin_code']);
+        $this->assertSame('Mérida', $datos['destination_code']);
+        $this->assertSame('Ciudad de México → Mérida', $datos['route']);
+    }
+
+    public function test_en_la_ruta_cabe_mas_que_un_codigo_de_tres_letras(): void
+    {
+        $campos = collect(app(DestinationWeddingStrategy::class)->sections())
+            ->first(fn ($seccion) => $seccion->key() === 'destination')
+            ->fields();
+
+        foreach (['origin_code', 'destination_code'] as $campo) {
+            $reglas = $campos[$campo]->getRules();
+
+            // Un aeropuerto son tres letras, pero "Ciudad de México" son 16.
+            $this->assertContains('max:40', $reglas, "El campo {$campo} sigue limitado de más.");
+        }
     }
 
     public function test_media_ruta_no_se_dibuja(): void

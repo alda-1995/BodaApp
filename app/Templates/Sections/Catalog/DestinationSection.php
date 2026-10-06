@@ -48,20 +48,25 @@ class DestinationSection extends Section
                 ->rules(['string', 'max:80']),
 
             /*
-            | Los códigos de aeropuerto son el guiño de viaje del diseño. Son
-            | opcionales: una boda a la que se llega en coche no tiene vuelo, y
-            | entonces la línea no se pinta.
+            | La ruta del viaje es el guiño del diseño. Cabe el código de tres
+            | letras del aeropuerto, pero también el nombre de la ciudad: no
+            | toda boda se nombra con códigos, y el límite corto obligaba a
+            | abreviar. Las mayúsculas las pone el CSS, así que aquí se guarda
+            | tal como se escriba.
+            |
+            | Son opcionales: a una boda a la que se llega en coche no hay que
+            | inventarle un vuelo, y entonces la línea no se pinta.
             */
-            'origin_code' => TextField::make('origin_code', 'Aeropuerto de origen')
-                ->placeholder('Ej. MEX')
-                ->help('Las tres letras del aeropuerto desde donde viaja la mayoría. Opcional.')
+            'origin_code' => TextField::make('origin_code', 'Desde dónde viajan')
+                ->placeholder('Ej. MEX, o Ciudad de México')
+                ->help('El código del aeropuerto o el nombre de la ciudad desde donde viaja la mayoría. Opcional.')
                 ->nullable()
-                ->rules(['string', 'max:4']),
+                ->rules(['string', 'max:40']),
 
-            'destination_code' => TextField::make('destination_code', 'Aeropuerto de destino')
-                ->placeholder('Ej. MID')
+            'destination_code' => TextField::make('destination_code', 'Hacia dónde viajan')
+                ->placeholder('Ej. MID, o Mérida')
                 ->nullable()
-                ->rules(['string', 'max:4']),
+                ->rules(['string', 'max:40']),
         ];
     }
 
@@ -104,7 +109,13 @@ class DestinationSection extends Section
     {
         $value = $this->text($values, $key);
 
-        return $value === null ? null : mb_strtoupper(trim($value));
+        /*
+        | Sólo se recortan los espacios. Las mayúsculas son cosa del diseño y
+        | las pone el CSS: gritar aquí un nombre de ciudad —"CIUDAD DE
+        | MÉXICO"— lo dejaría así guardado para cualquier plantilla que algún
+        | día use este dato.
+        */
+        return $value === null ? null : trim($value);
     }
 
     private function eventDate(array $all): ?Carbon

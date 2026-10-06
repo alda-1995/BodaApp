@@ -27,6 +27,17 @@
                 @endif
             </div>
 
+            {{--
+                Sin dirección no hay nada que ver ni que mandar, y es lo
+                primero que hay que resolver: va de ancho completo, bajo el
+                saludo, antes que las cifras.
+            --}}
+            @unless ($invitationUrl)
+                <div class="max-w-5xl">
+                    <x-organizer.missing-address />
+                </div>
+            @endunless
+
             <!-- Grilla de Tarjetas -->
             <div class="max-w-xl">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

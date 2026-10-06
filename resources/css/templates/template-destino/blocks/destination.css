@@ -134,9 +134,15 @@
     gap: 1rem;
 }
 
+/*
+ * La ruta va en versales, como el resto de esta banda. Es el CSS quien las
+ * pone y no el servidor: así se guarda lo que el organizador escribió, le
+ * quepa un código de tres letras o el nombre de su ciudad.
+ */
 .td-destination__route {
     font-size: var(--td-size-lead);
     letter-spacing: 0.04em;
+    text-transform: uppercase;
 }
 
 .td-destination__calendar {

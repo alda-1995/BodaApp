@@ -12,6 +12,13 @@
                         target="_blank" rel="noopener">
                         Ver mi invitación
                     </x-controls.button>
+                @else
+                    {{--
+                        Sin dirección no hay invitación que ver, así que en vez
+                        de esconder el botón sin explicar nada se dice qué falta
+                        y dónde se arregla.
+                    --}}
+                    <x-organizer.missing-address compact />
                 @endif
             </div>
             <p class="text-[#737373] text-parrafo mb-6">

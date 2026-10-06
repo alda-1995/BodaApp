@@ -2,13 +2,12 @@
     /*
     | Landing de venta.
     |
-    | Las plantillas, su precio y su vigencia salen de la base ($templates), no
-    | escritos aquí: lo que el superadmin cambie en su panel se ve en esta
-    | página sin tocarla. Lo único fijo es lo que la plataforma hace, que es lo
-    | mismo para todas.
+    | Las plantillas y su precio salen de la base ($templates), no escritos
+    | aquí: lo que el superadmin cambie en su panel se ve en esta página sin
+    | tocarla. Lo único fijo es lo que la plataforma hace, que es lo mismo para
+    | todas.
     */
     $desde = $templates->min('price');
-    $vigencia = $templates->max('duration_days');
 
     $secciones = [
         '#plantillas' => 'Plantillas',
@@ -85,12 +84,6 @@
                                     ${{ number_format($template->price, 0) }}
                                     <span class="text-size-small-heading text-gray">MXN</span>
                                 </p>
-
-                                @if ($template->duration_days)
-                                    <p class="mt-1 text-size-small-heading text-gray">
-                                        Tu invitación queda en línea {{ $template->duration_days }} días después de la boda.
-                                    </p>
-                                @endif
 
                                 <div class="mt-7 flex flex-col gap-2">
                                     <a href="{{ route('checkout.checkout-preview', $template->slug) }}"
@@ -172,7 +165,6 @@
                 <div class="mt-10 divide-y divide-black/10 border-y border-black/10" x-data="{ abierta: null }">
                     @foreach ([
                         ['¿Es un pago único?', 'Sí. Pagas una vez por tu invitación y no hay mensualidades ni cobros después.'],
-                        ['¿Cuánto tiempo está en línea?', $vigencia ? "Hasta {$vigencia} días después de la fecha de tu boda, para que a tus invitados les siga sirviendo mientras la recuerdan." : 'Queda en línea durante toda la organización y un tiempo después de la boda.'],
                         ['¿Puedo cambiar cosas después de comprar?', 'Sí, cuando quieras. Entras a tu panel, cambias lo que necesites y tus invitados ven el cambio en la misma liga, sin tener que reenviarla.'],
                         ['¿Mis invitados necesitan instalar algo?', 'No. Es una página que se abre en el navegador del celular, como cualquier liga que mandas por WhatsApp.'],
                         ['¿Alguien más puede ayudarme a organizar?', 'Sí. Desde Configuración puedes invitar a un coadministrador para que entre al panel contigo.'],
