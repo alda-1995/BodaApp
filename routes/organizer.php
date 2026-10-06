@@ -5,6 +5,7 @@ use App\Http\Controllers\Organizer\EventInfoController;
 use App\Http\Controllers\Organizer\SharedEventsController;
 use App\Http\Controllers\Organizer\GuestController;
 use App\Http\Controllers\Organizer\NotificationController;
+use App\Http\Controllers\Organizer\OrderController;
 use App\Http\Controllers\Organizer\RsvpController;
 use App\Http\Controllers\Organizer\SettingsController;
 use Illuminate\Support\Facades\Route;
@@ -21,6 +22,22 @@ Route::middleware(['auth', 'role:organizer|coadmin'])
             ->name('events.wizard.edit');
         Route::put('/configuracion-evento/{event:slug}/{step}', [EventSetupController::class, 'update'])
             ->name('events.wizard.update');
+    });
+
+/*
+ * Historial de pagos del dueño.
+ *
+ * Va fuera de 'event.active' a propósito: cuando una invitación vence es justo
+ * cuando alguien quiere revisar qué pagó, y cerrarle su propio historial sería
+ * lo contrario de lo que necesita.
+ */
+Route::middleware(['auth', 'role:organizer'])
+    ->prefix('configuracion/pagos')
+    ->name('organizer.orders.')
+    ->controller(OrderController::class)
+    ->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/{order}', 'show')->whereNumber('order')->name('show');
     });
 
 // Sólo el dueño, y sólo con una invitación comprada y vigente.

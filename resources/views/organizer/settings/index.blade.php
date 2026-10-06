@@ -144,6 +144,22 @@
                             @enderror
                         </section>
 
+                        {{--
+                            Pagos: va aquí arriba, junto a los datos de la
+                            cuenta, porque es información de la cuenta y no de
+                            la boda. No tiene nada que guardar —es un enlace—,
+                            pero se presenta como una sección más para que se
+                            lea como parte de Configuración y no como un añadido.
+                        --}}
+                        <section class="mb-10">
+                            <h3 class="{{ $sectionTitle }}">Pagos</h3>
+
+                            <p class="{{ $hint }} mb-3">Lo que has comprado y en qué quedó cada pago.</p>
+
+                            <a href="{{ route('organizer.orders.index') }}"
+                                class="text-size-small-heading text-[#2563EB] hover:underline">Ver mis pagos</a>
+                        </section>
+
                         {{-- Paleta de colores --}}
                         <section class="mb-10">
                             <h3 class="{{ $sectionTitle }}">Paleta de colores</h3>
