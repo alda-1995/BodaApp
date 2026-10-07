@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Notifications\CustomResetPasswordNotification;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -98,6 +99,24 @@ class User extends Authenticatable
     public function currentEvent(): ?Event
     {
         return $this->latestEvent()->first();
+    }
+
+    /**
+     * Sus invitaciones que ya no sirven —vencidas o apagadas por el superadmin—,
+     * de la más reciente a la más vieja.
+     *
+     * El filtro va en PHP y no en SQL porque "ya no sirve" es isAvailable(), que
+     * mezcla el interruptor con la fecha; un organizador tiene un puñado de
+     * invitaciones, no miles.
+     */
+    public function pastEvents(): Collection
+    {
+        return $this->events()
+            ->with('template')
+            ->orderByDesc('id')
+            ->get()
+            ->reject(fn (Event $event) => $event->isAvailable())
+            ->values();
     }
 
     /**

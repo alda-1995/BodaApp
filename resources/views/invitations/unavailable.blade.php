@@ -18,7 +18,8 @@
         <div class="inv-container inv-narrow">
             <h1 class="inv-title">Esta invitación ya no está disponible</h1>
             <p class="inv-text">
-                @if ($event->expires_at)
+                {{-- Sólo si de verdad venció: una apagada a mano tiene su fecha por delante. --}}
+                @if ($event->isExpired())
                     Estuvo activa hasta el {{ $event->expires_at->format('d/m/Y') }}.
                 @endif
                 Si necesitas información del evento, comunícate con los novios.

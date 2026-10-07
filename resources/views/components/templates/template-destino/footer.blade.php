@@ -1,6 +1,5 @@
 {{--
-    Cierre de la invitación: el monograma sobre su propia marca de agua y la
-    fecha, escrita como en la portada.
+    Cierre de la invitación: el monograma y la fecha, escrita como en la portada.
 
     No es un bloque del wizard sino la firma de la plantilla, así que no tiene
     paso propio: toma el monograma del pie que el organizador subió en

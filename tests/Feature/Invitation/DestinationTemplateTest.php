@@ -315,11 +315,9 @@ class DestinationTemplateTest extends TestCase
 
         $html = $this->get(route('templates.preview', $template->slug))->assertOk()->getContent();
 
-        // La firma y su marca de agua salen del mismo archivo.
-        preg_match_all('/td-footer__(?:watermark|monogram)" src="([^"]+)"/', $html, $pies);
+        preg_match_all('/td-footer__monogram" src="([^"]+)"/', $html, $pies);
 
-        $this->assertCount(2, $pies[1], 'El pie debería pintar la firma y su marca de agua.');
-        $this->assertSame($pies[1][0], $pies[1][1], 'Las dos salen del mismo archivo.');
+        $this->assertCount(1, $pies[1], 'El pie debería firmar con el monograma.');
         $this->assertStringEndsWith('assets-destino/monograma.png', $pies[1][0]);
     }
 

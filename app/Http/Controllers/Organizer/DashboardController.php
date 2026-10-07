@@ -24,7 +24,7 @@ class DashboardController extends Controller
         if (!$event?->isAvailable()) {
             return view('organizer.dashboard.index', [
                 'available' => false,
-                'event' => $event,
+                'pastEvents' => $user->pastEvents(),
                 'hasSharedEvents' => $user->coadminships()->accepted()->exists(),
             ]);
         }

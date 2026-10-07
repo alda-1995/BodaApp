@@ -6,7 +6,7 @@
                 <p class="text-parrafo text-[#737373]">Aquí configuras la invitación digital de tu boda.</p>
             </div>
 
-            <x-organizer.buy-invitation :event="$event" :has-shared-events="$hasSharedEvents" />
+            <x-organizer.buy-invitation :past="$pastEvents" :has-shared-events="$hasSharedEvents" />
         </div>
     </section>
 </x-layouts.dashboard-layout>

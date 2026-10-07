@@ -23,7 +23,7 @@ class EventInfoController extends Controller
         }
 
         return view('organizer.event-info.unavailable', [
-            'event' => $event,
+            'pastEvents' => $user->pastEvents(),
             'hasSharedEvents' => $user->coadminships()->accepted()->exists(),
         ]);
     }

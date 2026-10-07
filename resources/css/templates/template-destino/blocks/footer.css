@@ -1,8 +1,5 @@
 /*
- * Cierre: el monograma sobre su propia marca de agua, y la fecha.
- *
- * La marca de agua es el mismo archivo, enorme y casi borrado. Va en
- * aria-hidden desde el Blade porque no añade nada que leer.
+ * Cierre: el monograma y la fecha, centrados sobre papel.
  */
 
 .td-footer {
@@ -26,13 +23,10 @@
  * portada —allá a blanco, aquí a tinta— y así sirve cualquier PNG que suban.
  */
 .td-footer__monogram {
-    filter: brightness(0);
-}
-
-.td-footer__monogram {
     position: relative;
     width: clamp(2.75rem, 5vw, 3.5rem);
     height: auto;
+    filter: brightness(0);
 }
 
 .td-footer__date {

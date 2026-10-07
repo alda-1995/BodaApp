@@ -20,8 +20,10 @@ class EnsureActiveEvent
         if (!$event?->isAvailable()) {
             return redirect()->route('events.info')->with(
                 'error',
+                // "Ya no está activa" y no "venció": también llega aquí la que el
+                // superadmin apagó, con su fecha todavía por delante.
                 $event
-                    ? 'Tu invitación digital venció. Compra una nueva para volver a usar esta sección.'
+                    ? 'Tu invitación digital ya no está activa. Compra una nueva para volver a usar esta sección.'
                     : 'Necesitas una invitación digital para usar esta sección.'
             );
         }

@@ -8,7 +8,7 @@
                         <h2 class="text-size-title">Dashboard</h2>
                         <p class="text-parrafo text-[#595959]">Hola, {{ auth()->user()->name ?: 'Usuario' }}</p>
                     </div>
-                    <x-organizer.buy-invitation :event="$event" :has-shared-events="$hasSharedEvents" />
+                    <x-organizer.buy-invitation :past="$pastEvents" :has-shared-events="$hasSharedEvents" />
                 </div>
             </section>
         @elseif (!$hasFeatures)

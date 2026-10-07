@@ -69,6 +69,23 @@
             },
         ],
         [
+            // Hasta cuándo sirve la invitación, y su interruptor. Se toca a mano
+            // cuando hay que intervenir: una boda pospuesta, una cortesía.
+            'label' => 'Vigencia',
+            'isHtml' => true,
+            'width' => 'w-[110px]',
+            'render' => function ($user) {
+                $event = $user->latestEvent;
+
+                if (!$event) {
+                    return '—';
+                }
+
+                return '<a href="' . route('superadmin.events.validity.edit', $event->id) . '" '
+                    . 'class="text-[#808080] hover:text-black transition-colors">Ajustar</a>';
+            },
+        ],
+        [
             // Las imágenes de la plantilla de esa boda: el monograma, un mapa,
             // una secuencia de animación. Sólo existen si la plantilla las declara.
             'label' => 'Imágenes',

@@ -105,7 +105,11 @@ class EventLifecycleTest extends TestCase
      | Invitación vencida
      * -------------------------------------------------------------------*/
 
-    public function test_vencida_el_dueno_ve_la_invitacion_a_comprar_otra(): void
+    /**
+     * Sin invitación en pie el panel se ve igual que el de quien nunca compró:
+     * lo único que puede hacer es elegir otra plantilla.
+     */
+    public function test_vencida_el_panel_se_ve_como_el_de_quien_no_ha_comprado(): void
     {
         $this->expire($this->event);
 
@@ -113,14 +117,60 @@ class EventLifecycleTest extends TestCase
             ->get(route('events.wizard.edit', ['event' => $this->event->slug, 'step' => 'general']))
             ->assertRedirect(route('events.info'));
 
-        $this->actingAs($this->organizer)->get(route('events.info'))
-            ->assertOk()
-            ->assertSee('Invitación vencida')
-            ->assertSee('Comprar otra invitación');
+        foreach (['events.info', 'panel'] as $route) {
+            $this->actingAs($this->organizer)->get(route($route))
+                ->assertOk()
+                ->assertSee('Aún no tienes una invitación digital activa')
+                ->assertSee('Ver plantillas')
+                ->assertSee('href="' . route('home') . '"', false);
+        }
+    }
+
+    public function test_vencida_queda_listada_como_invitacion_anterior(): void
+    {
+        $this->expire($this->event);
 
         $this->actingAs($this->organizer)->get(route('panel'))
             ->assertOk()
-            ->assertSee('Tu invitación digital ya no está activa');
+            ->assertSee('Tus invitaciones anteriores')
+            ->assertSee('Venció el ' . $this->event->fresh()->expires_at->format('d/m/Y'))
+            // Desde aquí llega a lo que pagó, que la configuración ya no le abre.
+            ->assertSee('href="' . route('organizer.orders.index') . '"', false);
+    }
+
+    /**
+     * Apagada a mano por el superadmin con su fecha todavía por delante: cierra
+     * igual, pero no se le dice "venció" porque no venció.
+     */
+    public function test_apagada_a_mano_cierra_el_panel_y_se_lista_como_desactivada(): void
+    {
+        $this->event->forceFill([
+            'expires_at' => now()->addMonths(3),
+            'is_active' => false,
+        ])->save();
+
+        $this->actingAs($this->organizer)->get(route('panel'))
+            ->assertOk()
+            ->assertSee('Aún no tienes una invitación digital activa')
+            ->assertSee('Desactivada')
+            ->assertDontSee('Venció el');
+
+        $this->actingAs($this->organizer)
+            ->get(route('events.wizard.edit', ['event' => $this->event->slug, 'step' => 'general']))
+            ->assertRedirect(route('events.info'));
+
+        $this->actingAs($this->organizer)->get(route('organizer.guests.index'))
+            ->assertRedirect(route('events.info'));
+    }
+
+    public function test_sin_invitaciones_previas_no_se_dibuja_el_historial(): void
+    {
+        $user = User::factory()->create();
+        $user->roles()->attach(Role::firstOrCreate(['name' => 'organizer'])->id);
+
+        $this->actingAs($user)->get(route('panel'))
+            ->assertOk()
+            ->assertDontSee('Tus invitaciones anteriores');
     }
 
     public function test_vencida_ya_no_se_puede_guardar(): void

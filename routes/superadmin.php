@@ -1,6 +1,7 @@
 <?php
 use App\Http\Controllers\Admin\EventTemplateAssetController;
 use App\Http\Controllers\Superadmin\DashboardController;
+use App\Http\Controllers\Superadmin\EventValidityController;
 use App\Http\Controllers\Template\TemplateController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +22,12 @@ Route::prefix('superadmin')
             ->name('events.assets.update');
         Route::delete('/eventos/{event}/imagenes', [EventTemplateAssetController::class, 'reset'])
             ->name('events.assets.reset');
+
+        // Hasta cuándo sirve una invitación, y su interruptor.
+        Route::get('/eventos/{event}/vigencia', [EventValidityController::class, 'edit'])
+            ->name('events.validity.edit');
+        Route::put('/eventos/{event}/vigencia', [EventValidityController::class, 'update'])
+            ->name('events.validity.update');
     });
 
 Route::controller(TemplateController::class)
