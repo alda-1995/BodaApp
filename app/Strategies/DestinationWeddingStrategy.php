@@ -64,7 +64,17 @@ class DestinationWeddingStrategy extends DefaultTemplateStrategy
                 | PNG sólido con fondo transparente.
                 */
                 ->add('monogram', $this->photo('monogram', 'Monograma de la pareja')
-                    ->help('Opcional. Va sobre la foto de portada y vuelve a cerrar la invitación. PNG con fondo transparente.')
+                    ->help('Opcional. Va sobre la foto de portada. PNG con fondo transparente.')
+                    ->allowedMimes(['png', 'webp']))
+                /*
+                | El del cierre va aparte porque no se usa igual: en la portada
+                | es pequeño sobre una foto, y en el pie se repite enorme como
+                | marca de agua. Suele ser otra versión del mismo dibujo, con más
+                | trazo. Si no suben ninguno se usa el de la portada, que es
+                | mejor que cerrar sin firma.
+                */
+                ->add('footer_monogram', $this->photo('footer_monogram', 'Monograma del pie')
+                    ->help('Opcional. El que cierra la invitación; se repite enorme de fondo, atenuado. Súbelo sólido, no pálido. Si lo dejas vacío se usa el de la portada.')
                     ->allowedMimes(['png', 'webp']))
                 ->add('scroll_hint', TextField::make('scroll_hint', 'Invitación a bajar')
                     ->placeholder('Ej. Scrolldown para descubrir')
@@ -77,6 +87,12 @@ class DestinationWeddingStrategy extends DefaultTemplateStrategy
                 ->example([
                     'cover_photo' => asset(self::IMG . 'portada.png'),
                     'monogram' => asset(self::IMG . 'monograma.png'),
+                    /*
+                    | El mismo dibujo sólido que la portada: el pie lo usa dos
+                    | veces —firma y marca de agua— y la marca la atenúa el CSS.
+                    | Un PNG ya pálido se perdería como firma.
+                    */
+                    'footer_monogram' => asset(self::IMG . 'monograma.png'),
                     'scroll_hint' => 'Scrolldown para descubrir',
                 ]),
 

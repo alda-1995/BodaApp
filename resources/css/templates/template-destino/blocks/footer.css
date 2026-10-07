@@ -17,15 +17,16 @@
     overflow: hidden;
 }
 
-.td-footer__watermark {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: clamp(18rem, 42vw, 34rem);
-    height: auto;
-    opacity: 0.12;
-    pointer-events: none;
+/*
+ * El monograma se pinta en tinta, venga como venga.
+ *
+ * El de la portada va en blanco porque está sobre una foto; aquí el fondo es
+ * papel claro y ese mismo archivo quedaría invisible. En esta plantilla el
+ * monograma es una silueta, así que se le fuerza el color igual que en la
+ * portada —allá a blanco, aquí a tinta— y así sirve cualquier PNG que suban.
+ */
+.td-footer__monogram {
+    filter: brightness(0);
 }
 
 .td-footer__monogram {

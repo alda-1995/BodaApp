@@ -287,6 +287,43 @@ class DestinationTemplateTest extends TestCase
     }
 
     /* ---------------------------------------------------------------------
+     | Pie
+     * -------------------------------------------------------------------*/
+
+    /**
+     * El monograma del pie se pide aparte del de la portada: allá va pequeño
+     * sobre una foto y aquí enorme sobre papel, y suelen ser dos versiones del
+     * mismo dibujo.
+     */
+    public function test_el_pie_pide_su_propio_monograma(): void
+    {
+        $general = collect(app(DestinationWeddingStrategy::class)->sections())
+            ->first(fn ($seccion) => $seccion->key() === 'general');
+
+        $campos = array_keys($general->fields());
+
+        $this->assertContains('monogram', $campos);
+        $this->assertContains('footer_monogram', $campos);
+
+        // Ninguno es obligatorio: una boda puede no tener monograma.
+        $this->assertFalse($general->fields()['footer_monogram']->isRequired());
+    }
+
+    public function test_el_pie_firma_con_el_monograma_del_pie(): void
+    {
+        $template = Template::factory()->create(['view_path' => self::VIEW, 'is_active' => true]);
+
+        $html = $this->get(route('templates.preview', $template->slug))->assertOk()->getContent();
+
+        // La firma y su marca de agua salen del mismo archivo.
+        preg_match_all('/td-footer__(?:watermark|monogram)" src="([^"]+)"/', $html, $pies);
+
+        $this->assertCount(2, $pies[1], 'El pie debería pintar la firma y su marca de agua.');
+        $this->assertSame($pies[1][0], $pies[1][1], 'Las dos salen del mismo archivo.');
+        $this->assertStringEndsWith('assets-destino/monograma.png', $pies[1][0]);
+    }
+
+    /* ---------------------------------------------------------------------
      | Preguntas frecuentes
      * -------------------------------------------------------------------*/
 
