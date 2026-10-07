@@ -15,13 +15,13 @@
 
     position: relative;
     background: var(--td-white);
-    padding-top: clamp(3rem, 6vw, 5rem);
+
+    padding-block: clamp(3rem, 6vw, 5rem);
 }
 
 .td-rsvp__columns {
     display: grid;
     gap: clamp(1.5rem, 4vw, 3rem);
-    padding-bottom: clamp(3rem, 6vw, 5rem);
 }
 
 @media (min-width: 900px) {
@@ -235,7 +235,8 @@
 .td-rsvp__status {
     display: none;
     max-width: 34rem;
-    margin: 0 auto clamp(2rem, 4vw, 3rem);
+    /* Sólo la separación de arriba: el cierre lo pone el padding de la sección. */
+    margin: clamp(2rem, 4vw, 3rem) auto 0;
     padding-inline: 1.5rem;
 }
 
