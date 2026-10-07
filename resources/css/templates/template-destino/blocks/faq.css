@@ -10,6 +10,14 @@
     background: var(--td-white);
 }
 
+/* La banda que abre la sección, de borde a borde. */
+.td-faq__photo {
+    width: 100%;
+    aspect-ratio: 1280 / 419;
+    object-fit: cover;
+    display: block;
+}
+
 .td-faq__columns {
     display: grid;
 }
@@ -67,6 +75,14 @@
 /* La elegida se tiñe del verde del panel: así se ve a cuál responde. */
 .td-faq__question.is-active {
     background: var(--td-mint);
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
+}
+
+.td-faq__item:has(.is-active) .td-faq__answer {
+    background: var(--td-mint);
+    border-end-start-radius: 0.5rem;
+    border-end-end-radius: 0.5rem;
 }
 
 .td-faq__panel {
@@ -82,11 +98,27 @@
     }
 }
 
-.td-faq__answer {
+/* El recado del destino: siempre a la vista, no cambia con las preguntas. */
+.td-faq__intro {
     font-size: var(--td-size-lead);
     max-width: 34ch;
 }
 
-.td-faq__answer a {
+/*
+ * La respuesta se despliega bajo su propia pregunta. El relleno va en el hijo
+ * y no aquí: x-collapse anima la altura de esta caja, y un padding propio
+ * impediría que llegue a cero al cerrarse.
+ */
+.td-faq__answer {
+    overflow: hidden;
+}
+
+.td-faq__answer-inner {
+    padding: 0.75rem 1.25rem 0.25rem;
+    font-size: var(--td-size-text);
+    color: var(--td-muted);
+}
+
+.td-faq__answer-inner a {
     color: var(--td-ink);
 }

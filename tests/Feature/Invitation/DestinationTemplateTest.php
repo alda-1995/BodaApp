@@ -287,6 +287,58 @@ class DestinationTemplateTest extends TestCase
     }
 
     /* ---------------------------------------------------------------------
+     | Preguntas frecuentes
+     * -------------------------------------------------------------------*/
+
+    public function test_las_preguntas_piden_su_foto_y_el_texto_del_panel(): void
+    {
+        $secciones = collect(app(DestinationWeddingStrategy::class)->sections());
+
+        $faqs = $secciones->first(fn ($seccion) => $seccion->key() === 'faqs');
+        $this->assertSame(['image', 'intro', 'faqs'], array_keys($faqs->fields()));
+
+        /*
+        | La banda de foto es de este bloque, no del anterior: si el paso de
+        | confirmación siguiera pidiéndola, se vería dos veces.
+        */
+        $rsvp = $secciones->first(fn ($seccion) => $seccion->key() === 'rsvp');
+        $this->assertNotContains('background_image', array_keys($rsvp->fields()));
+    }
+
+    /**
+     * Las dos columnas no se mezclan: la respuesta se despliega bajo su propia
+     * pregunta, y el panel derecho es sólo del texto de la sección.
+     */
+    public function test_la_respuesta_va_bajo_su_pregunta_y_el_panel_es_del_texto(): void
+    {
+        $template = Template::factory()->create(['view_path' => self::VIEW, 'is_active' => true]);
+
+        $html = $this->get(route('templates.preview', $template->slug))->assertOk()->getContent();
+
+        $this->assertStringContainsString('td-faq__photo', $html);
+        $this->assertStringContainsString('td-faq__intro', $html);
+
+        // Cada respuesta vive dentro del <li> de su pregunta, en la columna
+        // izquierda; el panel derecho sólo lleva el texto.
+        $this->assertMatchesRegularExpression(
+            '/td-faq__panel[^>]*>\s*(?:<!--.*?-->\s*)*<p class="td-faq__intro"/s',
+            $html,
+            'El panel derecho debería llevar sólo el texto de la sección.',
+        );
+        $this->assertSame(
+            substr_count($html, 'td-faq__item'),
+            substr_count($html, 'td-faq__answer"'),
+            'Cada pregunta debe tener su respuesta dentro de su propia fila.',
+        );
+
+        // Ninguna abierta de entrada.
+        $this->assertStringContainsString('x-data="{ abierta: null }"', $html);
+
+        // Y la banda ya no se pinta desde la confirmación.
+        $this->assertStringNotContainsString('td-rsvp__photo', $html);
+    }
+
+    /* ---------------------------------------------------------------------
      | Itinerario
      * -------------------------------------------------------------------*/
 

@@ -197,12 +197,30 @@ class DestinationWeddingStrategy extends DefaultTemplateStrategy
 
             $this->section(RsvpSection::class)
                 ->blade('contact-form')
-                ->add('background_image', $this->photo('background_image', 'Foto bajo el formulario')
-                    ->help('Opcional. La banda ancha que cierra la confirmación.'))
-                ->first('rsvp_deadline', 'background_image', 'welcome_message', 'thank_you_message')
-                ->example(['background_image' => asset(self::IMG . 'rsvp-playa.png')]),
+                ->first('rsvp_deadline', 'welcome_message', 'thank_you_message'),
 
-            $this->section(FaqSection::class),
+            /*
+            | La banda de foto que separa la confirmación de las preguntas es de
+            | este bloque, no del anterior: va pegada a él y es lo primero que
+            | se ve al llegar.
+            |
+            | El texto del panel es lo que se lee a la derecha mientras no se
+            | haya elegido ninguna pregunta; al tocar una, su respuesta ocupa
+            | ese sitio.
+            */
+            $this->section(FaqSection::class)
+                ->add('image', $this->photo('image', 'Foto sobre las preguntas')
+                    ->help('La banda ancha que abre esta sección.'))
+                ->add('intro', TextareaField::make('intro', 'Texto del panel derecho')
+                    ->placeholder('Ej. Primavera perfecta: días 22-26°C, noches 10-14°C. Te recomendamos llevar una capa para la recepción al aire libre.')
+                    ->help('Se lee a la derecha mientras no se elige ninguna pregunta.')
+                    ->nullable()
+                    ->rules(['string', 'max:400']))
+                ->first('image', 'intro')
+                ->example([
+                    'image' => asset(self::IMG . 'rsvp-playa.png'),
+                    'intro' => 'Primavera perfecta: días 22-26°C, noches 10-14°C. Te recomendamos llevar una capa para la recepción al aire libre.',
+                ]),
         ];
     }
 

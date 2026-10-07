@@ -4,7 +4,6 @@
     $guest = $context->guest;
     $maxPasses = (int) ($guest->max_passes ?? $section->get('open_link_max_passes', 1));
     $deadline = $section->get('deadline');
-    $fondo = $section->get('background_image');
 
     /*
     | Con la liga abierta apagada sólo confirma quien llegó por su invitación
@@ -160,10 +159,6 @@
             @endif
         </div>
     </div>
-
-    @if ($fondo)
-        <img class="td-rsvp__photo" src="{{ $fondo }}" alt="" loading="lazy">
-    @endif
 
     {{-- Encendida de entrada si este invitado ya había respondido. --}}
     <div @class(['td-rsvp__status', 'is-visible' => $yaConfirmo]) data-rsvp-status="confirmed">
