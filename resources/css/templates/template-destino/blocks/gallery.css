@@ -1,9 +1,15 @@
 /*
- * Galería: una tira de fotos que baja en escalera sobre negro.
+ * Galería: una tira de fotos en escalera que sube hacia la derecha.
  *
- * El escalón sale del índice que pone el Blade (--td-card-index), así que la
- * diagonal se mantiene con las fotos que haya. Se recorre con scroll y no con
- * un carrusel: funciona sin JS y en móvil es el gesto natural.
+ * El escalón lo pone gallery.js en cada fotograma, porque depende de dónde está
+ * la foto en la ventana y no de su sitio en la lista: una escalera que creciera
+ * sin fin no podría dar la vuelta. Aquí sólo se maqueta la tira y se le deja un
+ * reposo decente para cuando el JS no corre.
+ *
+ * La separación va como margin-right de CADA foto, incluida la última, y no
+ * como 'gap' del contenedor: con 'gap' la tira mide 2N·ancho + (2N−1)·hueco,
+ * así que envolver el desplazamiento a la mitad no cae justo donde la copia
+ * repite a la primera y la vuelta daría un salto.
  */
 
 .td-gallery {
@@ -12,43 +18,44 @@
     overflow: hidden;
 }
 
+.td-gallery__viewport {
+    position: relative;
+    overflow: hidden;
+    /* Sitio para la escalera, que sube y baja fuera de su caja. */
+    padding-block: 5rem;
+    /* Se puede arrastrar, y se nota antes de intentarlo. */
+    cursor: grab;
+    /* El gesto horizontal es de la tira; el vertical sigue siendo de la página. */
+    touch-action: pan-y;
+}
+
+.td-gallery__viewport.is-arrastrando {
+    cursor: grabbing;
+}
+
+.td-gallery__viewport.is-arrastrando * {
+    user-select: none;
+}
+
+.td-gallery__marquee {
+    display: flex;
+    width: max-content;
+    will-change: transform;
+}
+
 .td-gallery__strip {
     display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
+    align-items: center;
     margin: 0;
-    padding: 0 1.5rem;
+    padding: 0;
     list-style: none;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-}
-
-/* La barra de scroll rompería el negro a sangre; el gesto se queda igual. */
-.td-gallery__strip {
-    scrollbar-width: none;
-}
-
-.td-gallery__strip::-webkit-scrollbar {
-    display: none;
 }
 
 .td-gallery__item {
     flex: 0 0 auto;
     width: clamp(9rem, 20vw, 16.5rem);
-    scroll-snap-align: center;
-}
-
-@media (min-width: 768px) {
-    .td-gallery__strip {
-        justify-content: center;
-        padding-inline: 4rem;
-    }
-
-    /* La escalera: cada foto baja un escalón respecto a la anterior. */
-    .td-gallery__item {
-        margin-top: calc(var(--td-card-index) * 3rem);
-    }
+    margin-right: clamp(0.5rem, 1vw, 0.75rem);
+    will-change: transform;
 }
 
 .td-gallery__link {
@@ -56,9 +63,30 @@
     cursor: zoom-in;
 }
 
+/* Arrastrando manda el cursor de la tira, no el de la lupa. */
+.td-gallery__viewport.is-arrastrando .td-gallery__link {
+    cursor: grabbing;
+}
+
 .td-gallery__item img {
     width: 100%;
     aspect-ratio: 265 / 352;
     object-fit: cover;
     display: block;
+    /* Arrastrar la tira no debe arrancar el arrastre nativo de la imagen. */
+    -webkit-user-drag: none;
+    user-select: none;
+}
+
+/*
+ * Sin JS la tira se queda quieta: al menos que se pueda recorrer a mano.
+ * Con JS, el script controla el desplazamiento y este scroll no estorba.
+ */
+.td-gallery__viewport:not(.is-vivo) {
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.td-gallery__viewport:not(.is-vivo)::-webkit-scrollbar {
+    display: none;
 }

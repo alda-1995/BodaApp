@@ -50,7 +50,7 @@
         </div>
 
         <div class="td-story__viewport" data-td-story style="--td-story-cards: {{ count($tarjetas) }}">
-            <div class="td-story__marquee">
+            <div class="td-story__marquee" data-marquesina>
                 @foreach ([false, true] as $esCopia)
                     <ul class="td-story__track"
                         @if ($esCopia) aria-hidden="true" data-td-story-copia @else data-td-story-original @endif>

@@ -358,6 +358,26 @@ class DestinationTemplateTest extends TestCase
         $this->assertStringContainsString('tabindex="-1"', $html);
     }
 
+    /**
+     * La galería gira igual que la historia, y por lo mismo lleva su lista dos
+     * veces: sin la copia, al llegar al final habría un salto.
+     */
+    public function test_la_galeria_lleva_la_lista_dos_veces_para_dar_la_vuelta(): void
+    {
+        $template = Template::factory()->create(['view_path' => self::VIEW, 'is_active' => true]);
+
+        $html = $this->get(route('templates.preview', $template->slug))->assertOk()->getContent();
+
+        $this->assertStringContainsString('data-td-gallery-original', $html);
+        $this->assertStringContainsString('aria-hidden="true" data-td-gallery-copia', $html);
+
+        // Seis fotos de ejemplo, doce piezas pintadas: original y copia.
+        $this->assertSame(12, substr_count($html, 'td-gallery__item'));
+
+        // Cada foto es un enlace a sí misma, con su posición para la copia.
+        $this->assertMatchesRegularExpression('/<a class="td-gallery__link" href="[^"]+\.png"/', $html);
+    }
+
     public function test_cada_foto_de_la_historia_se_puede_abrir(): void
     {
         $template = Template::factory()->create(['view_path' => self::VIEW, 'is_active' => true]);

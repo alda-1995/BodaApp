@@ -1,31 +1,45 @@
 @props(['section', 'context'])
 
 @php
-    $fotos = $section->get('images', []);
+    $fotos = collect($section->get('images', []))->values();
 @endphp
 
 {{--
     Galería (GallerySection).
 
-    Las fotos bajan en escalera sobre negro, como una tira de contactos. El
-    escalón lo calcula el CSS a partir del índice, así que la diagonal se
-    mantiene con las fotos que haya.
+    Una tira de fotos en escalera que sube hacia la derecha y gira en bucle. La
+    segunda lista es una copia exacta de la primera: es lo que hace que al
+    llegar al final empiece otra vez sin un salto visible. Va en aria-hidden
+    porque no añade nada que leer.
 
-    No es un carrusel: la tira se recorre de lado con scroll, que funciona sin
-    JS. Cada foto es un enlace a sí misma, así que al hacer clic se abre grande
-    en el visor (PhotoSwipe, en gallery.js) y, sin JS, en el navegador.
+    El escalón lo calcula gallery.js según dónde esté cada foto, no según su
+    sitio en la lista: una escalera que creciera sin fin no podría dar la vuelta.
+
+    Se puede arrastrar, y cada foto se abre en grande al tocarla (PhotoSwipe).
+    Es un enlace de verdad, así que sin JS abre la imagen en el navegador.
 --}}
-@if ($fotos)
+@if ($fotos->isNotEmpty())
     <section class="td-gallery" id="galeria">
-        <ul class="td-gallery__strip" data-td-gallery>
-            @foreach ($fotos as $foto)
-                <li class="td-gallery__item" style="--td-card-index: {{ $loop->index }}">
-                    <a class="td-gallery__link" href="{{ $foto }}" target="_blank" rel="noopener"
-                        aria-label="Ver la foto {{ $loop->iteration }} en grande">
-                        <img src="{{ $foto }}" alt="Foto de la pareja" loading="lazy">
-                    </a>
-                </li>
-            @endforeach
-        </ul>
+        <div class="td-gallery__viewport" data-td-gallery>
+            <div class="td-gallery__marquee" data-marquesina>
+                @foreach ([false, true] as $esCopia)
+                    <ul class="td-gallery__strip"
+                        @if ($esCopia) aria-hidden="true" data-td-gallery-copia @else data-td-gallery-original @endif>
+
+                        @foreach ($fotos as $indice => $foto)
+                            <li class="td-gallery__item">
+                                <a class="td-gallery__link" href="{{ $foto }}"
+                                    data-indice="{{ $indice }}"
+                                    target="_blank" rel="noopener"
+                                    @if ($esCopia) tabindex="-1" @endif
+                                    aria-label="Ver la foto {{ $indice + 1 }} en grande">
+                                    <img src="{{ $foto }}" alt="Foto de la pareja" loading="lazy">
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endforeach
+            </div>
+        </div>
     </section>
 @endif

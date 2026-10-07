@@ -1,47 +1,43 @@
 /**
- * Galería: el visor para ver las fotos en grande.
+ * Galería: una tira de fotos en escalera que gira en bucle.
  *
- * Aquí no se arma ningún carrusel. La tira ya se recorre con scroll desde el
- * CSS, que funciona sin JS y es el gesto natural en móvil, así que lo único
- * que añade el JS es abrir la foto completa.
+ * La escalera sube hacia la derecha y se repite, así que el escalón no puede
+ * salir del sitio de la foto en la lista: si creciera sin fin, al dar la vuelta
+ * habría un salto enorme. Sale de DÓNDE ESTÁ en la ventana, igual que el arco
+ * de "Nuestra historia", y por eso lo calcula el JS en cada fotograma.
  *
- * Cada foto es un enlace de verdad: sin JS abre la imagen en el navegador.
+ * El girar, el arrastrar y la vuelta sin salto los pone marquesina.js.
+ *
+ * Sin JS no queda rota: el CSS deja la escalera fija y la tira se recorre a
+ * mano, y cada foto sigue siendo un enlace que abre la imagen en el navegador.
  */
 import PhotoSwipeLightbox from 'photoswipe/lightbox';
 
+import { armarMarquesina } from './marquesina.js';
+import { armarVisorConCopia } from './visor.js';
+
+/** Cuánto sube de un lado a otro de la ventana. */
+const SUBIDA = 150; // px
+/** Lo que avanza sola, en píxeles por segundo. */
+const VELOCIDAD = 30;
+
 export function initGallery() {
-    document.querySelectorAll('[data-td-gallery]').forEach(armarVisor);
-}
+    document.querySelectorAll('[data-td-gallery]').forEach((tira) => {
+        armarVisorConCopia(tira, PhotoSwipeLightbox, {
+            original: '[data-td-gallery-original]',
+            copia: '[data-td-gallery-copia]',
+            enlace: '.td-gallery__link',
+        });
 
-function armarVisor(tira) {
-    const visor = new PhotoSwipeLightbox({
-        gallery: tira,
-        children: '.td-gallery__link',
-        // El grueso de la librería sólo se descarga cuando alguien abre una foto.
-        pswpModule: () => import('photoswipe'),
-        bgOpacity: 0.95,
-        closeTitle: 'Cerrar',
-        zoomTitle: 'Acercar',
-        arrowPrevTitle: 'Foto anterior',
-        arrowNextTitle: 'Foto siguiente',
-        errorMsg: 'No se pudo cargar la foto.',
+        armarMarquesina(tira, {
+            pieza: '.td-gallery__item',
+            velocidad: VELOCIDAD,
+            /*
+             * Sube hacia la derecha: la de la izquierda es la más baja y la de
+             * la derecha la más alta, como en el diseño. Es una recta, no una
+             * curva, para que la escalera se lea como escalera.
+             */
+            transformar: (_pieza, t) => `translateY(${(-t * SUBIDA).toFixed(2)}px)`,
+        });
     });
-
-    /*
-     * Las medidas salen de la <img> que ya está en la página. Así no se piden
-     * las fotos otra vez sólo para medirlas. Si todavía no cargó —'lazy' y
-     * nunca estuvo a la vista— se abre sin medidas y PhotoSwipe la ajusta.
-     */
-    visor.addFilter('domItemData', (itemData, element) => {
-        const img = element.querySelector('img');
-
-        if (img?.naturalWidth) {
-            itemData.width = img.naturalWidth;
-            itemData.height = img.naturalHeight;
-        }
-
-        return itemData;
-    });
-
-    visor.init();
 }
