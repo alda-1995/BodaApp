@@ -67,21 +67,16 @@
                     @csrf
                     @method('PUT')
 
-                    <label for="expires_at" class="block font-inter text-size-small-heading text-black mb-1.5">
-                        Vence el
-                    </label>
-                    <input id="expires_at" name="expires_at" type="datetime-local"
-                        value="{{ old('expires_at', $event->expires_at?->format('Y-m-d\TH:i')) }}"
-                        class="h-[50px] w-full rounded-md border px-4 font-inter text-size-small-heading text-black {{ $errors->has('expires_at') ? 'border-red-500' : 'border-base-gray' }}" />
+                    {{-- El mismo calendario que el organizador usa en el wizard. --}}
+                    <x-controls.inputs.flatpickr-date-time label="Vence el" name="expires_at"
+                        :value="$event->expires_at" placeholder="Sin fecha de vencimiento" />
 
-                    @error('expires_at')
-                        <span class="error text-red-500 text-size-small-heading block mt-1">{{ $message }}</span>
-                    @else
-                        <p class="{{ $hint }} mt-1 mb-6">
+                    @unless ($errors->has('expires_at'))
+                        <p class="{{ $hint }} -mt-2 mb-6">
                             Normalmente se calcula sola: fecha de la boda más los días de la plantilla.
                             Lo que escribas aquí manda sobre ese cálculo. Déjala vacía y no vencerá.
                         </p>
-                    @enderror
+                    @endunless
 
                     {{--
                         El interruptor va aparte de la fecha porque son cosas

@@ -18,6 +18,7 @@ class DeliveryIssue
     public const REJECTED = 'rejected';
     public const RATE_LIMITED = 'rate_limited';
     public const CONNECTION = 'connection';
+    public const EVENT_UNAVAILABLE = 'event_unavailable';
     public const UNKNOWN = 'unknown';
 
     /**
@@ -74,6 +75,7 @@ class DeliveryIssue
             self::RATE_LIMITED => 'Se enviaron muchos mensajes en poco tiempo. Espera unos minutos y vuelve a intentarlo.',
             self::CONNECTION => "No pudimos conectarnos con el servicio de {$channelLabel}. Suele resolverse solo: inténtalo de nuevo en unos minutos.",
             self::REJECTED => "El servicio de {$channelLabel} no aceptó el mensaje. Revisa el dato de contacto del invitado o inténtalo más tarde.",
+            self::EVENT_UNAVAILABLE => 'Tu invitación dejó de estar activa antes de que saliera este mensaje, así que no se envió.',
             default => 'No pudimos entregar el mensaje. Inténtalo de nuevo y, si sigue igual, escríbenos para revisarlo.',
         };
     }

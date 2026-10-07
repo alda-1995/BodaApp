@@ -104,13 +104,29 @@ class EventValidityTest extends TestCase
             ->assertSee('name="is_active"', false);
     }
 
+    /**
+     * El mismo calendario que el organizador usa en el wizard, no un
+     * datetime-local del navegador: se lee igual y escribe en el mismo formato.
+     */
+    public function test_la_fecha_usa_el_calendario_del_wizard(): void
+    {
+        $response = $this->actingAs($this->superadmin)
+            ->get(route('superadmin.events.validity.edit', $this->event->id))
+            ->assertOk();
+
+        $response->assertSee('flatpickr(inputEl, config)', false)
+            ->assertSee("altFormat: 'd/m/Y H:i'", false)
+            ->assertSee("dateFormat: 'Y-m-d H:i:s'", false)
+            ->assertDontSee('type="datetime-local"', false);
+    }
+
     /* ---------------------------------------------------------------------
      | Lo que hace
      * -------------------------------------------------------------------*/
 
     public function test_vencerla_a_mano_la_cierra_para_todos(): void
     {
-        $this->guardar(['expires_at' => now()->subDay()->format('Y-m-d\TH:i')])
+        $this->guardar(['expires_at' => now()->subDay()->format('Y-m-d H:i:s')])
             ->assertSessionHasNoErrors();
 
         $event = $this->event->fresh();
@@ -128,7 +144,7 @@ class EventValidityTest extends TestCase
         $this->event->forceFill(['expires_at' => now()->subWeek(), 'is_active' => false])->save();
 
         $this->guardar([
-            'expires_at' => now()->addMonths(3)->format('Y-m-d\TH:i'),
+            'expires_at' => now()->addMonths(3)->format('Y-m-d H:i:s'),
             'is_active' => '1',
         ])->assertSessionHasNoErrors();
 
@@ -148,7 +164,7 @@ class EventValidityTest extends TestCase
         $this->event->forceFill(['is_active' => false])->save();
 
         $this->guardar([
-            'expires_at' => now()->addMonths(3)->format('Y-m-d\TH:i'),
+            'expires_at' => now()->addMonths(3)->format('Y-m-d H:i:s'),
             'is_active' => null,
         ])->assertSessionHasNoErrors();
 
@@ -165,7 +181,7 @@ class EventValidityTest extends TestCase
     public function test_apagada_a_mano_la_pagina_publica_no_inventa_una_fecha(): void
     {
         $this->guardar([
-            'expires_at' => now()->addMonths(3)->format('Y-m-d\TH:i'),
+            'expires_at' => now()->addMonths(3)->format('Y-m-d H:i:s'),
             'is_active' => null,
         ])->assertSessionHasNoErrors();
 
@@ -193,7 +209,7 @@ class EventValidityTest extends TestCase
     {
         $aMano = now()->addYear()->startOfMinute();
 
-        $this->guardar(['expires_at' => $aMano->format('Y-m-d\TH:i')])->assertSessionHasNoErrors();
+        $this->guardar(['expires_at' => $aMano->format('Y-m-d H:i:s')])->assertSessionHasNoErrors();
 
         $this->assertSame(
             $aMano->format('Y-m-d H:i'),
@@ -213,7 +229,7 @@ class EventValidityTest extends TestCase
         return $this->actingAs($this->superadmin)
             ->from(route('superadmin.events.validity.edit', $this->event->id))
             ->put(route('superadmin.events.validity.update', $this->event->id), array_merge([
-                'expires_at' => now()->addMonths(2)->format('Y-m-d\TH:i'),
+                'expires_at' => now()->addMonths(2)->format('Y-m-d H:i:s'),
                 'is_active' => '1',
             ], $overrides));
     }

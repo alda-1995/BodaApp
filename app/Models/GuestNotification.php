@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Notifications\DeliveryIssue;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -45,6 +46,18 @@ class GuestNotification extends Model
         return $this->belongsTo(Notification::class);
     }
 
+    /**
+     * Envíos de un evento concreto.
+     *
+     * Esta tabla cuelga del invitado, que es del organizador y no de la boda, así
+     * que un contacto arrastra los envíos de todas sus bodas. El evento se alcanza
+     * por el Notification al que pertenece el envío.
+     */
+    public function scopeForEvent(Builder $query, int $eventId): Builder
+    {
+        return $query->whereHas('notification', fn ($notification) => $notification->where('event_id', $eventId));
+    }
+
     public function markSent(?string $providerMessageId = null): void
     {
         $this->update([
@@ -53,6 +66,19 @@ class GuestNotification extends Model
             'error_message' => null,
             'failure_code' => null,
             'sent_at' => now(),
+        ]);
+    }
+
+    /**
+     * No se envió y no tiene sentido reintentarlo. No cuenta para el cupo: el
+     * mensaje nunca salió.
+     */
+    public function markSkipped(string $reason, string $code): void
+    {
+        $this->update([
+            'status' => self::STATUS_SKIPPED,
+            'error_message' => mb_substr($reason, 0, 250),
+            'failure_code' => $code,
         ]);
     }
 

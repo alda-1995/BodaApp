@@ -53,8 +53,12 @@ class NotificationService
             ->where('event_guest.event_id', $event->id)
             ->with([
                 'rsvp',
+                // Sólo los envíos de ESTA boda: el invitado es del organizador y
+                // arrastra los de las anteriores.
                 'guest' => fn ($query) => $query->withCount([
-                    'notifications as sent_notifications_count' => fn ($sent) => $sent->where('status', GuestNotification::STATUS_SENT),
+                    'notifications as sent_notifications_count' => fn ($sent) => $sent
+                        ->forEvent($event->id)
+                        ->where('status', GuestNotification::STATUS_SENT),
                 ]),
             ])
             ->when($filter === self::FILTER_PENDING, fn ($query) => $query->where(
@@ -63,7 +67,9 @@ class NotificationService
             ))
             ->when($filter === self::FILTER_NOT_NOTIFIED, fn ($query) => $query->whereDoesntHave(
                 'guest.notifications',
-                fn ($sent) => $sent->where('status', GuestNotification::STATUS_SENT)
+                fn ($sent) => $sent
+                    ->forEvent($event->id)
+                    ->where('status', GuestNotification::STATUS_SENT)
             ))
             ->orderBy('guests.name')
             ->get();
@@ -123,7 +129,7 @@ class NotificationService
     {
         return GuestNotification::query()
             ->with(['guest', 'notification'])
-            ->whereHas('notification', fn ($query) => $query->where('event_id', $event->id))
+            ->forEvent($event->id)
             ->whereIn('status', self::ATTENTION_STATUSES)
             ->latest('updated_at')
             ->latest('id')
@@ -138,7 +144,7 @@ class NotificationService
     public function attentionCount(Event $event): int
     {
         return GuestNotification::query()
-            ->whereHas('notification', fn ($query) => $query->where('event_id', $event->id))
+            ->forEvent($event->id)
             ->whereIn('status', [GuestNotification::STATUS_QUEUED, GuestNotification::STATUS_FAILED])
             ->count();
     }
@@ -147,7 +153,7 @@ class NotificationService
     public function usedQuota(Event $event): int
     {
         return GuestNotification::query()
-            ->whereHas('notification', fn ($query) => $query->where('event_id', $event->id))
+            ->forEvent($event->id)
             ->where('status', '!=', GuestNotification::STATUS_SKIPPED)
             ->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
             ->count();

@@ -40,6 +40,26 @@ class SendGuestNotification implements ShouldQueue
             return; // ya se envió o el registro se borró
         }
 
+        /*
+         * La invitación pudo vencer —o el superadmin apagarla— entre que el
+         * organizador mandó el lote y la cola llegó a este envío. No se manda un
+         * mensaje con un enlace que ya responde "no disponible": queda omitido,
+         * que no se reintenta ni consume cupo, y con su motivo a la vista.
+         */
+        if (!$delivery->notification->event?->isAvailable()) {
+            $delivery->markSkipped(
+                'La invitación ya no estaba activa al momento del envío.',
+                DeliveryIssue::EVENT_UNAVAILABLE,
+            );
+
+            Log::info('Envío omitido: la invitación ya no estaba activa', [
+                'delivery_id' => $delivery->id,
+                'event_id' => $delivery->notification->event_id,
+            ]);
+
+            return;
+        }
+
         $channel = $channels->get($delivery->notification->channel);
         $message = $delivery->notification->template()->renderFor($delivery->guest, $delivery->notification->event);
 

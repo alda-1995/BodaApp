@@ -14,6 +14,7 @@ use App\Models\Template;
 use App\Models\User;
 use App\Notifications\ChannelManager;
 use App\Notifications\DeliveryIssue;
+use App\Services\NotificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
@@ -127,6 +128,47 @@ class NotificationTest extends TestCase
             ->assertDontSee('Confirmado');
     }
 
+    /**
+     * Cada boda empieza de cero.
+     *
+     * La lista de invitados es del organizador, no de la boda, así que un mismo
+     * contacto arrastra los envíos de celebraciones anteriores. Para la boda
+     * nueva no cuentan: nadie ha recibido nada todavía.
+     */
+    public function test_los_envios_de_una_boda_anterior_no_cuentan_en_la_nueva(): void
+    {
+        $invitado = $this->addGuest('Betsy Torres');
+        $this->markNotified($invitado);
+
+        // Otra boda del mismo organizador, con el mismo contacto invitado.
+        $nueva = Event::factory()->create([
+            'user_id' => $this->organizer->id,
+            'template_id' => $this->event->template_id,
+            'custom_url' => 'segunda-boda-' . uniqid(),
+        ]);
+        $invitado->events()->attach($nueva->id, [
+            'uuid' => (string) Str::uuid(),
+            'max_passes' => 1,
+        ]);
+
+        $servicio = app(NotificationService::class);
+
+        $enLaVieja = $servicio->invitationsFor($this->event)->sole();
+        $enLaNueva = $servicio->invitationsFor($nueva)->sole();
+
+        $this->assertSame(1, $enLaVieja->guest->sent_notifications_count);
+        $this->assertSame(0, $enLaNueva->guest->sent_notifications_count, 'La boda nueva empieza sin envíos.');
+
+        // Y sigue estando en "sin notificar" de la boda nueva, que es el filtro
+        // que se usa para no olvidar a nadie.
+        $this->assertCount(0, $servicio->invitationsFor($this->event, NotificationService::FILTER_NOT_NOTIFIED));
+        $this->assertCount(1, $servicio->invitationsFor($nueva, NotificationService::FILTER_NOT_NOTIFIED));
+
+        // El cupo mensual ya iba por evento; queda fijado.
+        $this->assertSame(1, $servicio->usedQuota($this->event));
+        $this->assertSame(0, $servicio->usedQuota($nueva));
+    }
+
     /* ---------------------------------------------------------------------
      | Envío
      * -------------------------------------------------------------------*/
@@ -237,6 +279,50 @@ class NotificationTest extends TestCase
 
         $this->assertSame(GuestNotification::STATUS_SENT, $delivery->fresh()->status);
         $this->assertNotNull($delivery->fresh()->sent_at);
+    }
+
+    /**
+     * La invitación puede vencer entre que se manda el lote y la cola llega a
+     * este envío. No se manda un mensaje con un enlace que ya no abre.
+     */
+    public function test_si_la_invitacion_dejo_de_estar_activa_el_envio_se_omite(): void
+    {
+        Mail::fake();
+        $betsy = $this->addGuest('Betsy Torres', ['email' => 'betsy@correo.com']);
+        $delivery = $this->queueDelivery($betsy, 'email', 'Hola {{nombre}}');
+
+        // Apagada después de encolar, como la dejaría el superadmin o el comando.
+        $this->event->forceFill(['is_active' => false])->save();
+
+        (new SendGuestNotification($delivery->id))->handle(app(ChannelManager::class));
+
+        Mail::assertNothingSent();
+
+        $delivery->refresh();
+        $this->assertSame(GuestNotification::STATUS_SKIPPED, $delivery->status);
+        $this->assertSame(DeliveryIssue::EVENT_UNAVAILABLE, $delivery->failure_code);
+        $this->assertStringContainsString(
+            'dejó de estar activa',
+            $delivery->issueMessage('Correo'),
+        );
+
+        // Omitido no consume cupo: el mensaje nunca salió.
+        $this->assertSame(0, app(NotificationService::class)->usedQuota($this->event));
+    }
+
+    public function test_un_envio_de_una_invitacion_vencida_tambien_se_omite(): void
+    {
+        Mail::fake();
+        $betsy = $this->addGuest('Betsy Torres', ['email' => 'betsy@correo.com']);
+        $delivery = $this->queueDelivery($betsy, 'email', 'Hola {{nombre}}');
+
+        // Encendida, pero con la vigencia ya pasada: el comando aún no ha corrido.
+        $this->event->forceFill(['expires_at' => now()->subDay(), 'is_active' => true])->save();
+
+        (new SendGuestNotification($delivery->id))->handle(app(ChannelManager::class));
+
+        Mail::assertNothingSent();
+        $this->assertSame(GuestNotification::STATUS_SKIPPED, $delivery->fresh()->status);
     }
 
     public function test_un_intento_fallido_sigue_en_espera_con_su_error(): void
