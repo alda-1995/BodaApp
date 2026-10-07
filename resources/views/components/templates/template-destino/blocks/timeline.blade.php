@@ -8,39 +8,30 @@
 {{--
     Ceremonia y recepción (ItinerarySection).
 
-    Dos mitades: la foto del destino a la izquierda, de borde a borde, con el
-    clima y la hora local encima; los momentos a la derecha, uno bajo otro.
+    Dos mitades: la foto del destino a la izquierda, de borde a borde; los
+    momentos a la derecha, uno bajo otro.
+
+    Cada momento lleva su propio título —"Ceremonia", "Recepción"— porque son
+    actos distintos, con su hora y su lugar. El título de la sección es
+    opcional: si cada momento ya se nombra, repetirlo arriba sobra.
+
+    Los datos de viaje del destino (el clima, la hora local) no se pintan aquí:
+    vienen rotulados en la propia foto.
 --}}
 <section class="td-timeline" id="itinerario">
     <div class="td-timeline__media">
         @if ($foto)
-            <img class="td-timeline__photo" src="{{ $foto }}" alt="{{ $section->get('title') }}" loading="lazy">
-        @endif
-
-        @if ($section->filled('weather') || $section->filled('timezone_label'))
-            <div class="td-timeline__facts">
-                @if ($section->filled('weather'))
-                    <p class="td-timeline__weather">{{ $section->get('weather') }}</p>
-                @endif
-
-                @if ($section->filled('timezone_label'))
-                    <p class="td-timeline__zone">{{ $section->get('timezone_label') }}</p>
-                @endif
-            </div>
+            <img class="td-timeline__photo" src="{{ $foto }}" alt="Itinerario" loading="lazy">
         @endif
     </div>
 
     <div class="td-timeline__body">
-        <h2 class="td-timeline__title">{{ $section->get('title') }}</h2>
-
         <ol class="td-timeline__list">
             @foreach ($momentos as $momento)
                 <li class="td-timeline__moment">
-                    {{--
-                        El catálogo da la hora en 12 horas ("5:30 pm"); este
-                        diseño la escribe en 24 ("17:30 hrs"), así que se arma
-                        aquí desde la fecha en vez de cambiarla para todos.
-                    --}}
+                    @if (!empty($momento['name']))
+                        <h2 class="td-timeline__title">{{ $momento['name'] }}</h2>
+                    @endif
                     @if (!empty($momento['date']))
                         <p class="td-timeline__time">{{ $momento['date']->format('H:i') }} hrs</p>
                     @endif

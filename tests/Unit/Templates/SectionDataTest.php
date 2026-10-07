@@ -43,7 +43,13 @@ class SectionDataTest extends TestCase
         $this->assertSame(BlockType::CONTACT_FORM, (new RsvpSection())->blockType());
     }
 
-    public function test_el_itinerario_ordena_por_hora_y_descarta_filas_vacias(): void
+    /**
+     * El orden lo pone el organizador arrastrando las filas, y se respeta
+     * aunque no sea el cronológico: hay bodas donde el civil se cuenta aparte,
+     * o donde se quiere abrir con la fiesta. Antes se reordenaba por hora y lo
+     * que él dejara daba igual.
+     */
+    public function test_el_itinerario_respeta_el_orden_del_wizard_y_descarta_filas_vacias(): void
     {
         $data = (new ItinerarySection())->data([
             'events' => [
@@ -53,8 +59,11 @@ class SectionDataTest extends TestCase
             ],
         ], []);
 
-        $this->assertSame(['Ceremonia', 'Fiesta'], array_column($data['moments'], 'name'));
-        $this->assertSame('3:30 pm', $data['moments'][0]['time']);
+        // Tal como venían, aunque la fiesta sea más tarde.
+        $this->assertSame(['Fiesta', 'Ceremonia'], array_column($data['moments'], 'name'));
+        // Y la fila sin nombre ni lugar no se pinta.
+        $this->assertCount(2, $data['moments']);
+        $this->assertSame('8:00 pm', $data['moments'][0]['time']);
     }
 
     public function test_la_portada_toma_ceremonia_y_fiesta_del_itinerario(): void

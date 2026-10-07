@@ -1,12 +1,16 @@
 /*
- * Nuestra historia: las fotos caen en abanico con su año encima.
+ * Nuestra historia: una tira de polaroids que gira describiendo un arco.
  *
- * El giro de cada polaroid sale del índice que pone el Blade (--td-card-index),
- * no de un valor por foto: así la composición se sostiene con las fotos que
- * haya, y agregar un año no obliga a retocar nada.
+ * El arco lo calcula story.js en cada fotograma, porque la altura y el giro de
+ * cada foto dependen de dónde está en ese momento y no de su sitio en la lista.
+ * Aquí sólo se maqueta la tira y se le da un reposo decente para cuando el JS
+ * no corre: giro fijo por tarjeta, con los valores que manda el Blade.
  *
- * En móvil el abanico no cabe —las fotos giradas se salen y se encogen—, así
- * que ahí se enderezan y se recorren de lado.
+ * La separación va como margin-right de CADA tarjeta, incluida la última, y no
+ * como 'gap' del contenedor: con 'gap' la tira mide 2N·ancho + (2N−1)·hueco,
+ * así que envolver el desplazamiento a la mitad no cae justo donde la copia
+ * repite a la primera y la vuelta daría un salto. Con el margen en cada una
+ * mide 2N·(ancho + hueco) y la mitad es exacta.
  */
 
 .td-story {
@@ -21,28 +25,51 @@
     margin-bottom: clamp(2rem, 5vw, 4rem);
 }
 
-.td-story__fan {
-    display: flex;
-    gap: 1rem;
-    margin: 0;
-    padding: 0 1.5rem;
-    list-style: none;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    /* Sin la barra, que en móvil se montaba sobre el borde de las fotos. */
-    scrollbar-width: none;
+.td-story__viewport {
+    position: relative;
+    overflow: hidden;
+    /* Sitio para el arco: las de las orillas bajan y giran fuera de su caja. */
+    padding-block: 1rem 6rem;
+    /* Se puede arrastrar, y se nota antes de intentarlo. */
+    cursor: grab;
+    /* El gesto horizontal es de la tira; el vertical sigue siendo de la página. */
+    touch-action: pan-y;
 }
 
-.td-story__fan::-webkit-scrollbar {
-    display: none;
+.td-story__viewport.is-arrastrando {
+    cursor: grabbing;
+}
+
+/* Al arrastrar no se selecciona el texto de los años. */
+.td-story__viewport.is-arrastrando,
+.td-story__viewport.is-arrastrando * {
+    user-select: none;
+}
+
+.td-story__marquee {
+    display: flex;
+    width: max-content;
+    /* El navegador sabe que esto se mueve en cada fotograma. */
+    will-change: transform;
+}
+
+.td-story__track {
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    padding: 0;
+    list-style: none;
 }
 
 .td-story__card {
     position: relative;
     flex: 0 0 auto;
-    width: clamp(10rem, 22vw, 17rem);
-    scroll-snap-align: center;
+    width: clamp(9rem, 20vw, 15rem);
+    margin-right: clamp(1rem, 2vw, 2rem);
+    /* Reposo sin JS; con JS lo sobrescribe el arco, fotograma a fotograma. */
+    transform: rotate(var(--td-card-giro, 0deg));
+    transform-origin: center center;
+    will-change: transform;
 }
 
 .td-story__year {
@@ -54,56 +81,36 @@
     margin-bottom: 0.5rem;
 }
 
+.td-story__link {
+    display: block;
+    cursor: zoom-in;
+}
+
+/* Arrastrando manda el cursor de la tira, no el de la lupa. */
+.td-story__viewport.is-arrastrando .td-story__link {
+    cursor: grabbing;
+}
+
 .td-story__photo {
     width: 100%;
     aspect-ratio: 5 / 6;
     object-fit: cover;
     display: block;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    /* Arrastrar la tira no debe arrancar el arrastre nativo de la imagen. */
+    -webkit-user-drag: none;
+    user-select: none;
 }
 
-@media (min-width: 900px) {
-    .td-story__fan {
-        justify-content: center;
-        gap: 0;
-        padding-inline: 4rem;
-        overflow: visible;
-    }
+/*
+ * Sin JS la tira se queda quieta: al menos que se pueda recorrer a mano.
+ * Con JS, el script controla el desplazamiento y este scroll no estorba.
+ */
+.td-story__viewport:not(.is-vivo) {
+    overflow-x: auto;
+    scrollbar-width: none;
+}
 
-    /*
-     * El abanico: cada tarjeta gira según su distancia al centro de la fila.
-     * El centro se fija en la tercera porque el diseño tiene cinco años; con
-     * más o con menos el abanico se abre igual, sólo que descentrado, que es
-     * preferible a depender de cuántas fotos suban.
-     *
-     * Sólo gira: la caída la dan los :nth-child de abajo. abs() en CSS es muy
-     * reciente y aquí no hace falta.
-     */
-    .td-story__card {
-        --td-card-middle: 2;
-        --td-card-offset: calc(var(--td-card-index) - var(--td-card-middle));
-        margin-inline: -1.5rem;
-        transform: rotate(calc(var(--td-card-offset) * 7deg));
-        transform-origin: center bottom;
-    }
-
-    /* Las de las orillas caen un poco, como cartas sobre una mesa. */
-    .td-story__card:first-child,
-    .td-story__card:last-child {
-        margin-top: 2.5rem;
-    }
-
-    .td-story__card:nth-child(2),
-    .td-story__card:nth-last-child(2) {
-        margin-top: 1.25rem;
-    }
-
-    .td-story__card:hover {
-        z-index: 2;
-    }
-
-    .td-story__year {
-        /* El año gira al revés que su foto, para quedar casi derecho. */
-        transform: rotate(calc(var(--td-card-offset) * -3deg));
-    }
+.td-story__viewport:not(.is-vivo)::-webkit-scrollbar {
+    display: none;
 }

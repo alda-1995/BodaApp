@@ -12,6 +12,7 @@ import { initClipboard } from './clipboard.js';
 import { initCountdown } from './countdown.js';
 import { initGallery } from './gallery.js';
 import { initRsvp } from './rsvp.js';
+import { initStory } from './story.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initCalendar();
@@ -19,4 +20,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initCountdown();
     initGallery();
     initRsvp();
+    initStory();
 });

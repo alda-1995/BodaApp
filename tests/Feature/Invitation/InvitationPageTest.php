@@ -125,12 +125,15 @@ class InvitationPageTest extends TestCase
         $this->assertStringContainsString('templates/template-travel/template.css', $html);
     }
 
-    public function test_el_itinerario_se_ordena_por_hora(): void
+    /**
+     * El orden lo pone el organizador en el wizard, no la hora: la invitación
+     * pinta las filas como él las dejó. En el fixture la fiesta va primero.
+     */
+    public function test_el_itinerario_respeta_el_orden_del_wizard(): void
     {
-        // Se capturó primero la fiesta, pero el día empieza con la ceremonia.
         $this->get('/invitacion/harry-y-zoe')
             ->assertOk()
-            ->assertSeeInOrder(['Ceremonia religiosa', 'Cena y fiesta']);
+            ->assertSeeInOrder(['Cena y fiesta', 'Ceremonia religiosa']);
     }
 
     public function test_las_secciones_vacias_no_se_pintan(): void

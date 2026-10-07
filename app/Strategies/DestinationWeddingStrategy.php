@@ -105,35 +105,20 @@ class DestinationWeddingStrategy extends DefaultTemplateStrategy
                     ],
                 ]),
 
+            /*
+            | Sin título de sección: cada momento se nombra solo ("Ceremonia",
+            | "Recepción"), así que un encabezado encima no diría nada nuevo.
+            |
+            | El clima y la hora local tampoco se preguntan: vienen rotulados en
+            | la propia foto, que la prepara el equipo de diseño.
+            */
             $this->section(ItinerarySection::class)
-                ->add('title', TextField::make('title', 'Título de la sección')
-                    ->placeholder('Ej. Ceremonia & Recepción')
-                    ->default('Ceremonia & Recepción')
-                    ->required()
-                    ->rules(['string', 'max:120']))
                 ->add('event_photo', $this->photo('event_photo', 'Foto para esta sección')
-                    ->help('Ocupa toda la mitad izquierda. Vertical.'))
-                /*
-                | El clima y la hora local se escriben: son el dato que el
-                | organizador ya conoce de su destino y no cambia de aquí a la
-                | boda. No se consultan a ningún servicio.
-                */
-                ->add('weather', TextField::make('weather', 'Clima típico del destino')
-                    ->placeholder('Ej. 28°C')
-                    ->help('Opcional. Va sobre la foto, como un dato de viaje.')
-                    ->nullable()
-                    ->rules(['string', 'max:20']))
-                ->add('timezone_label', TextField::make('timezone_label', 'Hora local del destino')
-                    ->placeholder('Ej. LOCAL TIME — GMT−6')
-                    ->nullable()
-                    ->rules(['string', 'max:60']))
-                // Primero el encabezado y la foto; al final los momentos.
-                ->first('title', 'event_photo', 'weather', 'timezone_label')
+                    ->help('Ocupa toda la mitad izquierda. Vertical. Si tu destino tiene un dato de viaje —el clima, la hora local— va rotulado en ella.'))
+                // Primero la foto; al final los momentos.
+                ->first('event_photo')
                 ->example([
-                    'title' => 'Ceremonia & Recepción',
                     'event_photo' => asset(self::IMG . 'itinerario.png'),
-                    'weather' => '28°C',
-                    'timezone_label' => 'LOCAL TIME — GMT−6',
                 ]),
 
             /*

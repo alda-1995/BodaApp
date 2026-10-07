@@ -8,6 +8,7 @@ use App\Services\Template\TemplateDiscoveryService;
 use App\Strategies\DestinationWeddingStrategy;
 use App\Templates\BlockType;
 use App\Templates\Sections\Catalog\DestinationSection;
+use App\Templates\Sections\Catalog\ItinerarySection;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
@@ -283,6 +284,90 @@ class DestinationTemplateTest extends TestCase
 
         // Y la fecha, que es con lo que el navegador sigue contando.
         $this->assertMatchesRegularExpression('/data-fecha="\d{4}-\d{2}-\d{2}T/', $html);
+    }
+
+    /* ---------------------------------------------------------------------
+     | Itinerario
+     * -------------------------------------------------------------------*/
+
+    /**
+     * El paso sólo pide la foto y los momentos.
+     *
+     * El clima y la hora local vienen rotulados en la propia foto, y el título
+     * de la sección sobra: cada momento se nombra solo.
+     */
+    public function test_el_itinerario_solo_pide_la_foto_y_los_momentos(): void
+    {
+        $itinerario = collect(app(DestinationWeddingStrategy::class)->sections())
+            ->first(fn ($seccion) => $seccion->key() === 'itinerary');
+
+        $this->assertSame(['event_photo', 'events'], array_keys($itinerario->fields()));
+    }
+
+    public function test_cada_momento_del_itinerario_lleva_su_propio_titulo(): void
+    {
+        $template = Template::factory()->create(['view_path' => self::VIEW, 'is_active' => true]);
+
+        $html = $this->get(route('templates.preview', $template->slug))->assertOk()->getContent();
+
+        // Tres momentos de ejemplo, tres títulos: no uno solo para todos.
+        $this->assertSame(3, substr_count($html, 'td-timeline__title'));
+        $this->assertStringContainsString('Ceremonia religiosa', $html);
+        $this->assertStringContainsString('Ceremonia civil', $html);
+
+        // Y nada del clima ni de la hora local en la página.
+        $this->assertStringNotContainsString('td-timeline__weather', $html);
+        $this->assertStringNotContainsString('td-timeline__zone', $html);
+    }
+
+    /**
+     * Las filas se pintan como el organizador las dejó en el wizard, no
+     * reordenadas por hora.
+     */
+    public function test_el_itinerario_respeta_el_orden_del_wizard(): void
+    {
+        $momentos = (new ItinerarySection())->data([
+            'events' => [
+                ['name' => 'Recepción', 'place_event' => 'Salón', 'date_event' => '2027-05-20 20:00:00'],
+                ['name' => 'Ceremonia', 'place_event' => 'Capilla', 'date_event' => '2027-05-20 17:30:00'],
+            ],
+        ], [])['moments'];
+
+        $this->assertSame(['Recepción', 'Ceremonia'], array_column($momentos, 'name'));
+    }
+
+    /**
+     * La tira de "Nuestra historia" da vueltas, y para eso lleva la lista dos
+     * veces: la copia es lo que hace que al terminar empiece otra vez sin un
+     * salto visible.
+     */
+    public function test_la_historia_lleva_la_lista_dos_veces_para_dar_la_vuelta(): void
+    {
+        $template = Template::factory()->create(['view_path' => self::VIEW, 'is_active' => true]);
+
+        $html = $this->get(route('templates.preview', $template->slug))->assertOk()->getContent();
+
+        $this->assertStringContainsString('data-td-story-original', $html);
+        $this->assertStringContainsString('data-td-story-copia', $html);
+
+        // Cinco años en el ejemplo, diez tarjetas pintadas: original y copia.
+        $this->assertSame(10, substr_count($html, 'td-story__card'));
+
+        // La copia no se lee dos veces ni se tabula.
+        $this->assertStringContainsString('aria-hidden="true" data-td-story-copia', $html);
+        $this->assertStringContainsString('tabindex="-1"', $html);
+    }
+
+    public function test_cada_foto_de_la_historia_se_puede_abrir(): void
+    {
+        $template = Template::factory()->create(['view_path' => self::VIEW, 'is_active' => true]);
+
+        $html = $this->get(route('templates.preview', $template->slug))->assertOk()->getContent();
+
+        // Un enlace de verdad a la propia foto: sin JS abre en el navegador.
+        $this->assertMatchesRegularExpression('/<a class="td-story__link" href="[^"]+\.png"/', $html);
+        // Y su posición, con la que la copia abre el visor donde toca.
+        $this->assertStringContainsString('data-indice="0"', $html);
     }
 
     public function test_la_portada_escribe_la_fecha_como_un_boleto(): void

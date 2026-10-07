@@ -35,6 +35,8 @@ class ItinerarySection extends Section
     {
         return [
             'events' => RepeaterField::make('events', 'Momentos del Itinerario')
+                // El orden que deje el organizador es el que se pinta.
+                ->sortable()
                 ->schema([
                     'name' => TextField::make('name', 'Nombre del momento')
                         ->placeholder('Ej. Boda Ceremonial, Recepción')
@@ -72,8 +74,15 @@ class ItinerarySection extends Section
                 ];
             })
             ->filter(fn (array $moment) => filled($moment['name']) || filled($moment['place']))
-            // El orden del día manda sobre el orden en que se capturaron.
-            ->sortBy(fn (array $moment) => $moment['date']?->timestamp ?? PHP_INT_MAX)
+            /*
+            | Manda el orden del wizard, no la hora.
+            |
+            | Antes se reordenaba por fecha, y eso ignoraba lo que el organizador
+            | había puesto: movía una fila y la invitación salía igual. Ahora las
+            | filas se pueden arrastrar y el orden que deje es el que se pinta,
+            | aunque no sea el cronológico: hay bodas donde el civil se cuenta
+            | aparte, o donde se quiere abrir con la fiesta.
+            */
             ->values()
             ->all();
 

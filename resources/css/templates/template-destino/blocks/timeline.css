@@ -31,30 +31,6 @@
     object-fit: cover;
 }
 
-/* El clima y la hora local, en blanco sobre la foto. */
-.td-timeline__facts {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    color: var(--td-white);
-    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45);
-}
-
-.td-timeline__weather {
-    font-size: var(--td-size-lead);
-    font-style: italic;
-    color: var(--td-white);
-}
-
-.td-timeline__zone {
-    font-size: var(--td-size-section);
-    font-weight: 500;
-    letter-spacing: 0.04em;
-    color: var(--td-white);
-}
-
 .td-timeline__body {
     display: flex;
     flex-direction: column;
@@ -66,8 +42,9 @@
 }
 
 .td-timeline__title {
+    font-family: var(--font-display);
     font-size: var(--td-size-title);
-    font-weight: 400;
+    font-weight: 200;
     max-width: 12ch;
 }
 
@@ -78,6 +55,16 @@
     margin: 0;
     padding: 0;
     list-style: none;
+}
+
+/* El nombre del acto: "Ceremonia", "Recepción". */
+.td-timeline__name {
+    font-size: var(--td-size-section);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    color: var(--td-muted);
 }
 
 .td-timeline__time {
