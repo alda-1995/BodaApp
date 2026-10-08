@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Template;
 
 use App\DTOs\Template\CreateTemplateDTO;
 use App\DTOs\Template\UpdateTemplateDTO;
+use App\Exceptions\TemplateImageException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Template\StoreTemplateRequest;
 use App\Http\Requests\Template\UpdateTemplateRequest;
 use App\Services\Template\TemplateDiscoveryService;
 use App\Services\TemplateService;
+use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Illuminate\Validation\ValidationException;
@@ -53,7 +55,9 @@ class TemplateController extends Controller
             price: (float) $data['price'],
             viewPath: $data['view_path'],
             isActive: $data['is_active'] ?? true,
-            durationDays: $data['duration_days'] ?? null
+            durationDays: $data['duration_days'] ?? null,
+            previewImage: $request->file('preview_image'),
+            description: $data['description'] ?? null
         );
 
         try {
@@ -62,6 +66,11 @@ class TemplateController extends Controller
             return redirect()->route('templates.index')
                 ->with('success', 'Plantilla creada correctamente y sincronizada con Stripe.');
 
+        } catch (TemplateImageException $e) {
+            // La plantilla sí se creó: se va a la lista y se avisa de la imagen,
+            // en vez de devolverlo al formulario como si nada se hubiera guardado.
+            return redirect()->route('templates.index')
+                ->with('warning', $e->getMessage());
         } catch (ValidationException $e) {
             throw $e;
         } catch (Exception $e) {
@@ -97,15 +106,24 @@ class TemplateController extends Controller
             viewPath: $data['view_path'],
             isActive: $data['is_active'] ?? true,
             adminFields: $data['admin_fields'] ?? [], // Pasamos los valores dinámicos
-            durationDays: $data['duration_days'] ?? null
+            durationDays: $data['duration_days'] ?? null,
+            previewImage: $request->file('preview_image'),
+            description: $data['description'] ?? null,
+            // El control de imagen reenvía la URL de la que ya había; vacía
+            // significa que la quitaron con el bote de basura.
+            keepPreviewImage: filled($data['preview_image_url'] ?? null)
         );
-        
+
         try {
             $this->templateService->update($id, $dto);
 
             return redirect()->route('templates.index')
                 ->with('success', 'Plantilla actualizada con éxito en el catálogo y Stripe.');
 
+        } catch (TemplateImageException $e) {
+            // El resto de los campos ya se guardó: se avisa sólo de la imagen.
+            return redirect()->route('templates.index')
+                ->with('warning', $e->getMessage());
         } catch (ValidationException $e) {
             throw $e;
         } catch (Exception $e) {

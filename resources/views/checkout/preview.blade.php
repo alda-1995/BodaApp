@@ -11,12 +11,20 @@
                     tarjeta decía siempre lo mismo —"Alfonso y Elena", "Categoría:
                     Elegante"— comprara quien comprara lo que comprara.
                 --}}
-                <div class="bg-[#FAFAFA] p-4 rounded-lg">
-                    <h3 class="font-inter text-size-heading">{{ $template->name }}</h3>
-                    <p class="font-inter text-size-small-heading text-[#8C8C8C] mt-1">
-                        Invitación digital con confirmación de asistencia, lista de invitados,
-                        itinerario, mesa de regalos y galería.
-                    </p>
+                <div class="bg-[#FAFAFA] rounded-lg overflow-hidden">
+                    @if ($template->previewImageUrl())
+                        <img src="{{ $template->previewImageUrl() }}" alt="Plantilla {{ $template->name }}"
+                            class="aspect-[16/9] w-full object-cover" />
+                    @endif
+
+                    <div class="p-4">
+                        <h3 class="font-inter text-size-heading">{{ $template->name }}</h3>
+                        <p class="font-inter text-size-small-heading text-[#8C8C8C] mt-1">
+                            {{ $template->description
+                                ?: 'Invitación digital con confirmación de asistencia, lista de invitados,
+                                    itinerario, mesa de regalos y galería.' }}
+                        </p>
+                    </div>
                 </div>
 
                 <div class="mt-6 flex justify-between gap-x-8 md:gap-x-12 pb-4 border-b border-b-[#EBEBEB]">

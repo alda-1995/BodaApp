@@ -5,6 +5,7 @@ namespace App\Models;
 use Database\Factories\TemplateFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
@@ -16,6 +17,7 @@ class Template extends Model
         'name',
         'slug',
         'view_path',
+        'description',
         'stripe_price_id',
         'price',
         'is_active',
@@ -43,6 +45,34 @@ class Template extends Model
                 $count++;
             }
         });
+    }
+
+    /** Sección y campo con que se guarda su imagen de presentación. */
+    public const PRESENTATION_SECTION = 'presentation';
+    public const PREVIEW_IMAGE_FIELD = 'preview_image';
+
+    /** Sus archivos, como los del wizard: el servicio de archivos los maneja igual. */
+    public function files(): MorphMany
+    {
+        return $this->morphMany(AppFile::class, 'fileable')->orderBy('sort_order');
+    }
+
+    /** El registro de su imagen de presentación, si subieron una. */
+    public function previewImage(): ?AppFile
+    {
+        return $this->files
+            ->firstWhere('field_name', self::PREVIEW_IMAGE_FIELD);
+    }
+
+    /**
+     * La imagen con la que se presenta, lista para un src.
+     *
+     * Null si no subieron ninguna: quien la pinta decide qué poner en su lugar,
+     * porque la landing y el resumen de compra no se ven igual.
+     */
+    public function previewImageUrl(): ?string
+    {
+        return $this->previewImage()?->url;
     }
 
     public function getAvailableFeaturesAttribute(): array

@@ -4,7 +4,8 @@
             <div class="max-w-lg">
                 <h2 class="text-size-title font-inter text-black mb-6">Editar Plantilla</h2>
 
-                <form method="POST" action="{{ route('templates.update', $template->id) }}" novalidate>
+                <form method="POST" action="{{ route('templates.update', $template->id) }}"
+                    enctype="multipart/form-data" novalidate>
                     @csrf
                     @method('PUT')
                     
@@ -21,6 +22,21 @@
                         Días que la invitación sigue activa después de la fecha del evento.
                         Si lo dejas vacío se usan {{ config('events.default_duration_days') }}.
                         Sólo aplica a las invitaciones que se compren desde ahora.
+                    </p>
+
+                    {{-- Con qué se presenta antes de comprarla: en la landing y en el resumen.
+                         El mismo control que el wizard, para que subir una imagen se haga igual
+                         en todo el panel. --}}
+                    <x-controls.inputs.image-upload label="Imagen de presentación" name="preview_image"
+                        :value="old('preview_image_url', $template->previewImageUrl())" />
+                    <p class="-mt-3 mb-4 font-inter text-size-small-heading text-[#8C8C8C]">
+                        Se ve en la landing y en el resumen de compra.
+                    </p>
+
+                    <x-controls.inputs.textarea label="Descripción" name="description" rows="3"
+                        placeholder="Qué trae esta plantilla y para qué boda es" :value="$template->description" />
+                    <p class="-mt-2 mb-4 font-inter text-size-small-heading text-[#8C8C8C]">
+                        El texto que acompaña a la plantilla antes de comprarla. Hasta 500 caracteres.
                     </p>
 
                     <!-- Campo View Path deshabilitado para evitar modificaciones accidentales en la edición -->

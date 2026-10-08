@@ -45,6 +45,11 @@ class UpdateTemplateRequest extends FormRequest
             'is_active'      => 'boolean',
             // Vacío = se usan los días por defecto de config/events.php.
             'duration_days'  => 'nullable|integer|min:1|max:365',
+            // Con qué se presenta antes de comprarla: su foto y su texto.
+            'preview_image'     => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
+            // La reenvía el control de imagen: vacía significa que la quitaron.
+            'preview_image_url' => 'nullable|string',
+            'description'       => 'nullable|string|max:500',
             'admin_fields'   => 'nullable|array',
             'admin_fields.*' => 'nullable|array',
         ];
@@ -60,6 +65,8 @@ class UpdateTemplateRequest extends FormRequest
             'view_path' => 'vista de la plantilla',
             'is_active' => 'estado activo',
             'duration_days' => 'días de vigencia',
+            'preview_image' => 'imagen de presentación',
+            'description' => 'descripción',
         ];
 
         return $this->mergeStrategyAttributes($baseAttributes, 'admin');
@@ -70,6 +77,14 @@ class UpdateTemplateRequest extends FormRequest
         return array_merge($this->defaultStrategyMessages(), [
             'price.min'          => 'El :attribute no puede ser menor a :min.',
             'view_path.required' => 'Debes seleccionar una :attribute.',
+
+            'preview_image.image'    => 'La :attribute debe ser un archivo de imagen.',
+            'preview_image.mimes'    => 'La :attribute debe ser JPG, PNG o WebP.',
+            'preview_image.max'      => 'La :attribute no puede pesar más de 5 MB.',
+            'preview_image.uploaded' => 'No pudimos subir la :attribute. Revisa que pese menos de 5 MB e inténtalo de nuevo.',
+
+            'description.string'     => 'La :attribute debe ser texto.',
+            'description.max'        => 'La :attribute no puede superar los :max caracteres.',
         ]);
     }
 }

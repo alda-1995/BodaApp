@@ -4,7 +4,7 @@
             <div class="max-w-lg">
                 <h2 class="text-size-subtitle font-inter text-black mb-6">Nueva Plantilla</h2>
 
-                <form method="POST" action="{{ route('templates.store') }}" novalidate>
+                <form method="POST" action="{{ route('templates.store') }}" enctype="multipart/form-data" novalidate>
                     @csrf
                     <x-controls.inputs.input label="Nombre de la Plantilla" type="text" name="name"
                         placeholder="Ej: Boda Emerald Esmeralda" value="{{ old('name') }}" required autofocus />
@@ -18,6 +18,20 @@
                         Días que la invitación sigue activa después de la fecha del evento.
                         Si lo dejas vacío se usan {{ config('events.default_duration_days') }}.
                     </p>
+                    {{-- Con qué se presenta antes de comprarla: en la landing y en el resumen.
+                         El mismo control que el wizard, para que subir una imagen se haga igual
+                         en todo el panel. --}}
+                    <x-controls.inputs.image-upload label="Imagen de presentación" name="preview_image" />
+                    <p class="-mt-3 mb-4 font-inter text-size-small-heading text-[#8C8C8C]">
+                        Se ve en la landing y en el resumen de compra.
+                    </p>
+
+                    <x-controls.inputs.textarea label="Descripción" name="description" rows="3"
+                        placeholder="Qué trae esta plantilla y para qué boda es" />
+                    <p class="-mt-2 mb-4 font-inter text-size-small-heading text-[#8C8C8C]">
+                        El texto que acompaña a la plantilla antes de comprarla. Hasta 500 caracteres.
+                    </p>
+
                     <x-controls.selects.select label="Ruta de platilla - código" name="view_path"
                         :options="$availableViews" :selected="old('view_path')"
                         placeholder="-- Selecciona el archivo/vista de destino --" />

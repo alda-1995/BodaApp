@@ -120,9 +120,13 @@ class FileStorageService
 
     /**
      * Encapsula la regla de negocio para construir las rutas de los directorios en Storage.
+     *
+     * La carpeta sale de la tabla del modelo: para un evento da 'events/…', que
+     * es donde ya están los archivos de siempre, y para cualquier otro modelo
+     * con archivos —una plantilla, por ejemplo— da la suya sin pisarlos.
      */
     private function buildDirectoryPath(Model $model, string $section): string
     {
-        return "events/{$model->id}/{$section}";
+        return "{$model->getTable()}/{$model->id}/{$section}";
     }
 }

@@ -73,24 +73,35 @@
                 @else
                     <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         @foreach ($templates as $template)
-                            <article class="flex flex-col rounded-2xl border border-black/5 bg-white p-7">
-                                <h3 class="font-main text-size-title">{{ $template->name }}</h3>
+                            <article class="flex flex-col overflow-hidden rounded-2xl border border-black/5 bg-white">
+                                {{-- Su propia foto; sin ella la tarjeta arranca en el nombre. --}}
+                                @if ($template->previewImageUrl())
+                                    <img src="{{ $template->previewImageUrl() }}" alt="Plantilla {{ $template->name }}"
+                                        loading="lazy" class="aspect-[4/3] w-full object-cover" />
+                                @endif
 
-                                <p class="mt-3 text-size-small-heading text-gray">
-                                    Portada, itinerario, mesa de regalos, galería y confirmación de asistencia.
-                                </p>
+                                <div class="flex flex-1 flex-col p-7">
+                                    <h3 class="font-main text-size-title">{{ $template->name }}</h3>
 
-                                <p class="mt-6 text-size-title">
-                                    ${{ number_format($template->price, 0) }}
-                                    <span class="text-size-small-heading text-gray">MXN</span>
-                                </p>
+                                    {{-- Su propio texto; sin él, lo que trae cualquiera. --}}
+                                    <p class="mt-3 text-size-small-heading text-gray">
+                                        {{ $template->description
+                                            ?: 'Portada, itinerario, mesa de regalos, galería y confirmación de asistencia.' }}
+                                    </p>
 
-                                <div class="mt-7 flex flex-col gap-2">
-                                    <a href="{{ route('checkout.checkout-preview', $template->slug) }}"
-                                        class="btn btn-main w-full rounded-full">Elegir esta</a>
+                                    {{-- El precio al fondo: así las tarjetas lo alinean aunque el texto sea desigual. --}}
+                                    <p class="mt-auto pt-6 text-size-title">
+                                        ${{ number_format($template->price, 0) }}
+                                        <span class="text-size-small-heading text-gray">MXN</span>
+                                    </p>
 
-                                    <a href="{{ route('templates.preview', $template->slug) }}" target="_blank" rel="noopener"
-                                        class="btn btn-secondary w-full rounded-full">Ver demo</a>
+                                    <div class="mt-7 flex flex-col gap-2">
+                                        <a href="{{ route('checkout.checkout-preview', $template->slug) }}"
+                                            class="btn btn-main w-full rounded-full">Elegir esta</a>
+
+                                        <a href="{{ route('templates.preview', $template->slug) }}" target="_blank" rel="noopener"
+                                            class="btn btn-secondary w-full rounded-full">Ver demo</a>
+                                    </div>
                                 </div>
                             </article>
                         @endforeach

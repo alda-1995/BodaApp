@@ -5,7 +5,11 @@ namespace App\Services;
 use App\DTOs\Template\CreateTemplateDTO;
 use App\DTOs\Template\UpdateTemplateDTO;
 use App\Models\Template;
+use App\Exceptions\TemplateImageException;
+use App\Services\FileStorageService;
 use Exception;
+use Throwable;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -15,7 +19,7 @@ class TemplateService
 {
     protected StripeClient $stripe;
 
-    public function __construct(StripeClient $stripe)
+    public function __construct(StripeClient $stripe, private readonly FileStorageService $files)
     {
         $this->stripe = $stripe;
     }
@@ -88,15 +92,24 @@ class TemplateService
                 throw new Exception('No se pudo determinar el ID de precio para Stripe.');
             }
 
-            return Template::create([
+            $template = Template::create([
                 'name' => $dto->name,
                 'price' => $dto->price,
                 'view_path' => $dto->viewPath,
+                'description' => $dto->description,
                 'stripe_price_id' => $stripePriceId,
                 'is_active' => $dto->isActive,
                 'duration_days' => $dto->durationDays,
             ]);
 
+            $this->syncPreviewImage($template, $dto->previewImage, recienCreada: true);
+
+            return $template;
+
+        } catch (TemplateImageException $e) {
+            // La plantilla ya existe: su mensaje lo dice y no debe convertirse
+            // en el genérico de Stripe, que aquí sería falso.
+            throw $e;
         } catch (Exception $e) {
             Log::error('Error en creación de plantilla: ' . $e->getMessage(), [
                 'data' => (array) $dto,
@@ -142,12 +155,18 @@ class TemplateService
                 'is_active' => $dto->isActive,
                 'stripe_price_id' => $stripePriceId,
                 'view_path' => $dto->viewPath,
+                'description' => $dto->description,
                 'admin_fields' => $dto->adminFields,
                 'duration_days' => $dto->durationDays,
             ]);
 
-            return $template;
+            $this->syncPreviewImage($template, $dto->previewImage, $dto->keepPreviewImage);
 
+            return $template->fresh();
+
+        } catch (TemplateImageException $e) {
+            // Los demás campos ya se guardaron: su mensaje lo dice.
+            throw $e;
         } catch (Exception $e) {
             Log::error('Error al actualizar plantilla con cambio de precio: ' . $e->getMessage(), [
                 'id' => $id,
@@ -155,6 +174,52 @@ class TemplateService
                 'trace' => $e->getTraceAsString(),
             ]);
             throw new Exception("No se pudo actualizar la plantilla");
+        }
+    }
+
+    /**
+     * Deja la imagen de presentación como la quiso el superadmin.
+     *
+     * Tres caminos, y el formulario no distingue solo entre los dos últimos: por
+     * eso llega $conservar, que sale de la URL que el control de imagen reenvía.
+     *
+     *  - Subió una: reemplaza a la anterior, archivo y registro.
+     *  - No subió nada y conserva: no se toca.
+     *  - No subió nada y la quitó con el bote: se borra.
+     */
+    private function syncPreviewImage(Template $template, ?UploadedFile $nueva, bool $conservar = true, bool $recienCreada = false): void
+    {
+        $actual = $template->previewImage();
+
+        try {
+            if ($nueva) {
+                $actual
+                    ? $this->files->replace($template, $nueva, $actual, Template::PRESENTATION_SECTION, Template::PREVIEW_IMAGE_FIELD)
+                    : $this->files->store($template, $nueva, Template::PRESENTATION_SECTION, Template::PREVIEW_IMAGE_FIELD);
+
+                return;
+            }
+
+            if (!$conservar && $actual) {
+                $this->files->deleteFile($actual);
+            }
+        } catch (Throwable $e) {
+            /*
+             * El disco falló, no Stripe ni la base: el resto de la plantilla ya
+             * quedó guardado. Se avisa de eso en concreto en vez de dar un error
+             * genérico que haría pensar que no se guardó nada.
+             */
+            Log::error('Falló la imagen de presentación de una plantilla: ' . $e->getMessage(), [
+                'template_id' => $template->id,
+                'operacion' => $nueva ? ($actual ? 'reemplazar' : 'subir') : 'quitar',
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            throw match (true) {
+                $recienCreada => TemplateImageException::alCrear($e),
+                $nueva !== null => TemplateImageException::alGuardar($e),
+                default => TemplateImageException::alQuitar($e),
+            };
         }
     }
 

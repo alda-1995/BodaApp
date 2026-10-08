@@ -36,6 +36,11 @@ class StoreTemplateRequest extends FormRequest
             'is_active'       => 'boolean',
             // Vacío = se usan los días por defecto de config/events.php.
             'duration_days'   => 'nullable|integer|min:1|max:365',
+            // Con qué se presenta antes de comprarla: su foto y su texto.
+            'preview_image'     => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
+            // La manda el control de imagen con la que ya había; aquí nunca hay.
+            'preview_image_url' => 'nullable|string',
+            'description'       => 'nullable|string|max:500',
         ];
     }
 
@@ -58,6 +63,14 @@ class StoreTemplateRequest extends FormRequest
             'duration_days.integer'    => 'Los días de vigencia deben ser un número entero.',
             'duration_days.min'        => 'Los días de vigencia deben ser al menos :min.',
             'duration_days.max'        => 'Los días de vigencia no pueden ser más de :max.',
+
+            'preview_image.image'      => 'La imagen de presentación debe ser un archivo de imagen.',
+            'preview_image.mimes'      => 'La imagen de presentación debe ser JPG, PNG o WebP.',
+            'preview_image.max'        => 'La imagen de presentación no puede pesar más de 5 MB.',
+            'preview_image.uploaded'   => 'No pudimos subir la imagen de presentación. Revisa que pese menos de 5 MB e inténtalo de nuevo.',
+
+            'description.string'       => 'La descripción debe ser texto.',
+            'description.max'          => 'La descripción no puede superar los :max caracteres.',
         ];
     }
 }
