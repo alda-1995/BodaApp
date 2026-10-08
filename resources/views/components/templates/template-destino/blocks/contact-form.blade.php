@@ -58,7 +58,13 @@
                     invitación personal que envían los novios.
                 </p>
             @else
-                @if ($deadline)
+                {{-- Los novios ven el formulario para revisar el diseño, pero no confirman. --}}
+                @if ($context->isOrganizerPreview)
+                    <p class="td-rsvp__notice">
+                        Estás viendo tu propia invitación: desde aquí no se confirma.
+                        Comparte el enlace con tus invitados.
+                    </p>
+                @elseif ($deadline)
                     <p class="td-rsvp__deadline">
                         Confirma antes del {{ $deadline->locale('es')->isoFormat('dddd D [de] MMMM [de] YYYY') }}
                     </p>
@@ -153,7 +159,7 @@
 
                         <div class="td-rsvp__errors" data-rsvp-errors></div>
 
-                        <button type="submit" class="td-rsvp__submit">Confirmar asistencia</button>
+                        <button type="submit" class="td-rsvp__submit" @disabled($context->isOrganizerPreview)>Confirmar asistencia</button>
                     </form>
                 </div>
             @endif

@@ -108,6 +108,14 @@
                         desde la invitación personal que envían los novios.
                     </p>
                 @else
+                    {{-- Los novios ven el formulario para revisar el diseño, pero no confirman. --}}
+                    @if ($context->isOrganizerPreview)
+                        <p class="tv-confirm__intro">
+                            Estás viendo tu propia invitación: desde aquí no se confirma.
+                            Comparte el enlace con tus invitados.
+                        </p>
+                    @endif
+
                     @if ($section->filled('welcome_message'))
                         <p class="tv-confirm__intro">
                             {{ $section->get('welcome_message') }}
@@ -193,7 +201,7 @@
                             <div class="tv-confirm__errors" data-rsvp-errors></div>
 
                             <div class="tv-confirm__actions">
-                                <button type="submit" class="tv-link">Confirmar asistencia</button>
+                                <button type="submit" class="tv-link" @disabled($context->isOrganizerPreview)>Confirmar asistencia</button>
                             </div>
                         </form>
                     </div>

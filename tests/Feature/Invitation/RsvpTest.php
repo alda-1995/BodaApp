@@ -135,6 +135,88 @@ class RsvpTest extends TestCase
     }
 
     /* =====================================================================
+     | Los novios mirando su propia invitación
+     |
+     | Entran por "Ver mi invitación" a ver cómo va quedando. La liga abierta no
+     | identifica a nadie, así que una confirmación suya sería un invitado
+     | inventado en su propia lista.
+     * ===================================================================*/
+
+    public function test_el_organizador_no_confirma_desde_su_propia_liga_abierta(): void
+    {
+        $this->actingAs($this->organizer)
+            ->postJson(self::URL, ['name' => 'Ana Ruiz', 'attendance' => 'confirmed', 'passes' => 1])
+            ->assertStatus(403)
+            ->assertJsonFragment(['message' => 'Estás viendo tu propia invitación: desde aquí no se confirma. Comparte el enlace con tus invitados.']);
+
+        $this->assertSame(0, Rsvp::count());
+        $this->assertSame(0, Guest::count(), 'Tampoco se le da de alta como invitado.');
+    }
+
+    public function test_un_coadministrador_tampoco_confirma_desde_la_liga_abierta(): void
+    {
+        $coadmin = User::factory()->create();
+        $coadmin->roles()->attach(Role::named('coadmin')->id);
+        $this->event->coadmins()->create([
+            'user_id' => $coadmin->id,
+            'email' => $coadmin->email,
+            'invited_by' => $this->organizer->id,
+            'accepted_at' => now(),
+        ]);
+
+        $this->actingAs($coadmin)
+            ->postJson(self::URL, ['name' => 'Ana Ruiz', 'attendance' => 'confirmed', 'passes' => 1])
+            ->assertStatus(403);
+
+        $this->assertSame(0, Rsvp::count());
+    }
+
+    /** Por su liga personal sí: ahí está respondiendo por ese invitado. */
+    public function test_el_organizador_si_confirma_desde_una_liga_personal(): void
+    {
+        $uuid = $this->guestUuid('Familia Martínez', maxPasses: 2);
+
+        $this->actingAs($this->organizer)
+            ->postJson(self::URL, ['uuid' => $uuid, 'attendance' => 'confirmed', 'passes' => 2])
+            ->assertOk();
+
+        $this->assertSame(1, Rsvp::count());
+    }
+
+    /** Cualquier otra persona con la sesión abierta confirma como siempre. */
+    public function test_otra_persona_con_sesion_confirma_normal(): void
+    {
+        $ajeno = User::factory()->create();
+
+        $this->actingAs($ajeno)
+            ->postJson(self::URL, ['name' => 'Ana Ruiz', 'attendance' => 'confirmed', 'passes' => 1])
+            ->assertOk();
+
+        $this->assertSame(1, Rsvp::count());
+    }
+
+    public function test_al_organizador_se_le_apaga_el_boton_de_confirmar(): void
+    {
+        $html = $this->actingAs($this->organizer)
+            ->get('/invitacion/harry-y-zoe')
+            ->assertOk()
+            ->assertSee('Estás viendo tu propia invitación')
+            ->getContent();
+
+        // El formulario sigue pintándose: entran justamente a ver cómo queda.
+        $this->assertStringContainsString('data-rsvp-form', $html);
+        $this->assertMatchesRegularExpression('/<button type="submit"[^>]*disabled/', $html);
+    }
+
+    public function test_a_un_invitado_no_se_le_apaga_nada(): void
+    {
+        $html = $this->get('/invitacion/harry-y-zoe')->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('Estás viendo tu propia invitación', $html);
+        $this->assertDoesNotMatchRegularExpression('/<button type="submit"[^>]*disabled/', $html);
+    }
+
+    /* =====================================================================
      | Lo que ve quien abre la invitación
      |
      | La liga abierta apagada y la fecha límite vencida son dos cosas

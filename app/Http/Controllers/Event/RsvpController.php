@@ -47,6 +47,18 @@ class RsvpController extends Controller
             return $this->fail('Lo sentimos, esta es una celebración privada. Sólo se puede confirmar desde la invitación personal que envían los novios.', 403);
         }
 
+        /*
+         * Los novios mirando su propia invitación. Entran a ver cómo va quedando
+         * y la liga abierta no identifica a nadie, así que una confirmación suya
+         * sería un invitado inventado en su propia lista.
+         *
+         * Sólo por la liga abierta: con una liga personal están respondiendo por
+         * ese invitado, que es algo que hacen de verdad.
+         */
+        if (!$invitation && ($user = $request->user()) && $event->isManagedBy($user)) {
+            return $this->fail('Estás viendo tu propia invitación: desde aquí no se confirma. Comparte el enlace con tus invitados.', 403);
+        }
+
         if ($invitation?->rsvp) {
             return $this->fail('Esta invitación ya había confirmado. Si necesitas cambiar algo, avísale a los novios.', 409);
         }

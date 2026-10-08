@@ -277,6 +277,15 @@
     color: var(--te-white);
 }
 
+/* Los novios mirando su propia invitación: el formulario se ve, pero no se manda. */
+.te-rsvp__submit:disabled,
+.te-rsvp__submit:disabled:hover {
+    opacity: 0.4;
+    background: var(--te-white);
+    color: inherit;
+    cursor: not-allowed;
+}
+
 /* --- Errores, espera y respuesta -------------------------------------------- */
 
 .te-rsvp__errors ul {

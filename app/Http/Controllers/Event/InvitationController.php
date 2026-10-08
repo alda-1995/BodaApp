@@ -48,8 +48,15 @@ class InvitationController extends Controller
         $invitation = $guest
             ? EventGuest::with('guest')->where('event_id', $event->id)->where('uuid', $guest)->first()
             : null;
-        // $ver = $this->renderer->forEvent($event, $invitation);
-        // dd($ver);
-        return view($viewPath, $this->renderer->forEvent($event, $invitation));
+        /*
+         * Los novios entrando por "Ver mi invitación": vienen a mirar cómo va
+         * quedando, no a confirmar. Sólo cuando llegan por la liga abierta; con
+         * una liga personal están respondiendo por ese invitado y eso sí vale.
+         */
+        $organizerPreview = !$invitation
+            && ($user = request()->user())
+            && $event->isManagedBy($user);
+
+        return view($viewPath, $this->renderer->forEvent($event, $invitation, (bool) $organizerPreview));
     }
 }

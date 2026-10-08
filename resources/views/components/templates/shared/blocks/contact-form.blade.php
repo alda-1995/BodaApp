@@ -17,6 +17,14 @@
                 invitación personal que envían los novios.
             </p>
         @else
+            {{-- Los novios ven el bloque para revisar el diseño, pero no confirman. --}}
+            @if ($context->isOrganizerPreview)
+                <p class="inv-text">
+                    Estás viendo tu propia invitación: desde aquí no se confirma.
+                    Comparte el enlace con tus invitados.
+                </p>
+            @endif
+
             @if ($section->filled('welcome_message'))
                 <p class="inv-text">{{ $section->get('welcome_message') }}</p>
             @endif

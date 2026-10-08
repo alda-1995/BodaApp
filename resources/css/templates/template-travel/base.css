@@ -124,6 +124,15 @@
     color: #fff;
 }
 
+/* Los novios mirando su propia invitación: el formulario se ve, pero no se manda. */
+.tv-link:disabled,
+.tv-link:disabled:hover {
+    opacity: 0.4;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--tv-ink);
+    cursor: not-allowed;
+}
+
 /* Interlineado amplio para los nombres de lugares. */
 .tv-line-max {
     line-height: 2;

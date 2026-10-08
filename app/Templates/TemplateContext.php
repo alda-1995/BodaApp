@@ -22,6 +22,14 @@ final class TemplateContext
         public readonly bool $isDemo = false,
         /** A dónde manda el formulario de confirmación; null en la vista previa. */
         public readonly ?string $rsvpUrl = null,
+        /**
+         * Los novios mirando su propia invitación por la liga abierta.
+         *
+         * Entran a ver cómo va quedando, no a confirmar: una confirmación suya
+         * ensuciaría su propia lista de invitados. Por su liga personal sí
+         * pueden, que ahí sí están respondiendo por alguien.
+         */
+        public readonly bool $isOrganizerPreview = false,
     ) {
     }
 

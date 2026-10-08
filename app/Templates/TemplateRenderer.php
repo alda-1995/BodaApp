@@ -32,7 +32,11 @@ class TemplateRenderer
     /**
      * @return array{context: TemplateContext, sections: array<string, SectionView>, assets: array<int, string>}
      */
-    public function forEvent(Event $event, ?EventGuest $invitation = null): array
+    /**
+     * @param bool $organizerPreview los novios mirando su propia invitación por
+     *                               la liga abierta, sólo para ver cómo va
+     */
+    public function forEvent(Event $event, ?EventGuest $invitation = null, bool $organizerPreview = false): array
     {
         $viewPath = $event->template?->view_path;
         $strategy = $this->discovery->forTemplate($event->template);
@@ -76,6 +80,7 @@ class TemplateRenderer
                 theme: $event->theme_colors,
                 guest: $invitation ? $this->guestData($invitation) : null,
                 rsvpUrl: route('invitation.rsvp', $event->custom_url),
+                isOrganizerPreview: $organizerPreview,
             ),
             'sections' => $views,
             'assets' => $this->assetsFor($viewPath, $this->foldersOf($strategy)),

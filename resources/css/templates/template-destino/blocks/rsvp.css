@@ -178,6 +178,13 @@
     opacity: 0.88;
 }
 
+/* Los novios mirando su propia invitación: el formulario se ve, pero no se manda. */
+.td-rsvp__submit:disabled,
+.td-rsvp__submit:disabled:hover {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
 .td-rsvp__errors:empty {
     display: none;
 }
