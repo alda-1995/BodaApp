@@ -74,10 +74,16 @@ class CheckoutOnboardingTest extends TestCase
         );
     }
 
-    public function test_si_ya_venia_con_la_sesion_abierta_entra_directo_al_panel(): void
+    /**
+     * No hay contraseña que crear, pero sí dirección que elegir: el evento que
+     * acaba de comprar nace sin una.
+     */
+    public function test_si_ya_venia_con_la_sesion_abierta_va_a_elegir_su_direccion(): void
     {
         $comprador = $this->buyer(yaRegistrado: true);
         $order = $this->completedOrderFor($comprador);
+        // La compra le deja un evento todavía sin dirección.
+        Event::factory()->create(['user_id' => $comprador->id, 'custom_url' => null]);
 
         $datos = $this->actingAs($comprador)
             ->getJson(route('checkout.status', $order->stripe_session_id))
@@ -85,7 +91,27 @@ class CheckoutOnboardingTest extends TestCase
             ->json();
 
         $this->assertFalse($datos['needs_password']);
-        $this->assertSame(route('panel'), $datos['redirect_url']);
+        $this->assertStringContainsString(route('onboarding.profile.view'), $datos['redirect_url']);
+        // Firmado: el paso no se abre escribiendo la dirección a mano.
+        $this->assertStringContainsString('signature=', $datos['redirect_url']);
+
+        $this->actingAs($comprador)->get($datos['redirect_url'])->assertOk();
+    }
+
+    /**
+     * Pagar con el correo de alguien no demuestra ser esa persona, y ese paso
+     * termina iniciando sesión. Sin sesión abierta se le manda a entrar.
+     */
+    public function test_sin_la_sesion_abierta_no_se_le_abre_el_paso_de_la_direccion(): void
+    {
+        $order = $this->completedOrderFor($this->buyer(yaRegistrado: true));
+
+        $datos = $this->getJson(route('checkout.status', $order->stripe_session_id))
+            ->assertOk()
+            ->json();
+
+        $this->assertStringContainsString(route('login'), $datos['redirect_url']);
+        $this->assertStringNotContainsString('onboarding', $datos['redirect_url']);
     }
 
     /* ---------------------------------------------------------------------

@@ -32,9 +32,16 @@ class EventService
             ->first();
     }
 
+    /**
+     * La invitación actual del usuario: la última que compró.
+     *
+     * Devolvía la primera, que en cuanto alguien compra una segunda es la vieja:
+     * el paso de la dirección escribía ahí y la recién comprada se quedaba sin
+     * ninguna. Mismo criterio que User::currentEvent().
+     */
     public function findByUserId(int $userId): ?Event
     {
-        return Event::where('user_id', $userId)->first();
+        return Event::where('user_id', $userId)->latest('id')->first();
     }
 
     public function createEvent(EventDTO $data): Event

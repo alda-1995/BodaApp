@@ -43,8 +43,10 @@
                         x-init="refresh()"
                         @input.debounce.400ms="refresh()">
                         @csrf
-                        <input type="hidden" name="email" value="{{ $user->email }}">
-                        <p class="text-[#8C8C8C] text-size-small-heading mb-2">Paso 2 de 2 · Tus datos y el evento</p>
+                        {{-- De quién es este paso lo sabe la sesión, no el formulario. --}}
+                        <p class="text-[#8C8C8C] text-size-small-heading mb-2">
+                            {{ ($pasoUnico ?? false) ? 'Tus datos y el evento' : 'Paso 2 de 2 · Tus datos y el evento' }}
+                        </p>
                         <h2 class="font-inter text-size-main text-black mb-4">¡Queremos conocerte!</h2>
                         
                         <div class="mb-4">

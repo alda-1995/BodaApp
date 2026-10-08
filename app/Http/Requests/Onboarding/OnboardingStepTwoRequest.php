@@ -14,7 +14,6 @@ class OnboardingStepTwoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'email', 'exists:users,email'],
             'name' => ['required', 'string', 'max:255'],
             'partner_1_name' => ['required', 'string', 'max:100'],
             'partner_2_name' => ['required', 'string', 'max:100'],

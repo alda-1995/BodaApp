@@ -186,8 +186,15 @@ class CustomUrlTest extends TestCase
 
     private function submitProfile(User $user, string $partner1, string $partner2)
     {
+        // El enlace firmado es lo que deja el correo en la sesión; el formulario
+        // ya no lo manda.
+        $this->get(URL::temporarySignedRoute(
+            'onboarding.profile.view',
+            now()->addMinutes(30),
+            ['email' => $user->email],
+        ))->assertOk();
+
         return $this->post(route('onboarding.profile.store'), [
-            'email' => $user->email,
             'name' => 'Organizador',
             'partner_1_name' => $partner1,
             'partner_2_name' => $partner2,

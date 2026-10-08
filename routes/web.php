@@ -42,18 +42,26 @@ Route::middleware('guest')->group(function () {
         ->name('onboarding.password.view');
     Route::post('/onboarding/set-password', [OnboardingController::class, 'storePassword'])
         ->name('onboarding.password.store');
-    
-    Route::get('/onboarding/setup-profile', [OnboardingController::class, 'showSetupProfileView'])
-        ->name('onboarding.profile.view');
-        
-    Route::post('/onboarding/setup-profile', [OnboardingController::class, 'storeProfile'])
-        ->name('onboarding.profile.store');
-
-    // Vista previa de la URL amigable mientras se escriben los nombres de la pareja.
-    Route::get('/onboarding/url-preview', [OnboardingController::class, 'previewUrl'])
-        ->middleware('throttle:60,1')
-        ->name('onboarding.url.preview');
 });
+
+/*
+ * Dirección de la invitación, el paso que cierra la compra.
+ *
+ * Fuera de 'guest' a propósito: por aquí pasa tanto quien acaba de crear su
+ * cuenta —todavía sin sesión— como quien ya la tenía y compró otra invitación
+ * con la sesión abierta. Quién es cada quien no lo decide este grupo: la vista
+ * exige un enlace firmado y el guardado lee el correo de la sesión.
+ */
+Route::get('/onboarding/setup-profile', [OnboardingController::class, 'showSetupProfileView'])
+    ->name('onboarding.profile.view');
+
+Route::post('/onboarding/setup-profile', [OnboardingController::class, 'storeProfile'])
+    ->name('onboarding.profile.store');
+
+// Vista previa de la URL amigable mientras se escriben los nombres de la pareja.
+Route::get('/onboarding/url-preview', [OnboardingController::class, 'previewUrl'])
+    ->middleware('throttle:60,1')
+    ->name('onboarding.url.preview');
 
 Route::post('/login', [AuthController::class, 'login'])->name('login.perform');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

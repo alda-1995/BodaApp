@@ -41,6 +41,12 @@ class AuthController extends Controller
                 return redirect()->to($invitationUrl);
             }
 
+            // Compró y aún no eligió la dirección de su invitación: ese paso va
+            // antes que el panel. Pasa cuando pagó sin la sesión abierta.
+            if ($setupUrl = $this->authService->profileSetupUrlIfPending($user)) {
+                return redirect()->to($setupUrl);
+            }
+
             if ($user->hasAnyRole(['superadmin', 'organizer', EventCoadmin::ROLE])) {
                 return redirect()->to($user->homeUrl());
             }

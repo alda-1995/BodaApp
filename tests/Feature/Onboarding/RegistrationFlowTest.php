@@ -168,26 +168,28 @@ class RegistrationFlowTest extends TestCase
     public function test_exige_nombre_y_nombres_de_la_pareja(): void
     {
         [$user] = $this->userWithEvent();
+        $this->abrirPaso($user->email);
 
-        $this->post(route('onboarding.profile.store'), ['email' => $user->email])
+        $this->post(route('onboarding.profile.store'), [])
             ->assertSessionHasErrors(['name', 'partner_1_name', 'partner_2_name']);
     }
 
-    public function test_el_perfil_con_correo_desconocido_manda_al_login(): void
+    /** Sin pasar antes por el enlace firmado no hay de quién es el paso. */
+    public function test_sin_abrir_el_paso_antes_manda_al_login(): void
     {
-        $this->post(route('onboarding.profile.store'), [
-            'email' => 'nadie@gmail.com',
-            'name' => 'Quien sea',
-            'partner_1_name' => 'Ana',
-            'partner_2_name' => 'Luis',
-        ])->assertSessionHasErrors('email'); // el correo debe existir
+        $this->post(route('onboarding.profile.store'), $this->profilePayload())
+            ->assertRedirect(route('login'))
+            ->assertSessionHas('error');
+
+        $this->assertGuest();
     }
 
     public function test_guarda_el_perfil_inicia_sesion_y_lleva_al_panel(): void
     {
         [$user, $event] = $this->userWithEvent();
+        $this->abrirPaso($user->email);
 
-        $this->post(route('onboarding.profile.store'), $this->profilePayload($user->email))
+        $this->post(route('onboarding.profile.store'), $this->profilePayload())
             ->assertRedirect(route('panel'))
             ->assertSessionHas('success');
 
@@ -201,9 +203,10 @@ class RegistrationFlowTest extends TestCase
     {
         // Cierra el flujo: el panel exige el rol organizer, que asigna el checkout.
         [$user] = $this->userWithEvent();
+        $this->abrirPaso($user->email);
 
         $this->followingRedirects()
-            ->post(route('onboarding.profile.store'), $this->profilePayload($user->email))
+            ->post(route('onboarding.profile.store'), $this->profilePayload())
             ->assertOk();
     }
 
@@ -224,8 +227,9 @@ class RegistrationFlowTest extends TestCase
     public function test_si_el_usuario_no_tiene_evento_no_rompe_ni_inicia_sesion(): void
     {
         $user = $this->newUser(); // sin evento
+        $this->abrirPaso($user->email);
 
-        $this->post(route('onboarding.profile.store'), $this->profilePayload($user->email))
+        $this->post(route('onboarding.profile.store'), $this->profilePayload())
             ->assertRedirect()
             ->assertSessionHas('error');
 
@@ -233,13 +237,81 @@ class RegistrationFlowTest extends TestCase
         $this->assertSame('Sin nombre', $user->fresh()->name, 'Nada debe guardarse a medias.');
     }
 
-    public function test_un_usuario_ya_autenticado_no_repite_el_registro(): void
+    /**
+     * Quien compra una segunda invitación le pone dirección a ESA, no a la vieja.
+     *
+     * El paso buscaba "el evento del usuario" y se quedaba con el primero, así
+     * que pisaba la dirección de la boda anterior y la recién comprada seguía sin
+     * ninguna: al volver a entrar pedía lo mismo otra vez.
+     */
+    public function test_la_direccion_se_le_pone_a_la_invitacion_recien_comprada(): void
+    {
+        [$user, $vieja] = $this->userWithEvent();
+        $vieja->update(['custom_url' => 'boda-anterior']);
+
+        $nueva = Event::factory()->create([
+            'user_id' => $user->id,
+            'template_id' => $vieja->template_id,
+            'custom_url' => null,
+        ]);
+
+        $this->abrirPaso($user->email);
+        $this->post(route('onboarding.profile.store'), $this->profilePayload())
+            ->assertRedirect(route('panel'));
+
+        $this->assertSame('ana-y-luis', $nueva->fresh()->custom_url);
+        $this->assertSame('boda-anterior', $vieja->fresh()->custom_url, 'La boda anterior no se toca.');
+    }
+
+    /**
+     * Quien compró sin la sesión abierta —o con la de otra cuenta— llega al paso
+     * de la dirección al entrar, que es cuando se sabe de verdad quién es.
+     */
+    public function test_al_entrar_con_una_invitacion_sin_direccion_va_a_elegirla(): void
     {
         [$user] = $this->userWithEvent();
+        $user->forceFill(['password' => Hash::make('Password123')])->save();
+
+        $respuesta = $this->post(route('login.perform'), [
+            'email' => $user->email,
+            'password' => 'Password123',
+        ]);
+
+        $respuesta->assertRedirectContains(route('onboarding.profile.view'));
+        $this->followingRedirects()->get($respuesta->headers->get('Location'))->assertOk();
+    }
+
+    public function test_al_entrar_con_la_direccion_ya_puesta_va_al_panel(): void
+    {
+        [$user, $event] = $this->userWithEvent();
+        $event->update(['custom_url' => 'ana-y-luis']);
+        $user->forceFill(['password' => Hash::make('Password123')])->save();
+
+        $this->post(route('login.perform'), [
+            'email' => $user->email,
+            'password' => 'Password123',
+        ])->assertRedirect(route('panel'));
+    }
+
+    /**
+     * Quien ya tenía cuenta compra con la sesión abierta y llega aquí igual: su
+     * evento nuevo tampoco tiene dirección todavía.
+     */
+    public function test_quien_ya_tiene_sesion_tambien_elige_su_direccion(): void
+    {
+        [$user, $event] = $this->userWithEvent();
 
         $this->actingAs($user)
             ->get($this->profileUrl($user->email))
+            ->assertOk()
+            // Para esa persona no hubo paso de contraseña, así que no son dos.
+            ->assertDontSee('Paso 2 de 2');
+
+        $this->actingAs($user)
+            ->post(route('onboarding.profile.store'), $this->profilePayload())
             ->assertRedirect(route('panel'));
+
+        $this->assertSame('ana-y-luis', $event->fresh()->custom_url);
     }
 
     /* =====================================================================
@@ -248,12 +320,16 @@ class RegistrationFlowTest extends TestCase
 
     public function test_nadie_puede_completar_el_registro_de_otra_persona(): void
     {
-        // BUG: el POST del paso 2 no exige enlace firmado ni token. Hoy cualquiera
-        // que conozca un correo puede enviar el formulario, cambiarle el nombre,
-        // fijar la URL de su invitación y quedar autenticado como esa persona.
+        // El correo sale de la sesión que deja el enlace firmado, no del formulario:
+        // mandarlo en el cuerpo no basta para quedar autenticado como esa persona.
         [$victima, $event] = $this->userWithEvent();
 
-        $this->post(route('onboarding.profile.store'), $this->profilePayload($victima->email, 'Intruso'));
+        $this->post(route('onboarding.profile.store'), [
+            'email' => $victima->email,
+            'name' => 'Intruso',
+            'partner_1_name' => 'Ana',
+            'partner_2_name' => 'Luis',
+        ]);
 
         // Un desconocido no debe quedar autenticado como el dueño de la cuenta.
         $this->assertGuest();
@@ -307,13 +383,18 @@ class RegistrationFlowTest extends TestCase
         ];
     }
 
-    private function profilePayload(string $email, string $name = 'Aldair Reyes'): array
+    private function profilePayload(string $name = 'Aldair Reyes'): array
     {
         return [
-            'email' => $email,
             'name' => $name,
             'partner_1_name' => 'Ana',
             'partner_2_name' => 'Luis',
         ];
+    }
+
+    /** Abre el paso por su enlace firmado, que es lo que deja el correo en la sesión. */
+    private function abrirPaso(string $email): void
+    {
+        $this->get($this->profileUrl($email))->assertOk();
     }
 }

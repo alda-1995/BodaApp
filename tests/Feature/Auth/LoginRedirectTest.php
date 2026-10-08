@@ -59,6 +59,24 @@ class LoginRedirectTest extends TestCase
             ->assertRedirect(route('panel'));
     }
 
+    /**
+     * Volver a /login con la sesión ya abierta es justo lo que pasa al regresar
+     * de pagar, así que por ahí también se llega al paso de la dirección.
+     */
+    public function test_organizer_con_sesion_y_sin_direccion_va_a_elegirla(): void
+    {
+        $user = $this->userWithRole('organizer');
+        Event::factory()->create([
+            'user_id' => $user->id,
+            'template_id' => Template::factory()->create(['view_path' => null])->id,
+            'custom_url' => null,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('login'))
+            ->assertRedirectContains(route('onboarding.profile.view'));
+    }
+
     public function test_organizer_con_evento_ve_su_panel(): void
     {
         $this->actingAs($this->organizerWithEvent())->get(route('panel'))->assertOk();
@@ -87,6 +105,9 @@ class LoginRedirectTest extends TestCase
         Event::factory()->create([
             'user_id' => $user->id,
             'template_id' => Template::factory()->create(['view_path' => null])->id,
+            // Ya configurada: sin dirección, al entrar se va antes al paso donde
+            // se elige (ver RegistrationFlowTest), y aquí se mira otra cosa.
+            'custom_url' => 'ana-y-luis-' . uniqid(),
         ]);
 
         return $user;

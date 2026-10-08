@@ -109,11 +109,28 @@ class CheckoutController extends Controller
             }
         }
 
-        // Si ya venía con la sesión abierta no se le pide entrar otra vez.
+        /*
+         * Ya tiene contraseña, así que no hay nada que crear ni confirmar. Lo que
+         * sí le falta es la dirección de su invitación: el evento acaba de nacer
+         * sin una. Se le lleva al mismo paso donde la elige quien compra por
+         * primera vez.
+         *
+         * Sólo si viene con la sesión abierta. Pagar con el correo de alguien no
+         * demuestra ser esa persona, y ese paso termina iniciando sesión: a quien
+         * no ha entrado se le manda a entrar, y el panel ya le pide la dirección.
+         */
         $yaDentro = Auth::check() && Auth::user()->email === $email;
 
+        if ($yaDentro) {
+            return [
+                'redirect_url' => $this->authService->profileSetupUrlIfPending($user) ?? route('panel'),
+                'needs_password' => false,
+            ];
+        }
+
+        // Al entrar se le lleva al paso de la dirección si le falta (AuthController).
         return [
-            'redirect_url' => $yaDentro ? route('panel') : route('login', ['email' => $email]),
+            'redirect_url' => route('login', ['email' => $email]),
             'needs_password' => false,
         ];
     }

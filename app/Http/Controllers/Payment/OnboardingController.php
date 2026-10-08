@@ -78,13 +78,7 @@ class OnboardingController extends Controller
 
         Password::deleteToken($user);
 
-        $signedUrl = URL::temporarySignedRoute(
-            'onboarding.profile.view',
-            now()->addMinutes(30),
-            ['email' => $user->email]
-        );
-
-        return redirect()->to($signedUrl);
+        return redirect()->to($this->authService->generateProfileSetupUrl($user->email));
     }
 
     public function showSetupProfileView(Request $request): View|RedirectResponse
@@ -102,7 +96,19 @@ class OnboardingController extends Controller
                 ->with('error', 'No encontramos una cuenta asociada para continuar.');
         }
 
-        return view('checkout.onboarding.setup-profile', compact('user'));
+        /*
+         * De quién es este paso queda en la sesión, no en el formulario.
+         *
+         * Al guardar se inicia sesión como esa persona, así que el correo no
+         * puede venir de un campo que cualquiera pueda cambiar.
+         */
+        $request->session()->put('onboarding.email', $user->email);
+
+        // Quien ya tenía cuenta no pasó por crear contraseña: para esa persona
+        // este es el único paso, y decirle "2 de 2" sería mentirle.
+        $pasoUnico = Auth::check() && Auth::id() === $user->id;
+
+        return view('checkout.onboarding.setup-profile', compact('user', 'pasoUnico'));
     }
 
     /**
@@ -138,12 +144,14 @@ class OnboardingController extends Controller
 
     public function storeProfile(OnboardingStepTwoRequest $request): RedirectResponse
     {
-        $email = $request->validated('email');
-        $user = $this->authService->getUserWithEmail($email);
+        // El correo sale de la sesión que dejó el enlace firmado, nunca del
+        // formulario: aquí abajo se inicia sesión como esa persona.
+        $email = $request->session()->get('onboarding.email');
+        $user = $email ? $this->authService->getUserWithEmail($email) : null;
 
         if (!$user) {
             return redirect()->route('login')
-                ->with('error', 'Usuario no encontrado.');
+                ->with('error', 'Tu sesión de configuración expiró. Vuelve a entrar para terminar.');
         }
 
         $dto = OnboardingProfileDTO::fromRequest($request);
@@ -169,6 +177,7 @@ class OnboardingController extends Controller
 
             Auth::login($user);
             $request->session()->regenerate();
+            $request->session()->forget('onboarding.email');
 
             return redirect()->route('panel')
                 ->with('success', '¡Cuenta y evento configurados con éxito!');

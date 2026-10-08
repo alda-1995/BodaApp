@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Notifications\Messages\MailMessage;
 
@@ -194,6 +195,39 @@ class AuthService
         }
 
         return Password::createToken($user);
+    }
+
+    /**
+     * Enlace firmado al paso donde se elige la dirección de la invitación.
+     *
+     * El mismo que recibe quien acaba de crear su contraseña, para que el paso
+     * sea uno solo, venga de donde venga.
+     */
+    public function generateProfileSetupUrl(string $email): string
+    {
+        return URL::temporarySignedRoute(
+            'onboarding.profile.view',
+            now()->addMinutes(30),
+            ['email' => $email],
+        );
+    }
+
+    /**
+     * Enlace al paso de la dirección, si a su invitación todavía le falta.
+     *
+     * Quien compra con la sesión abierta llega ahí en cuanto paga. Quien compró
+     * sin ella —o con la sesión de otra cuenta— llega al entrar, que es cuando
+     * se sabe de verdad quién es. Null si no hay nada pendiente.
+     */
+    public function profileSetupUrlIfPending(User $user): ?string
+    {
+        $event = $user->currentEvent();
+
+        if (!$event?->isAvailable() || filled($event->custom_url)) {
+            return null;
+        }
+
+        return $this->generateProfileSetupUrl($user->email);
     }
 
     public function logout(): void
