@@ -8,6 +8,7 @@ use App\Models\Rsvp;
 use App\Models\Template;
 use App\Models\User;
 use App\Services\EventWizardService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 /**
@@ -52,7 +53,7 @@ class DashboardService
             'fallidas' => $this->countOrders('failed', $period),
             // Sin ventas no hay promedio que sacar, y dividir entre cero revienta.
             'ticket' => $pagadas > 0 ? $ingresos / $pagadas : 0.0,
-            'acumulado' => (float) Order::where('status', 'completed')->sum('amount'),
+            'acumulado' => (float) $this->paidOrders()->sum('amount'),
             'top_plantillas' => $this->topTemplates($period),
         ];
     }
@@ -108,8 +109,8 @@ class DashboardService
      */
     public function activity(DashboardPeriod $period): Collection
     {
-        $compras = Order::with(['user', 'template'])
-            ->where('status', 'completed')
+        $compras = $this->paidOrders()
+            ->with(['user', 'template'])
             ->whereBetween('created_at', [$period->from, $period->to])
             ->latest()
             ->limit(self::FILAS * 2)
@@ -159,16 +160,36 @@ class DashboardService
      | Piezas de los bloques
      * ===================================================================*/
 
+    /**
+     * Lo que cuenta como venta: una orden pagada cuya invitación sigue existiendo.
+     *
+     * La llave va del evento a la orden, así que borrar una boda deja su orden
+     * huérfana. Seguir sumándola infla los ingresos con invitaciones que ya no
+     * existen y el panel deja de cuadrar con lo que se ve en Usuarios.
+     *
+     * Sólo aplica a las pagadas: una orden pendiente o fallida todavía no tiene
+     * evento —se crea al confirmarse el pago— y exigirle uno las borraría de la
+     * cuenta.
+     */
+    private function paidOrders(): Builder
+    {
+        return Order::where('status', 'completed')->whereHas('event');
+    }
+
     private function income(DashboardPeriod $period): float
     {
-        return (float) Order::where('status', 'completed')
+        return (float) $this->paidOrders()
             ->whereBetween('created_at', [$period->from, $period->to])
             ->sum('amount');
     }
 
     private function countOrders(string $status, DashboardPeriod $period): int
     {
-        return Order::where('status', $status)
+        $orders = $status === 'completed'
+            ? $this->paidOrders()
+            : Order::where('status', $status);
+
+        return $orders
             ->whereBetween('created_at', [$period->from, $period->to])
             ->count();
     }
@@ -186,10 +207,9 @@ class DashboardService
 
     private function topTemplates(DashboardPeriod $period): Collection
     {
-        return Order::query()
+        return $this->paidOrders()
             ->selectRaw('template_id, COUNT(*) as ventas, SUM(amount) as ingresos')
             ->with('template')
-            ->where('status', 'completed')
             ->whereBetween('created_at', [$period->from, $period->to])
             ->whereNotNull('template_id')
             ->groupBy('template_id')

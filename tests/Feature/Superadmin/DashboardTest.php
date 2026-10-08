@@ -64,6 +64,25 @@ class DashboardTest extends TestCase
         Order::query()->delete();
     }
 
+    /**
+     * Una venta de verdad: orden pagada con su invitación, como la deja el pago.
+     *
+     * Una orden pagada suelta no es una venta para el panel: al borrar una boda
+     * su orden queda huérfana y dejaría de cuadrar con lo que se ve en Usuarios.
+     */
+    private function venta(array $attributes = []): Order
+    {
+        $order = Order::factory()->create(array_merge(['status' => 'completed'], $attributes));
+
+        Event::factory()->create([
+            'order_id' => $order->id,
+            'user_id' => $order->user_id,
+            'template_id' => $order->template_id,
+        ]);
+
+        return $order;
+    }
+
     /* =====================================================================
      | Acceso
      * ===================================================================*/
@@ -106,8 +125,8 @@ class DashboardTest extends TestCase
     {
         $this->soloMisOrdenes();
 
-        Order::factory()->create(['status' => 'completed', 'amount' => 1000]);
-        Order::factory()->create(['status' => 'completed', 'amount' => 500]);
+        $this->venta(['amount' => 1000]);
+        $this->venta(['amount' => 500]);
         // Ni la que quedó a medias ni la que falló son dinero en la caja.
         Order::factory()->create(['status' => 'pending', 'amount' => 900]);
         Order::factory()->create(['status' => 'failed', 'amount' => 700]);
@@ -119,6 +138,49 @@ class DashboardTest extends TestCase
         $this->assertSame(1, $ventas['pendientes']);
         $this->assertSame(1, $ventas['fallidas']);
         $this->assertSame(750.0, $ventas['ticket']);
+    }
+
+    /**
+     * Borrar una boda deja su orden huérfana —la llave va de evento a orden— y
+     * esa ya no es una venta que el panel pueda enseñar: no hay invitación
+     * detrás, y seguir sumándola descuadra las cifras contra Usuarios.
+     */
+    public function test_una_orden_sin_invitacion_no_cuenta_como_venta(): void
+    {
+        $this->soloMisOrdenes();
+
+        $this->venta(['amount' => 1000]);
+        $huerfana = $this->venta(['amount' => 500]);
+        $huerfana->event->delete();
+
+        $ventas = $this->service()->sales(DashboardPeriod::fromRequest('mes'));
+
+        $this->assertSame(1000.0, $ventas['ingresos']);
+        $this->assertSame(1000.0, $ventas['acumulado']);
+        $this->assertSame(1, $ventas['pagadas']);
+        $this->assertSame(1000.0, $ventas['ticket']);
+        $this->assertSame(1, $ventas['top_plantillas']->sum('ventas'));
+
+        // Tampoco se asoma a la línea de actividad.
+        $compras = $this->service()
+            ->activity(DashboardPeriod::fromRequest('mes'))
+            ->where('tipo', 'compra');
+
+        $this->assertCount(1, $compras);
+    }
+
+    /** Pendientes y fallidas todavía no tienen evento: exigirles uno las borraría. */
+    public function test_las_pendientes_y_fallidas_se_siguen_contando(): void
+    {
+        $this->soloMisOrdenes();
+
+        Order::factory()->create(['status' => 'pending', 'amount' => 900]);
+        Order::factory()->create(['status' => 'failed', 'amount' => 700]);
+
+        $ventas = $this->service()->sales(DashboardPeriod::fromRequest('mes'));
+
+        $this->assertSame(1, $ventas['pendientes']);
+        $this->assertSame(1, $ventas['fallidas']);
     }
 
     public function test_sin_ventas_el_ticket_promedio_no_revienta(): void
@@ -137,8 +199,8 @@ class DashboardTest extends TestCase
     {
         $this->soloMisOrdenes();
 
-        Order::factory()->create(['status' => 'completed', 'amount' => 1000, 'created_at' => now()]);
-        Order::factory()->create(['status' => 'completed', 'amount' => 400, 'created_at' => now()->subMonths(3)]);
+        $this->venta(['amount' => 1000, 'created_at' => now()]);
+        $this->venta(['amount' => 400, 'created_at' => now()->subMonths(3)]);
 
         $esteMes = $this->service()->sales(DashboardPeriod::fromRequest('mes'));
         $esteAnio = $this->service()->sales(DashboardPeriod::fromRequest('anio'));
@@ -220,7 +282,7 @@ class DashboardTest extends TestCase
     {
         $this->soloMisOrdenes();
 
-        Order::factory()->create(['status' => 'completed', 'amount' => 1200]);
+        $this->venta(['amount' => 1200]);
         $this->eventoQueVence(now()->addYear()->toDateTimeString());
 
         $this->actingAs($this->superadmin)
@@ -239,7 +301,7 @@ class DashboardTest extends TestCase
     {
         $this->soloMisOrdenes();
 
-        Order::factory()->create(['status' => 'completed', 'amount' => 1200, 'created_at' => now()->subMonths(6)]);
+        $this->venta(['amount' => 1200, 'created_at' => now()->subMonths(6)]);
 
         $html = $this->actingAs($this->superadmin)
             ->get(route('superadmin.dashboard', [
