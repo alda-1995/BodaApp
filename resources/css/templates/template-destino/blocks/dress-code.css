@@ -34,7 +34,7 @@
 }
 
 .td-dress__type {
-    font-size: var(--td-size-title);
+    font-size: var(--td-size-section);
     font-weight: 400;
     margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
 }
@@ -60,13 +60,13 @@
 
 .td-dress__note-title {
     font-family: var(--font-display);
-    font-size: var(--td-size-section);
+    font-size: var(--td-size-lead);
     font-weight: 500;
     margin-bottom: 1rem;
 }
 
 .td-dress__note-text {
-    font-size: var(--td-size-lead);
+    font-size: var(--td-size-text);
 }
 
 .td-dress__colors {

@@ -61,7 +61,7 @@
 
 .td-hotels__name {
     font-family: var(--font-display);
-    font-size: var(--td-size-hero);
+    font-size: var(--td-size-title);
     font-weight: 500;
     line-height: var(--td-leading-tight);
 }
@@ -72,7 +72,9 @@
     border: 1px solid var(--td-ink);
     border-radius: 0.5rem;
     color: var(--td-ink);
-    font-weight: 500;
+    font-size: var(--td-size-text);
+    background-color: var(--td-white);
+    font-weight: 600;
     text-decoration: none;
     transition: background-color 0.2s ease, color 0.2s ease;
 }
@@ -84,7 +86,7 @@
 }
 
 .td-hotels__rate {
-    font-size: var(--td-size-lead);
+    font-size: var(--td-size-text);
     font-style: italic;
     font-weight: 500;
     max-width: 22ch;
