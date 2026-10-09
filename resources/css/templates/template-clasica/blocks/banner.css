@@ -43,17 +43,28 @@
 /*
  * La tarjeta no es un fondo a sangre: en el diseño mide 607 de 1280 y va
  * centrada, sobresaliendo por encima del panel.
+ *
+ * Se encoge sola para caber en la pantalla. No se estira al 100% del alto: se
+ * queda en el tamaño del diseño mientras quepa, y sólo cuando la pantalla es
+ * más baja se achica lo justo para que la invitación, los nombres y la fecha se
+ * lean completos sin bajar. 'fit-content' hace que la tarjeta se ciña a la foto
+ * ya encogida, para que el texto siga centrado sobre ella y no sobre un hueco.
  */
 .tc-banner__tarjeta {
     position: relative;
     /* Encima del panel, que es un ::before sin z-index. */
     z-index: 1;
-    width: min(92%, 38rem);
+    width: fit-content;
+    max-width: min(92%, 38rem);
 }
 
 .tc-banner__photo {
-    width: 100%;
+    display: block;
+    width: auto;
     height: auto;
+    max-width: 100%;
+    /* 'svh' y no 'vh': en el móvil cuenta con la barra del navegador a la vista. */
+    max-height: 99svh;
 }
 
 /* El texto va dentro de la tarjeta, centrado sobre ella. */
@@ -64,25 +75,39 @@
     align-content: center;
     padding-inline: 6%;
     text-align: center;
+    /*
+     * El contenedor de consulta va aquí y no en la tarjeta: 'inline-size'
+     * contiene el ancho, y la tarjeta necesita sacar el suyo de la foto. Este
+     * bloque, en cambio, recibe su ancho de la tarjeta (inset: 0), así que
+     * medirse contra él es medirse contra ella.
+     */
+    container-type: inline-size;
 }
 
+/*
+ * Las medidas van en 'cqw': un tanto por ciento del ancho de la tarjeta, no de
+ * la ventana. Son las proporciones del diseño —14, 56 y 18 px sobre el ancho
+ * útil de la tarjeta, 534 de 607—, así que en pantalla grande se ve igual que
+ * antes, y cuando la tarjeta se encoge por falta de alto el texto la acompaña.
+ */
 .tc-banner__linea {
     font-family: var(--font-secondary);
-    font-size: clamp(0.6875rem, 1.1vw, 1rem);
+    font-size: clamp(0.6875rem, 2.64cqw, 1rem);
     letter-spacing: 0.12em;
     text-transform: uppercase;
 }
 
 .tc-banner__nombres {
-    margin-top: clamp(0.75rem, 2.2vw, 2rem);
-    font-size: clamp(1.75rem, 4.4vw, 3.5rem);
+    margin-top: clamp(0.75rem, 5.28cqw, 2rem);
+    /* font-size: clamp(1.75rem, 10.54cqw, 3.5rem); */
+    font-size: var(--tc-size-title);
     text-transform: uppercase;
 }
 
 .tc-banner__fecha {
-    margin-top: clamp(0.75rem, 2.2vw, 2rem);
+    margin-top: clamp(0.75rem, 5.28cqw, 2rem);
     font-family: var(--font-secondary);
-    font-size: clamp(0.75rem, 1.4vw, 1.25rem);
+    font-size: clamp(0.75rem, 3.35cqw, 1.25rem);
 }
 
 /* De borde a borde: es lo único que se sale del panel. */
