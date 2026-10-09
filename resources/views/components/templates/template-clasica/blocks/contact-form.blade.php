@@ -30,7 +30,7 @@
     invitation.rsvp por fetch y rsvp.js deja visible la capa que toca. El nombre
     va partido en dos campos y rsvp.js los junta al enviar.
 --}}
-{{-- El papel es el fondo de toda la sección, de borde a borde. --}}
+{{-- El papel viaja en una variable: el CSS lo pinta en la tarjeta del centro. --}}
 <section class="tc-rsvp" id="confirmacion" data-rsvp
     data-url="{{ $context->rsvpUrl }}"
     data-demo="{{ $context->isDemo ? '1' : '' }}"

@@ -1,30 +1,36 @@
 /*
- * Confirmación de asistencia: el papel de fondo de toda la sección y el
- * formulario escrito encima, centrado.
+ * Confirmación de asistencia: una tarjeta de papel centrada sobre el crema, con
+ * el formulario escrito encima.
  *
  * Los campos son una línea y no una caja, como en el diseño; el único enmarcado
  * es el recado para los novios.
  */
 
 .tc-rsvp {
-    /*
-     * El papel se repite en mosaico en vez de estirarse: así una invitación con
-     * preguntas personalizadas crece sin deformar el grano ni dejar un borde
-     * cortado. 'contain' fija el ancho de la baldosa al de la sección, de modo
-     * que el relieve se lee al mismo tamaño que en el diseño.
-     */
-    background:
-        var(--tc-papel-rsvp) top center / 100% auto repeat-y,
-        var(--tc-cream);
+    background: var(--tc-white);
     padding-block: clamp(3rem, 8vw, 6.5rem);
     padding-inline: clamp(1.5rem, 6vw, 6.25rem);
 }
 
-/* 40% del ancho en el diseño: el formulario no llega al relieve de los bordes. */
+/* La tarjeta de papel: poco más de la mitad del ancho, como en el diseño. */
 .tc-rsvp__panel {
-    width: min(100%, 26rem);
+    /*
+     * El papel cubre la tarjeta escalado a la par en los dos ejes: con el
+     * formulario del diseño se lee tal cual, y si la boda pide muchas preguntas
+     * y la tarjeta se estira, el papel se acerca por los lados en vez de
+     * deformar el grano o repetirse dejando una costura a media altura.
+     * Anclado arriba para que el relieve de la cabecera siempre se vea.
+     *
+     * La foto la sube el organizador, así que esto vale para cualquier imagen;
+     * sin foto la tarjeta se queda en crema y el formulario se lee igual.
+     */
+    background: var(--tc-papel-rsvp, none) top center / cover no-repeat;
+    width: min(100%, 41rem);
     margin-inline: auto;
+    padding-block: clamp(2.5rem, 6vw, 5rem);
+    padding-inline: clamp(1.5rem, 5vw, 4.5rem);
 }
+
 
 .tc-rsvp__titulo {
     font-size: var(--tc-size-title);
@@ -42,10 +48,13 @@
     text-align: center;
 }
 
+/* El formulario no llega al relieve de los bordes de la tarjeta. */
 .tc-rsvp__panel form {
     display: grid;
     gap: 1.25rem;
+    width: min(100%, 21rem);
     margin-top: clamp(1.5rem, 3vw, 2.5rem);
+    margin-inline: auto;
 }
 
 /* Cada campo es una línea: la etiqueta encima y el dato sobre el filo. */
@@ -127,8 +136,10 @@
     background: none;
     color: inherit;
     cursor: pointer;
+    background-color: var(--tc-white);
     font-family: var(--font-secondary);
-    font-size: 1.25rem;
+    /* Al tamaño de los campos: en la tarjeta angosta cabe en un solo renglón. */
+    font-size: var(--tc-size-text);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     transition: background 0.2s ease, color 0.2s ease;
