@@ -1,0 +1,24 @@
+/*
+ * Plantilla "Boda Clásica": CSS3 propio, sin Tailwind.
+ *
+ * Igual que las demás plantillas, este archivo sólo arma las partes:
+ *  - typography.css → fuentes y escala
+ *  - base.css       → paleta, contenedor y piezas comunes
+ *  - blocks/*.css   → un archivo por bloque, como las vistas
+ *
+ * Las clases van con el prefijo .tc- y los colores salen de la paleta del
+ * evento (--color-brand), igual que en las otras plantillas.
+ */
+
+@import url("./typography.css");
+@import url("./base.css");
+
+@import url("./blocks/banner.css");
+@import url("./blocks/timeline.css");
+@import url("./blocks/gallery.css");
+@import url("./blocks/dress-code.css");
+@import url("./blocks/gift-registry.css");
+@import url("./blocks/countdown.css");
+@import url("./blocks/rsvp.css");
+@import url("./blocks/faq.css");
+@import url("./blocks/footer.css");

@@ -68,6 +68,9 @@ class ItinerarySection extends Section
                     'place' => $row['place_event'] ?? '',
                     'location' => $row['location_event'] ?? '',
                     'maps' => $row['location_maps'] ?? null,
+                    // Sólo la piden los diseños que la añaden al repetidor; en
+                    // los demás llega null y su bloque ni la mira.
+                    'photo' => $this->imageUrl($row['photo'] ?? null),
                     'date' => $date,
                     // Hora corta ("3:30 pm"): en español saldría "3:30 p. m.".
                     'time' => $date?->locale('en')->isoFormat('h:mm a'),

@@ -23,6 +23,7 @@ final class BlockType
     public const CONTACT_FORM = 'contact-form';
     public const HOTELS = 'hotels';
     public const TRANSPORT = 'transport';
+    public const COUNTDOWN = 'countdown';
 
     /**
      * Nombre legible de cada tipo, para el panel del superadmin.
@@ -40,6 +41,7 @@ final class BlockType
             self::GIFT_REGISTRY => 'Mesa de regalos',
             self::GALLERY => 'Galería',
             self::FAQ => 'Preguntas frecuentes',
+            self::COUNTDOWN => 'Cuenta regresiva',
             self::CONTACT_FORM => 'Formulario de contacto',
             self::HOTELS => 'Hoteles recomendados',
             self::TRANSPORT => 'Transporte',

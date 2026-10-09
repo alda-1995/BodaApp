@@ -1,0 +1,58 @@
+/*
+ * Cierre: la ilustración arriba a la izquierda, la fecha debajo de ella y los
+ * nombres grandes abajo a la derecha.
+ *
+ * Una rejilla de dos columnas y dos filas: el dibujo ocupa la de arriba a la
+ * izquierda y deja libre el hueco donde caen los nombres.
+ */
+
+.tc-footer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: end;
+    gap: clamp(1rem, 3vw, 2.5rem);
+    padding: clamp(2rem, 6vw, 5rem) clamp(1.5rem, 4.5vw, 3.5rem);
+    background: var(--tc-white);
+}
+
+.tc-footer__dibujo {
+    grid-column: 1;
+    grid-row: 1;
+    width: min(100%, 16rem);
+    height: auto;
+}
+
+.tc-footer__fecha {
+    grid-column: 1;
+    grid-row: 2;
+    font-family: var(--font-primary);
+    font-size: var(--tc-size-lead);
+    font-style: italic;
+    letter-spacing: 0.04em;
+}
+
+.tc-footer__nombres {
+    grid-column: 2;
+    grid-row: 2;
+    font-family: var(--font-primary);
+    font-size: var(--tc-size-display);
+    line-height: 1.1;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+@media (max-width: 700px) {
+    /* En el celular, una cosa bajo otra y centradas. */
+    .tc-footer {
+        grid-template-columns: minmax(0, 1fr);
+        justify-items: center;
+        text-align: center;
+    }
+
+    .tc-footer__dibujo,
+    .tc-footer__fecha,
+    .tc-footer__nombres {
+        grid-column: 1;
+        grid-row: auto;
+    }
+}

@@ -1,0 +1,106 @@
+/*
+ * Cuenta regresiva: una foto dentro del marco dorado y, debajo, cuánto falta.
+ *
+ * El marco es un PNG con la ventana transparente: va encima de la foto, no
+ * detrás, y por eso la foto se recorta a la medida de esa ventana.
+ */
+
+.tc-countdown {
+    display: grid;
+    justify-items: center;
+    padding-block: clamp(2rem, 5vw, 4rem) clamp(3rem, 7vw, 5.5rem);
+    padding-inline: clamp(1.5rem, 6vw, 6.25rem);
+    background: var(--tc-cream);
+}
+
+/* 694x1041 en el diseño. */
+.tc-countdown__marco {
+    position: relative;
+    width: min(100%, 26rem);
+    aspect-ratio: 694 / 1041;
+}
+
+/* La ventana del marco: 354x577 centrada en 694x1041. */
+.tc-countdown__fotos {
+    position: absolute;
+    top: 22.9%;
+    left: 24.5%;
+    width: 51%;
+    height: 55.4%;
+}
+
+.tc-countdown__foto {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+}
+
+.tc-countdown__foto.is-visible {
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-countdown__foto {
+        transition-duration: 0.01ms;
+    }
+}
+
+/* Encima de las fotos: su ventana es transparente. */
+.tc-countdown__marco::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--tc-marco) center / contain no-repeat;
+    pointer-events: none;
+}
+
+.tc-countdown__cuenta {
+    margin-top: clamp(1.5rem, 4vw, 3rem);
+    text-align: center;
+}
+
+.tc-countdown__titulo {
+    font-size: var(--tc-size-section);
+    text-transform: uppercase;
+}
+
+.tc-countdown__cifras {
+    display: flex;
+    justify-content: center;
+    margin: clamp(1rem, 2.5vw, 2rem) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.tc-countdown__cifra {
+    flex: 0 1 7.5rem;
+    padding-inline: clamp(0.75rem, 2vw, 2rem);
+}
+
+.tc-countdown__cifra + .tc-countdown__cifra {
+    border-left: 1px solid var(--tc-line);
+}
+
+.tc-countdown__numero {
+    display: block;
+    font-family: var(--font-primary);
+    font-size: var(--tc-size-display);
+    font-style: italic;
+    font-weight: 300;
+    line-height: 1.1;
+    /* Las cifras no deben bailar al cambiar de 09 a 10. */
+    font-variant-numeric: tabular-nums;
+}
+
+.tc-countdown__unidad {
+    display: block;
+    margin-top: 0.5rem;
+    font-family: var(--font-secondary);
+    font-size: clamp(0.5625rem, 1vw, 0.875rem);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}

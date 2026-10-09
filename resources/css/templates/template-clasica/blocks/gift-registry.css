@@ -1,0 +1,75 @@
+/*
+ * Mesa de regalos: el título en cursiva sobre el crema y las opciones en
+ * tarjetas enmarcadas, de dos en dos.
+ *
+ * El marco de cada tarjeta es un PNG casi todo transparente —sólo el filete—,
+ * así que se pone de fondo y el crema se ve a través.
+ */
+
+.tc-gifts {
+    padding-block: clamp(3rem, 7vw, 5.5rem);
+    padding-inline: clamp(1.5rem, 6vw, 6.25rem);
+    background: var(--tc-cream);
+    text-align: center;
+}
+
+.tc-gifts__titulo {
+    font-size: var(--tc-size-section);
+    font-style: italic;
+    text-transform: uppercase;
+}
+
+.tc-gifts__mensaje {
+    max-width: 38rem;
+    margin: 0.75rem auto 0;
+    font-family: var(--font-primary);
+    font-size: var(--tc-size-lead);
+}
+
+.tc-gifts__lista {
+    display: grid;
+    gap: clamp(1rem, 2.5vw, 2rem);
+    max-width: 56rem;
+    margin: clamp(2rem, 4vw, 3.5rem) auto 0;
+    padding: 0;
+    list-style: none;
+}
+
+@media (min-width: 640px) {
+    .tc-gifts__lista {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.tc-gifts__opcion {
+    display: grid;
+}
+
+/* La tarjeta es <a> cuando la opción tiene liga y <div> cuando no. */
+.tc-gifts__tarjeta {
+    display: grid;
+    align-content: center;
+    /* 389x259 en el diseño. */
+    aspect-ratio: 389 / 259;
+    padding: 12%;
+    background: var(--tc-marco-tarjeta) center / 100% 100% no-repeat;
+    color: inherit;
+    text-decoration: none;
+}
+
+a.tc-gifts__tarjeta:hover,
+a.tc-gifts__tarjeta:focus-visible {
+    opacity: 0.75;
+}
+
+.tc-gifts__tienda {
+    font-family: var(--font-primary);
+    font-size: var(--tc-size-lead);
+}
+
+.tc-gifts__dato {
+    margin-top: 0.4rem;
+    font-family: var(--font-secondary);
+    font-size: clamp(0.6875rem, 1.1vw, 1rem);
+    color: var(--tc-muted);
+}

@@ -1,0 +1,135 @@
+/*
+ * Ceremonia y recepción: cada momento es una tarjeta con sus datos escritos
+ * dentro, sobre el mismo panel con textura de la portada.
+ *
+ * Las tarjetas se alternan de lado y se montan un poco entre ellas. El lado lo
+ * decide :nth-child y no una clase en el HTML: así, añadir un tercer momento en
+ * el wizard sigue el mismo vaivén sin que nadie toque la plantilla.
+ */
+
+.tc-timeline {
+    position: relative;
+    display: grid;
+    padding-block: clamp(2rem, 5vw, 4rem) clamp(4rem, 9vw, 7.5rem);
+    padding-inline: clamp(1rem, 4vw, 3rem);
+}
+
+.tc-timeline::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 10%;
+    /* Sólo detrás de los primeros momentos, como en el diseño. */
+    bottom: 22%;
+    left: 10%;
+    /* Sin z-index negativo: eso lo mandaría detrás del fondo blanco del body. */
+    /*
+     * La textura llega del Blade en --tc-textura. En CSS no se puede escribir
+     * su ruta: con el servidor de Vite en marcha, un url() absoluto se resuelve
+     * contra el origen de Vite, que no sirve public/, y la imagen desaparece.
+     */
+    background: var(--tc-textura) center / cover;
+}
+
+/*
+ * La tarjeta se ajusta a su foto: inline-grid para que el bloque mida lo que
+ * mida la imagen y el texto, que va encima en absoluto, la cubra exacta.
+ */
+.tc-timeline__momento {
+    position: relative;
+    /* Encima del panel, que es un ::before sin z-index. */
+    z-index: 1;
+    display: inline-grid;
+    max-width: 100%;
+}
+
+/* Impares a la izquierda, pares a la derecha y montados sobre el anterior. */
+.tc-timeline__momento:nth-child(odd) {
+    justify-self: start;
+}
+
+.tc-timeline__momento:nth-child(even) {
+    justify-self: end;
+}
+
+.tc-timeline__momento + .tc-timeline__momento {
+    margin-top: clamp(-16rem, -13vw, -5rem);
+}
+
+@media (max-width: 700px) {
+    /* En el celular no caben montadas: una debajo de otra y centradas. */
+    .tc-timeline__momento {
+        justify-self: center;
+    }
+
+    .tc-timeline__momento + .tc-timeline__momento {
+        margin-top: clamp(1rem, 4vw, 2rem);
+    }
+}
+
+/*
+ * Un tope de ancho Y otro de alto, con las medidas en auto: el navegador mete
+ * la foto dentro de esa caja sin deformarla. Una apaisada topa con el ancho y
+ * queda ancha y baja; una vertical topa con el alto y queda estrecha, que es
+ * justo la diferencia entre la tarjeta de la ceremonia y la de la recepción.
+ *
+ * Así el tamaño sale de la foto y no del número de momento: un tercero se
+ * acomoda solo, suba lo que suba el organizador.
+ */
+.tc-timeline__foto {
+    width: auto;
+    height: auto;
+    max-width: min(100%, 38rem);
+    max-height: clamp(18rem, 34vw, 30rem);
+}
+
+.tc-timeline__datos {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-content: center;
+    padding-inline: 14%;
+    text-align: center;
+}
+
+.tc-timeline__rotulo {
+    font-family: var(--font-secondary);
+    font-size: clamp(0.625rem, 1.1vw, 1rem);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.tc-timeline__lugar {
+    margin-top: 0.5rem;
+    font-size: clamp(1rem, 1.9vw, 1.5625rem);
+}
+
+.tc-timeline__direccion {
+    margin-top: 0.4rem;
+    font-family: var(--font-secondary);
+    font-size: clamp(0.625rem, 1.1vw, 1rem);
+}
+
+.tc-timeline__hora {
+    margin-top: 0.6rem;
+    font-family: var(--font-primary);
+    font-size: clamp(1.25rem, 2.8vw, 2.25rem);
+}
+
+.tc-timeline__mapa {
+    margin-top: 0.9rem;
+    color: inherit;
+    font-family: var(--font-secondary);
+    font-size: clamp(0.625rem, 1.1vw, 1rem);
+    letter-spacing: 0.12em;
+    text-decoration: none;
+    text-transform: uppercase;
+    border-bottom: 1px solid currentcolor;
+    justify-self: center;
+    padding-bottom: 0.15rem;
+}
+
+.tc-timeline__mapa:hover,
+.tc-timeline__mapa:focus-visible {
+    opacity: 0.7;
+}

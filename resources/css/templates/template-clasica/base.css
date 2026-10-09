@@ -1,0 +1,57 @@
+/*
+ * Base de la plantilla "Boda Clásica": paleta, contenedor y piezas comunes.
+ *
+ * El diseño es casi todo tinta negra sobre blanco; el único color propio es la
+ * banda crema de la mesa de regalos. La paleta del evento entra por
+ * --color-brand como acento, así que una pareja puede teñir los detalles sin
+ * tocar el contraste, que es lo que sostiene este diseño.
+ */
+
+.tc {
+    --color-primary: #000000;
+    --tc-ink: #000000;
+    --tc-accent: var(--color-brand, #000000);
+    --tc-white: #ffffff;
+    --tc-cream: #fcf6ec;
+    --tc-line: #000000;
+    --tc-muted: #6b6b6b;
+
+    background: var(--tc-white);
+    color: var(--tc-ink);
+    font-family: var(--font-secondary);
+}
+
+/* El diseño trabaja sobre 1280px con 100px de margen: 8% a cada lado. */
+.tc-container {
+    width: 100%;
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .tc-container {
+        padding-inline: 4rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .tc-container {
+        padding-inline: 6.25rem;
+    }
+}
+
+/* El aire entre bloques, que en este diseño es mucho y siempre el mismo. */
+.tc-seccion {
+    padding-block: clamp(4rem, 9vw, 7.5rem);
+}
+
+.tc img {
+    display: block;
+    max-width: 100%;
+}
+
+/* Hasta que Alpine arranca, lo que va plegado no debe asomar. */
+.tc [x-cloak] {
+    display: none !important;
+}

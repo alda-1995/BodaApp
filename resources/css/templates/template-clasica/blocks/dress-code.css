@@ -1,0 +1,67 @@
+/*
+ * Código de vestimenta: una etiqueta colgante centrada sobre el panel con
+ * textura, con todo el texto escrito dentro.
+ *
+ * Aquí el panel sí va de borde a borde —en el diseño es más ancho que la
+ * página—, así que es el fondo de la sección y no un ::before recortado.
+ */
+
+.tc-dress {
+    display: grid;
+    justify-items: center;
+    padding-block: clamp(2rem, 5vw, 4rem);
+    background: var(--tc-textura) center / cover;
+}
+
+/* 507 de 1280 en el diseño. */
+.tc-dress__etiqueta {
+    position: relative;
+    width: min(86%, 32rem);
+}
+
+.tc-dress__foto {
+    width: 100%;
+    height: auto;
+}
+
+.tc-dress__texto {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-content: center;
+    /* La etiqueta es angosta: el texto se mete bien dentro de su marco. */
+    padding-inline: 22%;
+    text-align: center;
+}
+
+.tc-dress__rotulo {
+    font-family: var(--font-secondary);
+    font-size: clamp(0.5625rem, 1vw, 0.875rem);
+    letter-spacing: 0.12em;
+    line-height: 1.5;
+    text-transform: uppercase;
+}
+
+/* En cursiva, como el diseño: es lo que le da el tono a este bloque. */
+.tc-dress__tipo {
+    margin-top: clamp(0.5rem, 1.5vw, 1.25rem);
+    font-size: clamp(1.25rem, 3.2vw, 2.5rem);
+    font-style: italic;
+    line-height: 1.15;
+}
+
+.tc-dress__detalle {
+    margin-top: clamp(0.5rem, 1.4vw, 1.1rem);
+    font-family: var(--font-primary);
+    font-size: clamp(0.6875rem, 1.4vw, 1.125rem);
+    font-style: italic;
+    font-weight: 300;
+    line-height: 1.4;
+}
+
+.tc-dress__tema {
+    margin-top: clamp(0.5rem, 1.4vw, 1.1rem);
+    font-family: var(--font-secondary);
+    font-size: clamp(0.5625rem, 1vw, 0.875rem);
+    color: var(--tc-muted);
+}

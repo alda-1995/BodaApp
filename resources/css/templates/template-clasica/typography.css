@@ -1,0 +1,55 @@
+/*
+ * Tipografía de "Boda Clásica".
+ *
+ * Dos familias, como el diseño: Cormorant para todo lo que se lee grande —los
+ * nombres, las horas, la cuenta regresiva— y Manrope para los datos en letra
+ * pequeña, que casi siempre van en versales.
+ *
+ * La escala sale de los tamaños del Figma sobre 1280px. Van con clamp() para
+ * que bajen solos en el celular en vez de tener un media query por tamaño.
+ */
+
+.tc {
+    --font-primary: "Cormorant", Georgia, "Times New Roman", serif;
+    --font-secondary: "Manrope", system-ui, -apple-system, sans-serif;
+
+    /* 72px en el diseño: los nombres de la portada y la cuenta regresiva. */
+    --tc-size-display: clamp(2.75rem, 5.6vw, 4.5rem);
+    /* 51px: el tipo de vestimenta y el "RSVP". */
+    --tc-size-title: clamp(2rem, 4vw, 3.1875rem);
+    /* 36px: los títulos de sección y las horas. */
+    --tc-size-section: clamp(1.625rem, 2.8vw, 2.25rem);
+    /* 25px: lugares, respuestas y la fecha de la portada. */
+    --tc-size-lead: clamp(1.125rem, 1.95vw, 1.5625rem);
+    /* 16px: los rótulos en versales y los datos. */
+    --tc-size-text: 1rem;
+}
+
+/*
+ * El reset va dentro de :where() a propósito: así no suma especificidad y
+ * cualquier clase de bloque puede darle su propio margen a un <p>. Sin esto,
+ * '.tc p' (0,1,1) le ganaba a '.tc-gifts__mensaje' (0,1,0) y le borraba el
+ * 'margin: auto' con el que se centra.
+ */
+.tc :where(h1, h2, h3) {
+    margin: 0;
+    font-family: var(--font-primary);
+    font-weight: 400;
+    line-height: 1.2;
+}
+
+.tc :where(p) {
+    margin: 0;
+    line-height: 1.4;
+}
+
+/*
+ * Los rótulos pequeños del diseño: Manrope en versales, con algo de tracking
+ * para que no se apelmacen. Se repiten en casi todos los bloques.
+ */
+.tc-rotulo {
+    font-family: var(--font-secondary);
+    font-size: var(--tc-size-text);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}

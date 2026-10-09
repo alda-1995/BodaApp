@@ -1,0 +1,96 @@
+/*
+ * Portada: tres capas, como en el diseño.
+ *
+ *   1. un panel con la textura de la plantilla, más angosto que la página, que
+ *      arranca a media tarjeta y corre por detrás de todo;
+ *   2. la tarjeta centrada, con el texto escrito DENTRO;
+ *   3. la foto ancha, que sí va de borde a borde sobre el panel.
+ *
+ * El panel es un ::before y no un <div>: es textura del diseño, no algo que el
+ * organizador suba, así que no tiene por qué existir en el HTML.
+ */
+
+.tc-banner {
+    display: grid;
+    justify-items: center;
+}
+
+.tc-banner__panel {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    width: 100%;
+    padding-bottom: clamp(2rem, 6vw, 5rem);
+}
+
+.tc-banner__panel::before {
+    content: "";
+    position: absolute;
+    /* Arranca a media tarjeta y deja 10% de aire a cada lado: 1024 de 1280. */
+    top: 28%;
+    right: 10%;
+    bottom: 0;
+    left: 10%;
+    /* Sin z-index negativo: eso lo mandaría detrás del fondo blanco del body. */
+    /*
+     * La textura llega del Blade en --tc-textura. En CSS no se puede escribir
+     * su ruta: con el servidor de Vite en marcha, un url() absoluto se resuelve
+     * contra el origen de Vite, que no sirve public/, y la imagen desaparece.
+     */
+    background: var(--tc-textura) center / cover;
+}
+
+/*
+ * La tarjeta no es un fondo a sangre: en el diseño mide 607 de 1280 y va
+ * centrada, sobresaliendo por encima del panel.
+ */
+.tc-banner__tarjeta {
+    position: relative;
+    /* Encima del panel, que es un ::before sin z-index. */
+    z-index: 1;
+    width: min(92%, 38rem);
+}
+
+.tc-banner__photo {
+    width: 100%;
+    height: auto;
+}
+
+/* El texto va dentro de la tarjeta, centrado sobre ella. */
+.tc-banner__texto {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-content: center;
+    padding-inline: 6%;
+    text-align: center;
+}
+
+.tc-banner__linea {
+    font-family: var(--font-secondary);
+    font-size: clamp(0.6875rem, 1.1vw, 1rem);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.tc-banner__nombres {
+    margin-top: clamp(0.75rem, 2.2vw, 2rem);
+    font-size: clamp(1.75rem, 4.4vw, 3.5rem);
+    text-transform: uppercase;
+}
+
+.tc-banner__fecha {
+    margin-top: clamp(0.75rem, 2.2vw, 2rem);
+    font-family: var(--font-secondary);
+    font-size: clamp(0.75rem, 1.4vw, 1.25rem);
+}
+
+/* De borde a borde: es lo único que se sale del panel. */
+.tc-banner__banda {
+    width: 100%;
+    position: relative;
+    z-index: 1;
+    margin-top: clamp(1rem, 2vw, 1.5rem);
+    aspect-ratio: 1280 / 761;
+    object-fit: cover;
+}

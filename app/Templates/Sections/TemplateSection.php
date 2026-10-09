@@ -31,6 +31,9 @@ final class TemplateSection extends Section
     /** @var array<string, Field> campos que agrega este diseño */
     private array $added = [];
 
+    /** Campos que este diseño mete dentro de un repetidor: [repetidor => Field[]]. */
+    private array $addedTo = [];
+
     /** @var array<int, string> campos del catálogo que este diseño no pinta */
     private array $dropped = [];
 
@@ -57,6 +60,20 @@ final class TemplateSection extends Section
     public function add(string $name, Field $field): self
     {
         $this->added[$name] = $field;
+
+        return $this;
+    }
+
+    /**
+     * Un campo que este diseño añade dentro de un repetidor del catálogo.
+     *
+     * Simétrico a drop('events.photo'): hay diseños que piden de cada fila algo
+     * que las demás plantillas no usan —una foto por momento del itinerario—, y
+     * sin esto habría que meterlo en el catálogo y preguntárselo a todas.
+     */
+    public function addTo(string $repeater, Field $field): self
+    {
+        $this->addedTo[$repeater][] = $field;
 
         return $this;
     }
@@ -185,6 +202,12 @@ final class TemplateSection extends Section
     public function fields(): array
     {
         $fields = array_merge($this->section->fields(), $this->added);
+
+        foreach ($this->addedTo as $repetidor => $extras) {
+            if (($campo = $fields[$repetidor] ?? null) instanceof RepeaterField) {
+                $campo->schema(array_merge($campo->getSchema(), $extras));
+            }
+        }
 
         foreach ($this->dropped as $name) {
             if (!str_contains($name, '.')) {

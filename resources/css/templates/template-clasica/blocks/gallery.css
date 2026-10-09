@@ -1,0 +1,122 @@
+/*
+ * Galería: un moodboard sobre papel.
+ *
+ * Las fotos caen en columnas —así entran las que sean, no cinco fijas— pero con
+ * un giro leve y un borde blanco que las hace parecer pegadas a mano. Los
+ * adornos van encima en posiciones del diseño; son decorativos, así que no
+ * reciben clics y el visor sigue abriéndose al tocar una foto.
+ */
+
+.tc-gallery {
+    padding-block: clamp(2rem, 5vw, 4rem);
+}
+
+/* El tablero sangra un poco por los lados, como en el diseño. */
+.tc-gallery__tablero {
+    position: relative;
+    padding: clamp(2rem, 5vw, 4.5rem) clamp(1.25rem, 4vw, 3.5rem);
+    background: var(--tc-papel) center / cover;
+}
+
+.tc-gallery__collage {
+    position: relative;
+    z-index: 1;
+    columns: 2;
+    column-gap: clamp(0.75rem, 2vw, 2rem);
+}
+
+@media (min-width: 700px) {
+    .tc-gallery__collage {
+        columns: 3;
+    }
+}
+
+@media (min-width: 1100px) {
+    .tc-gallery__collage {
+        columns: 4;
+    }
+}
+
+.tc-gallery__enlace {
+    display: block;
+    /* Sin esto una foto se partiría entre el final de una columna y la siguiente. */
+    break-inside: avoid;
+    margin-bottom: clamp(1rem, 2.5vw, 2.25rem);
+    padding: clamp(0.4rem, 0.9vw, 0.75rem);
+    background: #fdfcf9;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
+    transition: transform 0.25s ease;
+}
+
+/*
+ * El giro se reparte por posición, no una clase por foto: suban seis o catorce,
+ * ninguna sale derecha del todo y ninguna queda igual que su vecina.
+ */
+.tc-gallery__enlace:nth-child(4n + 1) { transform: rotate(-2.2deg); }
+.tc-gallery__enlace:nth-child(4n + 2) { transform: rotate(1.6deg); }
+.tc-gallery__enlace:nth-child(4n + 3) { transform: rotate(-1.1deg); }
+.tc-gallery__enlace:nth-child(4n)     { transform: rotate(2.4deg); }
+
+.tc-gallery__enlace:hover,
+.tc-gallery__enlace:focus-visible {
+    transform: rotate(0deg) scale(1.02);
+}
+
+.tc-gallery__foto {
+    width: 100%;
+    height: auto;
+}
+
+/* --- Adornos del diseño ---------------------------------------------------- */
+
+.tc-gallery__adornos {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.tc-gallery__adorno {
+    position: absolute;
+    width: clamp(3rem, 9vw, 7rem);
+    height: auto;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.18));
+}
+
+/* Las posiciones salen del Figma, en porcentaje del tablero. */
+.tc-gallery__adorno--1 { top: 7%;  left: 21%; width: clamp(2rem, 4.5vw, 3.5rem); }
+.tc-gallery__adorno--2 { top: 19%; left: 41%; }
+.tc-gallery__adorno--3 { top: 7%;  left: 2%;  width: clamp(4rem, 12vw, 9rem); }
+.tc-gallery__adorno--4 { top: 65%; left: 24%; }
+.tc-gallery__adorno--5 { top: 43%; left: 75%; width: clamp(2.5rem, 5vw, 4rem); }
+
+@media (max-width: 700px) {
+    /* En el celular estorban más de lo que aportan. */
+    .tc-gallery__adornos {
+        display: none;
+    }
+}
+
+/* --- La nota de papel rasgado ---------------------------------------------- */
+
+.tc-gallery__nota {
+    position: relative;
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: min(100%, 34rem);
+    margin-inline: auto 0;
+    /* Se mete un poco entre las fotos, como pegada encima. */
+    margin-top: clamp(-4rem, -4vw, -1rem);
+    padding: clamp(2rem, 5vw, 3.5rem);
+    aspect-ratio: 622 / 530;
+    background: var(--tc-nota) center / cover;
+    transform: rotate(-5deg);
+}
+
+.tc-gallery__texto {
+    font-family: var(--font-secondary);
+    font-size: clamp(0.75rem, 1.1vw, 1rem);
+    line-height: 1.7;
+    text-align: center;
+}

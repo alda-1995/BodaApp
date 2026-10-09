@@ -1,0 +1,77 @@
+/*
+ * Preguntas frecuentes: una lista numerada con línea fina entre filas.
+ *
+ * La respuesta se despliega bajo su propia pregunta. El "+" es texto y no un
+ * icono: así cambia a "−" sin cargar nada.
+ */
+
+.tc-faq {
+    padding-block: clamp(4rem, 9vw, 7.5rem);
+    padding-inline: clamp(1.5rem, 6vw, 6.25rem);
+}
+
+.tc-faq__titulo {
+    font-size: var(--tc-size-section);
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.tc-faq__lista {
+    max-width: 74rem;
+    margin: clamp(2rem, 4vw, 3.5rem) auto 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--tc-line);
+}
+
+.tc-faq__fila {
+    border-bottom: 1px solid var(--tc-line);
+}
+
+/*
+ * Tres columnas, como el diseño: el número pegado a la izquierda, la pregunta
+ * a media página y el "+" al extremo derecho.
+ */
+.tc-faq__cabecera {
+    display: grid;
+    /* Mitad y mitad: el número abre la fila y la pregunta arranca al centro. */
+    grid-template-columns: 1fr 1fr auto;
+    gap: clamp(1rem, 3vw, 2.5rem);
+    align-items: center;
+    width: 100%;
+    padding-block: clamp(1rem, 2vw, 1.5rem);
+    border: 0;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    text-align: left;
+}
+
+.tc-faq__numero {
+    font-family: var(--font-primary);
+    font-size: var(--tc-size-lead);
+    font-variant-numeric: tabular-nums;
+}
+
+.tc-faq__pregunta {
+    font-family: var(--font-primary);
+    font-size: var(--tc-size-lead);
+}
+
+.tc-faq__signo {
+    /* En cursiva, como el diseño. */
+    font-style: italic;
+    font-family: var(--font-primary);
+    font-size: var(--tc-size-section);
+    line-height: 1;
+}
+
+.tc-faq__respuesta {
+    padding-bottom: clamp(1rem, 2vw, 1.5rem);
+    /* Alineada con la pregunta, no con el número. */
+    padding-left: clamp(2rem, 5vw, 4.5rem);
+    font-family: var(--font-secondary);
+    font-size: var(--tc-size-text);
+    line-height: 1.7;
+    color: var(--tc-muted);
+}

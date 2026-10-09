@@ -49,6 +49,14 @@ class TemplatesSeeder extends Seeder
                 'is_active' => true,
                 'duration_days' => 21,
             ],
+            [
+                'name' => 'Boda Clásica',
+                'slug' => 'boda-clasica',
+                'view_path' => 'build-templates.template-clasica.index',
+                'price' => 100.00,
+                'is_active' => true,
+                'duration_days' => 21,
+            ],
         ];
     }
 }

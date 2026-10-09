@@ -1,0 +1,224 @@
+/*
+ * Confirmación de asistencia: el papel de fondo de toda la sección y el
+ * formulario escrito encima, centrado.
+ *
+ * Los campos son una línea y no una caja, como en el diseño; el único enmarcado
+ * es el recado para los novios.
+ */
+
+.tc-rsvp {
+    /*
+     * El papel se repite en mosaico en vez de estirarse: así una invitación con
+     * preguntas personalizadas crece sin deformar el grano ni dejar un borde
+     * cortado. 'contain' fija el ancho de la baldosa al de la sección, de modo
+     * que el relieve se lee al mismo tamaño que en el diseño.
+     */
+    background:
+        var(--tc-papel-rsvp) top center / 100% auto repeat-y,
+        var(--tc-cream);
+    padding-block: clamp(3rem, 8vw, 6.5rem);
+    padding-inline: clamp(1.5rem, 6vw, 6.25rem);
+}
+
+/* 40% del ancho en el diseño: el formulario no llega al relieve de los bordes. */
+.tc-rsvp__panel {
+    width: min(100%, 26rem);
+    margin-inline: auto;
+}
+
+.tc-rsvp__titulo {
+    font-size: var(--tc-size-title);
+    text-align: center;
+}
+
+.tc-rsvp__limite,
+.tc-rsvp__aviso {
+    margin-top: 0.75rem;
+    font-family: var(--font-primary);
+    font-size: var(--tc-size-lead);
+    font-weight: 300;
+    /* En cursiva, como el diseño. */
+    font-style: italic;
+    text-align: center;
+}
+
+.tc-rsvp__panel form {
+    display: grid;
+    gap: 1.25rem;
+    margin-top: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+/* Cada campo es una línea: la etiqueta encima y el dato sobre el filo. */
+.tc-campo {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.tc-campo > span,
+.tc-campo legend {
+    font-family: var(--font-secondary);
+    font-size: var(--tc-size-text);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.tc-campo input,
+.tc-campo select,
+.tc-campo textarea {
+    width: 100%;
+    padding: 0.25rem 0;
+    border: 0;
+    border-bottom: 1px solid var(--tc-line);
+    background: none;
+    color: inherit;
+    font-family: var(--font-secondary);
+    font-size: var(--tc-size-text);
+}
+
+.tc-campo input:focus-visible,
+.tc-campo select:focus-visible,
+.tc-campo textarea:focus-visible {
+    outline: 0;
+    border-bottom-color: var(--tc-accent);
+}
+
+.tc-campo input::placeholder,
+.tc-campo textarea::placeholder {
+    color: var(--tc-muted);
+}
+
+.tc-campo--opciones {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.tc-campo--caja textarea {
+    padding: 0.75rem;
+    border: 1px solid var(--tc-line);
+}
+
+.tc-check {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    margin-top: 0.6rem;
+    font-family: var(--font-secondary);
+    font-size: var(--tc-size-text);
+}
+
+.tc-check input {
+    width: 1.25rem;
+    height: 1.25rem;
+    accent-color: var(--tc-accent);
+}
+
+.tc-campo__nota {
+    font-family: var(--font-secondary);
+    font-size: 0.8125rem;
+    color: var(--tc-muted);
+}
+
+.tc-rsvp__enviar {
+    justify-self: start;
+    margin-top: 0.5rem;
+    padding: 0.9rem 2.5rem;
+    border: 1px solid var(--tc-line);
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    font-family: var(--font-secondary);
+    font-size: 1.25rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.tc-rsvp__enviar:hover,
+.tc-rsvp__enviar:focus-visible {
+    background: var(--tc-ink);
+    color: var(--tc-white);
+}
+
+/* Los novios mirando su propia invitación: el formulario se ve, pero no se manda. */
+.tc-rsvp__enviar:disabled,
+.tc-rsvp__enviar:disabled:hover {
+    opacity: 0.4;
+    background: none;
+    color: inherit;
+    cursor: not-allowed;
+}
+
+.tc-rsvp__errores:empty {
+    display: none;
+}
+
+.tc-rsvp__errores {
+    font-family: var(--font-secondary);
+    font-size: var(--tc-size-text);
+    color: #a03a3a;
+}
+
+.tc-rsvp__espera {
+    display: none;
+    margin-top: 1.5rem;
+    font-family: var(--font-secondary);
+    font-size: var(--tc-size-text);
+    text-align: center;
+}
+
+.tc-rsvp__espera.is-visible {
+    display: block;
+}
+
+.tc-rsvp__spinner {
+    display: inline-block;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid var(--tc-line);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: tc-giro 0.8s linear infinite;
+}
+
+@keyframes tc-giro {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-rsvp__spinner {
+        animation-duration: 3s;
+    }
+}
+
+/* Las capas de respuesta: las enciende rsvp.js con .is-visible. */
+.tc-rsvp__estado {
+    display: none;
+    max-width: 34rem;
+    margin: clamp(2rem, 4vw, 3rem) auto 0;
+}
+
+.tc-rsvp__estado.is-visible {
+    display: block;
+}
+
+.tc-rsvp__nota {
+    padding: clamp(1.5rem, 3vw, 2rem);
+    border: 1px solid var(--tc-line);
+    text-align: center;
+}
+
+.tc-rsvp__nota h3 {
+    font-size: var(--tc-size-section);
+}
+
+.tc-rsvp__nota p {
+    margin-top: 0.75rem;
+    font-family: var(--font-secondary);
+    font-size: var(--tc-size-text);
+    color: var(--tc-muted);
+}
+
+.tc-rsvp__nota--error p {
+    color: #a03a3a;
+}
