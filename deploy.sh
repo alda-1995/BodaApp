@@ -161,8 +161,18 @@ al_salir() {
                 || rojo "NO SE PUDO. Entra y corre:  ssh $SERVIDOR 'php $APP/artisan up'"
         fi
 
-        rojo ""
-        rojo "El árbol anterior sigue en el servidor. Para deshacer:  ./deploy.sh --volver"
+        #
+        # Sólo tiene sentido ofrecer la vuelta atrás si el intercambio llegó a
+        # hacerse. Si falló antes, el árbol que está sirviendo es el de siempre
+        # y '--volver' restauraría uno más viejo sin ninguna razón.
+        #
+        if [[ $mantenimiento_puesto -eq 1 ]]; then
+            rojo ""
+            rojo "Para deshacer el intercambio:  ./deploy.sh --volver"
+        else
+            rojo ""
+            rojo "Falló antes de tocar el servidor: sigue sirviendo el árbol de siempre."
+        fi
     fi
 }
 trap al_salir EXIT
@@ -286,12 +296,23 @@ verde "  paquete listo ($(du -h "$paquete" | cut -f1))"
 paso "Desplegando"
 mantenimiento_puesto=1
 
-cat "$paquete" | ssh -o ServerAliveInterval=30 "$SERVIDOR" bash -s <<DESPLIEGUE
+#
+# Dos envíos y no uno: el paquete viaja por la entrada estándar de un comando
+# simple, y el script por la de 'bash -s'. No se pueden mezclar —si se intenta,
+# el heredoc gana y el servidor guarda el texto del script creyendo que es el
+# tar—, así que van en dos conexiones. Dos, no siete: eso era lo que disparaba
+# el cortafuegos.
+#
+remoto="/tmp/tamira-despliegue.tar.gz"
+
+cat "$paquete" | ssh -o ServerAliveInterval=30 "$SERVIDOR" "cat > $remoto"
+verde "  paquete recibido"
+
+ssh -o ServerAliveInterval=30 "$SERVIDOR" bash -s <<DESPLIEGUE
 set -euo pipefail
 
-paquete=\$(mktemp)
-cat > "\$paquete"
-
+paquete="$remoto"
+[[ -s "\$paquete" ]] || { echo "El paquete no llegó o llegó vacío."; exit 1; }
 echo "  recibido: \$(du -h "\$paquete" | cut -f1)"
 
 # --- El árbol nuevo, desde cero -------------------------------------------
