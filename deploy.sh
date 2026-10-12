@@ -33,8 +33,13 @@ readonly APP="$RAIZ/app_tamira"
 readonly ANTERIOR="$RAIZ/app_tamira.anterior"
 readonly NUEVO="$RAIZ/app_tamira.nuevo"
 readonly COMPARTIDO="$RAIZ/compartido"
+readonly RESPALDOS="$COMPARTIDO/respaldos"
 readonly WEB="$RAIZ/public_html"
 readonly SITIO="https://tamira.app"
+
+# Cuántas copias de la base se conservan. Pesa ~1 MB comprimida, así que
+# treinta días caben de sobra y dan margen para notar un borrado tardío.
+readonly COPIAS=30
 
 rojo()  { printf '\033[31m%s\033[0m\n' "$*"; }
 verde() { printf '\033[32m%s\033[0m\n' "$*"; }
@@ -45,12 +50,63 @@ modo="desplegar"
 
 for argumento in "$@"; do
     case "$argumento" in
-        --imagenes) subir_imagenes=1 ;;
-        --preparar) modo="preparar" ;;
-        --volver)   modo="volver" ;;
-        *) echo "Uso: ./deploy.sh [--imagenes] | --preparar | --volver"; exit 1 ;;
+        --imagenes)  subir_imagenes=1 ;;
+        --preparar)  modo="preparar" ;;
+        --volver)    modo="volver" ;;
+        --respaldar) modo="respaldar" ;;
+        --respaldos) modo="respaldos" ;;
+        *)
+            cat <<USO
+Uso:
+  ./deploy.sh              despliega (toma un respaldo de la base antes)
+  ./deploy.sh --imagenes   además las imágenes de las plantillas (80 MB)
+  ./deploy.sh --volver     deshace el último despliegue
+  ./deploy.sh --preparar   prepara el servidor (una sola vez)
+  ./deploy.sh --respaldar  toma un respaldo de la base ahora mismo
+  ./deploy.sh --respaldos  lista los respaldos que hay en el servidor
+USO
+            exit 1 ;;
     esac
 done
+
+#
+# El respaldo de la base, en el servidor.
+#
+# Las credenciales se leen del .env de allá y no salen de la máquina: ni viajan
+# por aquí ni quedan en el historial de comandos. '--single-transaction' saca
+# una foto consistente sin bloquear las tablas, así que se puede correr con el
+# sitio en pie.
+#
+guion_respaldo() {
+    cat <<GUION
+set -euo pipefail
+cd "$APP"
+
+leer() { grep -E "^\$1=" .env | head -1 | cut -d= -f2- | tr -d '"' | tr -d '\r'; }
+BD=\$(leer DB_DATABASE); US=\$(leer DB_USERNAME); PW=\$(leer DB_PASSWORD)
+
+[[ -n "\$BD" && -n "\$US" ]] || { echo "No pude leer DB_DATABASE/DB_USERNAME del .env"; exit 1; }
+
+mkdir -p "$RESPALDOS"
+destino="$RESPALDOS/\${BD}-\$(date +%Y%m%d-%H%M%S)\${1:-}.sql.gz"
+
+mysqldump --single-transaction --quick --routines --events \\
+    -u "\$US" -p"\$PW" "\$BD" 2>/dev/null | gzip > "\$destino"
+
+# Un dump vacío es peor que ninguno: parece respaldo y no lo es.
+if [[ \$(stat -c %s "\$destino") -lt 1024 ]]; then
+    rm -f "\$destino"
+    echo "El respaldo salió vacío. Revisa las credenciales del .env."
+    exit 1
+fi
+
+echo "  respaldo: \$(basename "\$destino")  (\$(du -h "\$destino" | cut -f1))"
+
+# Se conservan los $COPIAS más recientes.
+ls -t "$RESPALDOS"/*.sql.gz 2>/dev/null | tail -n +\$(($COPIAS + 1)) | xargs -r rm -f
+echo "  copias guardadas: \$(ls "$RESPALDOS"/*.sql.gz 2>/dev/null | wc -l)"
+GUION
+}
 
 # -----------------------------------------------------------------------------
 #  Preparar el servidor (una sola vez)
@@ -92,12 +148,41 @@ chmod -R 775 "$COMPARTIDO/storage"
 # public/ apunta a la raíz web: es lo que hace que public_path() resuelva bien.
 ln -sfn "$WEB" "$APP/public"
 
+mkdir -p "$RESPALDOS"
+
 echo
 echo "  compartido/:"
 ls -la "$COMPARTIDO" | tail -n +4 | awk '{print "    ", \$1, \$9, \$10, \$11}'
 echo "  enlaces en el árbol:"
 ls -la "$APP/.env" "$APP/storage" "$APP/public" | awk '{print "    ", \$9, \$10, \$11}'
 PREPARAR
+
+    #
+    # El respaldo diario. Va en el crontab del servidor, no aquí: tiene que
+    # correr aunque nadie despliegue en semanas, que es justo cuando hace falta.
+    #
+    paso "Programando el respaldo diario"
+
+    ssh "$SERVIDOR" bash -s <<CRON
+set -euo pipefail
+guion="$COMPARTIDO/respaldar.sh"
+
+cat > "\$guion" <<'FIN'
+#!/bin/sh
+# Respaldo diario de la base. Lo pone y lo actualiza deploy.sh --preparar.
+$(guion_respaldo)
+FIN
+
+chmod 700 "\$guion"
+
+# Se quita primero la línea vieja para no acumular duplicados al reejecutar.
+( crontab -l 2>/dev/null | grep -v "respaldar.sh"
+  echo "0 3 * * * \$guion >> $COMPARTIDO/respaldos.log 2>&1"
+) | crontab -
+
+echo "  respaldo diario a las 3:00, conservando $COPIAS copias"
+crontab -l | grep respaldar | sed 's/^/    /'
+CRON
 
     verde ""
     verde "Servidor preparado. Ya puedes desplegar con ./deploy.sh"
@@ -107,6 +192,26 @@ fi
 # -----------------------------------------------------------------------------
 #  Volver atrás
 # -----------------------------------------------------------------------------
+
+if [[ "$modo" == "respaldar" ]]; then
+    paso "Respaldando la base"
+    ssh "$SERVIDOR" bash -s <<< "$(guion_respaldo)"
+    verde ""
+    verde "Listo. Están en $RESPALDOS"
+    exit 0
+fi
+
+if [[ "$modo" == "respaldos" ]]; then
+    paso "Respaldos en el servidor"
+    ssh "$SERVIDOR" "ls -lht '$RESPALDOS'/*.sql.gz 2>/dev/null | awk '{print \"  \", \$5, \$6, \$7, \$8, \$9}'" \
+        || echo "  Todavía no hay ninguno. Toma el primero con: ./deploy.sh --respaldar"
+    echo
+    echo "  Para bajarte uno:"
+    echo "     scp -P 22022 tamira:$RESPALDOS/NOMBRE.sql.gz ."
+    echo "  Para restaurarlo (CUIDADO, sobrescribe la base):"
+    echo "     ssh tamira 'cd $APP && zcat $RESPALDOS/NOMBRE.sql.gz | mysql -u USUARIO -p BASE'"
+    exit 0
+fi
 
 if [[ "$modo" == "volver" ]]; then
     paso "Deshaciendo el último despliegue"
@@ -205,11 +310,32 @@ if [[ -n "$(git status --porcelain)" ]]; then
     exit 1
 fi
 
+#
+# Sólo desde main, y sin excepción.
+#
+# Producción tiene que poder reconstruirse desde una rama que todo el mundo ve.
+# Desplegar desde otra deja el servidor con código que no está en ninguna parte
+# compartida, y el día que haya que entender qué está corriendo, no hay dónde
+# mirarlo.
+#
 rama="$(git branch --show-current)"
 if [[ "$rama" != "main" ]]; then
-    rojo "Estás en la rama '$rama', no en main."
-    read -rp "¿Desplegar igual? (escribe: si) " respuesta
-    [[ "$respuesta" == "si" ]] || exit 1
+    rojo "Estás en la rama '$rama'. A producción sólo se despliega desde main."
+    rojo ""
+    rojo "Integra tu rama primero:"
+    rojo "   git checkout main && git merge $rama"
+    exit 1
+fi
+
+#
+# Los commits sin subir no bloquean, pero sí avisan: si hay que volver atrás
+# desde otra máquina, lo que sólo vive aquí no existe para nadie más.
+#
+sin_subir="$(git rev-list --count '@{u}..HEAD' 2>/dev/null || echo 0)"
+if [[ "$sin_subir" != "0" ]]; then
+    rojo "Vas a desplegar $sin_subir commit(s) que no has subido a origin/main."
+    read -rp "¿Continuar de todas formas? (escribe: si) " respuesta
+    [[ "$respuesta" == "si" ]] || { echo "Cancelado. Sube con: git push origin main"; exit 1; }
 fi
 
 # Un solo intento: cada fallo suma para el cortafuegos del servidor.
@@ -240,6 +366,14 @@ read -rp "Esto toca PRODUCCIÓN. ¿Continuar? (escribe: desplegar) " confirmacio
 # -----------------------------------------------------------------------------
 #  1. Compilar
 # -----------------------------------------------------------------------------
+
+#
+# Antes de nada, una foto de la base. Un despliegue no la toca, pero el código
+# nuevo sí puede: si algo escribe donde no debe, la diferencia entre un susto y
+# una pérdida es tener esto.
+#
+paso "Respaldando la base antes de desplegar"
+ssh "$SERVIDOR" bash -s <<< "$(guion_respaldo '-antes-del-despliegue')"
 
 paso "Compilando el front"
 npm run build

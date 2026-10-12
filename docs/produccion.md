@@ -200,7 +200,17 @@ Desde tu máquina, en Git Bash y en la raíz del proyecto:
 ./deploy.sh --imagenes     # además las imágenes de las plantillas (80 MB)
 ./deploy.sh --volver       # deshace el último despliegue
 ./deploy.sh --preparar     # una sola vez, antes del primero
+./deploy.sh --respaldar    # respaldo de la base ahora
+./deploy.sh --respaldos    # ver los respaldos que hay
 ```
+
+**Sólo se despliega desde `main`.** Desde cualquier otra rama el script se
+niega, sin preguntar: producción tiene que poder reconstruirse desde una rama
+que todo el mundo ve. Si traes trabajo en otra rama, intégralo primero.
+
+Si hay commits que no has subido a `origin/main`, avisa y pide confirmación —
+no bloquea, pero lo que sólo vive en tu máquina no existe para nadie más el día
+que haya que volver atrás desde otro sitio.
 
 ### Cómo funciona
 
@@ -326,17 +336,46 @@ curl -s -o /dev/null -w "%{http_code}\n" https://tamira.app/storage/...
 
 ---
 
-## Respaldos
+## Respaldos de la base
 
 **GitHub guarda el código, no la base de datos.** Los eventos, invitados,
 confirmaciones y órdenes viven en MySQL y de eso el repositorio no tiene nada.
 
-Antes de que entren datos reales conviene encender un respaldo diario que
-conserve siete días:
+Hay tres momentos en que se respalda, y los tres están automatizados:
 
-```cron
-0 3 * * * mysqldump -u USUARIO -p'CONTRASENA' BASE | gzip > /home/tamira/respaldos/tamira-$(date +\%F).sql.gz && find /home/tamira/respaldos -name 'tamira-*.sql.gz' -mtime +7 -delete
+| cuándo | qué lo dispara |
+|---|---|
+| **cada día a las 3:00** | el cron `compartido/respaldar.sh` |
+| **antes de cada despliegue** | el propio `deploy.sh` |
+| **cuando quieras** | `./deploy.sh --respaldar` |
+
+Se guardan en `compartido/respaldos/` y se conservan **las 30 más recientes**;
+las viejas se borran solas. Comprimida ocupa unos 20 KB, así que treinta días
+no son nada en disco y dan margen para notar un borrado tardío.
+
+```bash
+./deploy.sh --respaldar    # tomar uno ahora
+./deploy.sh --respaldos    # ver los que hay
 ```
 
-Un respaldo que nunca se ha restaurado no es un respaldo: conviene bajar uno y
-probar que importa bien antes de confiar en él.
+Las credenciales se leen del `.env` **del servidor** y no salen de ahí: no
+viajan por la red ni quedan en el historial de comandos de nadie.
+
+El volcado usa `--single-transaction`, que saca una foto consistente sin
+bloquear las tablas, así que puede correr con el sitio en pie. Y si el archivo
+sale de menos de 1 KB se borra y el respaldo falla con aviso: un dump vacío es
+peor que ninguno, porque parece un respaldo y no lo es.
+
+### Restaurar
+
+```bash
+# Bajarse uno
+scp -P 22022 tamira:/home/tamira/compartido/respaldos/NOMBRE.sql.gz .
+
+# Restaurarlo EN EL SERVIDOR (sobrescribe la base: toma uno nuevo antes)
+ssh tamira
+zcat /home/tamira/compartido/respaldos/NOMBRE.sql.gz | mysql -u USUARIO -p BASE
+```
+
+> Un respaldo que nunca se ha restaurado no es un respaldo. Conviene bajar uno
+> y probar que importa bien **en local** antes de necesitarlo de verdad.
