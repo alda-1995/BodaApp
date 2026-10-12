@@ -1,0 +1,92 @@
+/*
+ * Retoques de la copia descargable.
+ *
+ * Esta hoja sólo entra en el paquete que se lleva el organizador cuando su
+ * invitación vence (StaticInvitationExport). Esa página es un archivo suelto:
+ * el navegador no carga módulos ES desde file://, así que no corre nada de JS.
+ *
+ * Aquí se arregla lo que en la invitación de verdad resolvía el JS. La regla es
+ * siempre la misma: enseñar lo que estaba escondido esperando un clic, y quitar
+ * lo que ya no lleva a ningún lado. Nunca esconder contenido del organizador.
+ */
+
+/* ---------------------------------------------------------------------------
+ | Lo que destapaba Alpine
+ * ------------------------------------------------------------------------- */
+
+/*
+ * Sin Alpine, 'x-cloak' nunca se quita y las respuestas de las preguntas
+ * quedarían escondidas para siempre.
+ */
+[x-cloak] { display: revert !important; }
+
+.tc-faq__respuesta,
+.td-faq__answer,
+.te-faq__answer {
+    display: block !important;
+    height: auto !important;
+}
+
+/* El "+" abría la pregunta; ahora ya está abierta y no hay nada que pulsar. */
+.tc-faq__signo { display: none; }
+.tc-faq__cabecera { cursor: default; }
+
+/* ---------------------------------------------------------------------------
+ | Los carruseles
+ * ------------------------------------------------------------------------- */
+
+/*
+ * Los arma Swiper. Sin él, la pista se queda como una tira con scroll
+ * horizontal y sólo se ve la primera tarjeta, con unas flechas que no hacen
+ * nada: justo lo que parece un error. En la copia se abren en una rejilla, de
+ * modo que todo se lee de un vistazo y sin arrastrar nada.
+ */
+.te-transport__viewport,
+.te-gallery__viewport,
+.td-gallery__viewport,
+.td-story__viewport {
+    max-width: none !important;
+    overflow: visible !important;
+}
+
+.te-transport__track,
+.te-gallery__track,
+.td-story__track {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1.5rem;
+    overflow: visible !important;
+    transform: none !important;
+}
+
+/* Cada tarjeta ocupa su celda: ya no es un slide al que se le fija el ancho. */
+.te-transport__ride,
+.te-gallery__slide,
+.td-story__slide {
+    flex: initial !important;
+    width: auto !important;
+    transform: none !important;
+}
+
+/* Las flechas no llevan a ningún lado. */
+.te-transport__nav,
+.swiper-button-next,
+.swiper-button-prev,
+.swiper-pagination {
+    display: none !important;
+}
+
+/* ---------------------------------------------------------------------------
+ | Lo que sólo aparecía al pasar el ratón
+ * ------------------------------------------------------------------------- */
+
+/*
+ * En "Nuestra historia" la foto de cada año se enciende al pasar por encima.
+ * En una copia impresa de hecho nadie pasa el ratón: son fotos que subió el
+ * organizador y se quedarían invisibles, así que se muestran todas.
+ */
+.te-story__year-photo,
+.td-story__photo {
+    opacity: 1 !important;
+    visibility: visible !important;
+}

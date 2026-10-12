@@ -261,6 +261,51 @@ class StaticInvitationExportTest extends TestCase
         @unlink($zip);
     }
 
+    /**
+     * El CSS sale de resources/, no de lo que compiló Vite.
+     *
+     * Mientras se desarrolla, el sitio en vivo sirve desde el servidor de Vite
+     * y public/build puede ser de hace días: si la copia saliera de ahí, el
+     * organizador se llevaría una plantilla vieja sin que nadie se entere.
+     */
+    public function test_el_css_sale_de_la_fuente_y_no_del_build(): void
+    {
+        $css = $this->file('invitacion.css');
+
+        /*
+        | Lo que separa una cosa de la otra sin lugar a dudas: Vite minifica y
+        | se come los comentarios, así que un comentario del código fuente sólo
+        | puede haber llegado leyendo resources/.
+        */
+        $this->assertStringContainsString(
+            'Plantilla "Boda Clásica": CSS3 propio',
+            $css,
+            'El CSS parece venir de public/build: ahí los comentarios no existen.',
+        );
+
+        // Y los @import quedaron metidos, no citados: una sola hoja.
+        $this->assertStringNotContainsString('@import', $css);
+        $this->assertStringContainsString('.tc-faq__respuesta', $css);
+    }
+
+    /**
+     * Los carruseles los arma Swiper. Sin JS se quedaban como una tira con
+     * scroll y unas flechas que no hacían nada —se veía como un error—, así que
+     * en la copia se abren en rejilla y las flechas se van.
+     */
+    public function test_los_carruseles_se_abren_en_rejilla_y_sin_flechas(): void
+    {
+        $css = $this->file('invitacion.css');
+
+        $this->assertStringContainsString('Retoques de la copia descargable', $css);
+        $this->assertStringContainsString('.te-transport__nav', $css);
+        $this->assertStringContainsString('.te-transport__track', $css);
+        $this->assertStringContainsString('grid-template-columns: repeat(auto-fit', $css);
+
+        // Y las fotos que sólo salían al pasar el ratón quedan a la vista.
+        $this->assertStringContainsString('.te-story__year-photo', $css);
+    }
+
     /** Las rutas relativas que aparecen en un archivo del paquete. */
     private function referencesIn(string $contenido): array
     {

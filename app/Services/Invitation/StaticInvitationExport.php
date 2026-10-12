@@ -39,6 +39,9 @@ class StaticInvitationExport
     private const FUENTES = 'fuentes';
     private const IMAGENES = 'imagenes';
 
+    /** Lo que se enseña y lo que se quita cuando no hay JS que lo resuelva. */
+    private const RETOQUES = 'resources/css/templates/shared/static-export.css';
+
     /**
      * Atributos que sólo entiende Alpine. Sin él puestos estorban: 'x-cloak'
      * deja las respuestas de las preguntas escondidas para siempre.
@@ -50,9 +53,6 @@ class StaticInvitationExport
 
     /** Lo que se recoge mientras se reescribe: ruta en el paquete => de dónde sale. */
     private array $archivos = [];
-
-    /** El manifiesto de Vite, leído una sola vez. */
-    private ?array $manifiesto = null;
 
     public function __construct(private readonly TemplateRenderer $renderer)
     {
@@ -212,12 +212,69 @@ class StaticInvitationExport
         );
 
         foreach ($hojas as $entrada) {
-            if ($archivo = $this->builtFile($entrada, 'css')) {
-                $css .= $this->rewriteCss((string) file_get_contents($archivo)) . "\n";
-            }
+            $css .= $this->sourceCss(base_path($entrada)) . "\n";
         }
 
         return $css . $this->staticSheet();
+    }
+
+    /**
+     * El CSS tal como está escrito en resources/, con sus @import ya metidos.
+     *
+     * Se lee de la fuente y no de lo que compiló Vite a propósito. El sitio en
+     * vivo sirve desde el servidor de Vite mientras se desarrolla, así que
+     * public/build puede ser de hace días: la copia saldría con una plantilla
+     * vieja y nadie se enteraría. resources/ viaja con el código en cualquier
+     * entorno, así que esto siempre es lo que el organizador acaba de ver.
+     *
+     * @param array<int, string> $vistos corta los @import que se citan en círculo
+     */
+    private function sourceCss(string $archivo, array $vistos = []): string
+    {
+        $archivo = (string) (realpath($archivo) ?: $archivo);
+
+        if (!is_file($archivo) || in_array($archivo, $vistos, true)) {
+            return '';
+        }
+
+        $vistos[] = $archivo;
+        $carpeta = dirname($archivo);
+        $css = (string) file_get_contents($archivo);
+
+        // Primero los @import, que se sustituyen por el contenido de su hoja.
+        $css = (string) preg_replace_callback(
+            '/@import\s+(?:url\()?["\']?([^"\')]+)["\']?\)?\s*;/i',
+            fn (array $m) => $this->sourceCss($this->resolve($carpeta, $m[1]), $vistos),
+            $css,
+        );
+
+        // Y después lo que quede: tipografías e imágenes, relativas a esta hoja.
+        return (string) preg_replace_callback(
+            '/url\((["\']?)([^"\')]+)\1\)/i',
+            function (array $m) use ($carpeta) {
+                $origen = $this->resolve($carpeta, $m[2]);
+
+                if (!is_file($origen)) {
+                    return $m[0];
+                }
+
+                $destino = $this->cssFolder($m[2]) . '/' . $this->fileName($origen);
+                $this->archivos[$destino] = $origen;
+
+                return "url('{$destino}')";
+            },
+            $css,
+        );
+    }
+
+    /** Una ruta escrita en un CSS, resuelta contra la carpeta de esa hoja. */
+    private function resolve(string $carpeta, string $ruta): string
+    {
+        if (preg_match('#^(https?:|data:|/)#i', $ruta)) {
+            return $ruta;
+        }
+
+        return $carpeta . DIRECTORY_SEPARATOR . ltrim($ruta, './');
     }
 
     /**
@@ -262,29 +319,13 @@ class StaticInvitationExport
     /**
      * Los retoques propios de la copia.
      *
-     * Lo que sin JavaScript quedaría escondido se enseña, y lo que ya no hace
-     * nada deja de parecer que se puede tocar.
+     * Viven en una hoja de resources/, con el resto del CSS, y no escritos aquí
+     * dentro: son decisiones de diseño —qué se enseña cuando no hay JS— y quien
+     * las toca es quien toca las plantillas, no quien toca este servicio.
      */
     private function staticSheet(): string
     {
-        return <<<'CSS'
-
-        /* --- Retoques de la copia descargable ------------------------------
-         * Esta página no lleva JavaScript, así que lo que Alpine mostraba al
-         * hacer clic se muestra desde el principio, y lo que era un botón deja
-         * de anunciarse como tal.
-         */
-        [x-cloak] { display: revert !important; }
-
-        .tc-faq__respuesta,
-        .td-faq__answer,
-        .te-faq__answer { display: block !important; height: auto !important; }
-
-        .tc-faq__cabecera,
-        .tc-faq__signo { cursor: default; }
-
-        .tc-faq__signo { display: none; }
-        CSS;
+        return "\n" . $this->sourceCss(base_path(self::RETOQUES));
     }
 
     /* ---------------------------------------------------------------------
@@ -382,26 +423,5 @@ class StaticInvitationExport
         }
 
         return is_file($origen) ? (string) file_get_contents($origen) : null;
-    }
-
-    /** El archivo que Vite compiló para una entrada del manifiesto. */
-    private function builtFile(string $entrada, string $extension): ?string
-    {
-        if ($this->manifiesto === null) {
-            $ruta = public_path('build/manifest.json');
-            $this->manifiesto = is_file($ruta)
-                ? (array) json_decode((string) file_get_contents($ruta), true)
-                : [];
-        }
-
-        $salida = $this->manifiesto[$entrada]['file'] ?? null;
-
-        if (!is_string($salida) || !Str::endsWith($salida, ".{$extension}")) {
-            return null;
-        }
-
-        $archivo = public_path('build/' . $salida);
-
-        return is_file($archivo) ? $archivo : null;
     }
 }
