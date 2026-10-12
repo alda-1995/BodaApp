@@ -55,16 +55,27 @@
                         </p>
                     </div>
 
-                    {{-- Apagada a mano y vencida por fecha no son lo mismo: se dicen distinto. --}}
-                    <span class="shrink-0 rounded-full bg-[#F2E0E0] px-3 py-1 text-size-small-heading text-[#8C2626]">
-                        @if (!$event->is_active)
-                            Desactivada
-                        @elseif ($event->expires_at)
-                            Venció el {{ $event->expires_at->format('d/m/Y') }}
-                        @else
-                            No disponible
-                        @endif
-                    </span>
+                    <div class="flex shrink-0 flex-col items-end gap-2">
+                        {{-- Apagada a mano y vencida por fecha no son lo mismo: se dicen distinto. --}}
+                        <span class="rounded-full bg-[#F2E0E0] px-3 py-1 text-size-small-heading text-[#8C2626]">
+                            @if (!$event->is_active)
+                                Desactivada
+                            @elseif ($event->expires_at)
+                                Venció el {{ $event->expires_at->format('d/m/Y') }}
+                            @else
+                                No disponible
+                            @endif
+                        </span>
+
+                        {{--
+                            Se la puede guardar aunque ya no se abra: un archivo
+                            suyo, con sus textos y sus fotos dentro.
+                        --}}
+                        <a href="{{ route('organizer.invitation.download', $event) }}"
+                            class="text-parrafo text-[#2563EB] hover:underline">
+                            Descargar copia
+                        </a>
+                    </div>
                 </li>
             @endforeach
         </ul>

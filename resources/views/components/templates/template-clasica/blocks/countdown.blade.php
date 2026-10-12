@@ -28,7 +28,16 @@
         </div>
     @endif
 
-    @if ($context->eventDate)
+    @if ($context->eventDate && $context->isStaticExport)
+        {{--
+            En la copia descargable no hay cuenta que llevar: la boda ya pasó y
+            las cuatro cifras marcarían cero. En su lugar queda la fecha.
+        --}}
+        <div class="tc-countdown__cuenta">
+            <h2 class="tc-countdown__titulo">El gran día fue</h2>
+            <p class="tc-countdown__fecha">{{ $context->formattedDateLong() }}</p>
+        </div>
+    @elseif ($context->eventDate)
         @php
             // Lo que falta ahora mismo; el navegador lo sigue contando.
             $restante = max(0, now()->diffInSeconds($context->eventDate, false));

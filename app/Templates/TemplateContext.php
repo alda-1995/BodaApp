@@ -30,6 +30,14 @@ final class TemplateContext
          * pueden, que ahí sí están respondiendo por alguien.
          */
         public readonly bool $isOrganizerPreview = false,
+        /**
+         * La copia que se lleva el organizador cuando su invitación vence.
+         *
+         * Es una página suelta en su computadora: no hay servidor al que
+         * escribirle ni JS que corra —los módulos no cargan desde file://—, así
+         * que lo que dependa de uno u otro no se pinta en vez de pintarse roto.
+         */
+        public readonly bool $isStaticExport = false,
     ) {
     }
 

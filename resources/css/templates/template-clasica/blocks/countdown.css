@@ -68,6 +68,14 @@
     text-transform: uppercase;
 }
 
+/* En la copia descargable, en lugar de las cuatro cifras. */
+.tc-countdown__fecha {
+    margin-top: clamp(1rem, 2.5vw, 2rem);
+    font-family: var(--font-primary);
+    font-size: var(--tc-size-lead);
+    font-style: italic;
+}
+
 .tc-countdown__cifras {
     display: flex;
     justify-content: center;

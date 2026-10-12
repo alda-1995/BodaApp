@@ -4,6 +4,7 @@ use App\Http\Controllers\Organizer\DashboardController;
 use App\Http\Controllers\Organizer\EventInfoController;
 use App\Http\Controllers\Organizer\SharedEventsController;
 use App\Http\Controllers\Organizer\GuestController;
+use App\Http\Controllers\Organizer\InvitationDownloadController;
 use App\Http\Controllers\Organizer\NotificationController;
 use App\Http\Controllers\Organizer\OrderController;
 use App\Http\Controllers\Organizer\RsvpController;
@@ -23,6 +24,17 @@ Route::middleware(['auth', 'role:organizer|coadmin'])
         Route::put('/configuracion-evento/{event:slug}/{step}', [EventSetupController::class, 'update'])
             ->name('events.wizard.update');
     });
+
+/*
+ * La copia descargable de una invitación vencida.
+ *
+ * Fuera de 'event.active', como el historial de pagos y por lo mismo: sólo
+ * tiene sentido cuando la invitación ya no está en pie. El propio controlador
+ * comprueba que el evento sea suyo y que de verdad haya vencido.
+ */
+Route::middleware(['auth', 'role:organizer', 'throttle:10,1'])
+    ->get('/mis-invitaciones/{event:slug}/descargar', InvitationDownloadController::class)
+    ->name('organizer.invitation.download');
 
 /*
  * Historial de pagos del dueño.
