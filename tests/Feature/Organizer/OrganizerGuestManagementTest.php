@@ -56,6 +56,73 @@ class OrganizerGuestManagementTest extends TestCase
             ->assertDontSee('Invitado Ajeno');
     }
 
+    /**
+     * Cada boda lleva su propia lista.
+     *
+     * Un invitado de una boda anterior se veía aquí a medias —sin tope de
+     * acompañantes y sin enlace, porque esos datos cuelgan de la unión con el
+     * evento— y en cambio no aparecía en notificaciones, que sí filtra por
+     * boda. Se veía como si algo se hubiera roto.
+     */
+    public function test_no_lista_invitados_de_una_boda_anterior(): void
+    {
+        [$deAntes, ] = $this->guestOfPreviousWeddingAndCurrentOne();
+
+        $this->actingAs($this->organizer)
+            ->get(route('organizer.guests.index'))
+            ->assertOk()
+            ->assertSee('Betsy Torres')
+            ->assertDontSee($deAntes->name);
+    }
+
+    /** Y tampoco se puede abrir el suyo desde esta boda. */
+    public function test_no_deja_abrir_un_invitado_de_otra_boda(): void
+    {
+        [$deAntes, ] = $this->guestOfPreviousWeddingAndCurrentOne();
+
+        $this->actingAs($this->organizer)
+            ->get(route('organizer.guests.show', $deAntes->id))
+            ->assertNotFound();
+    }
+
+    /**
+     * Deja al organizador con dos bodas: la de setUp, que pasa a ser la vieja, y
+     * una nueva que es la que manda.
+     *
+     * El orden importa: la boda "actual" es la última que se creó, así que la
+     * anterior tiene que existir antes. Montarlo al revés hace que la prueba
+     * compruebe justo lo contrario de lo que dice.
+     *
+     * @return array{0: Guest, 1: Guest}  el de la boda vieja y el de la nueva
+     */
+    private function guestOfPreviousWeddingAndCurrentOne(): array
+    {
+        $deAntes = Guest::factory()->create([
+            'user_id' => $this->organizer->id,
+            'name' => 'Invitado De La Boda Pasada',
+        ]);
+        $deAntes->events()->attach($this->event->id, [
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'max_passes' => 1,
+        ]);
+
+        $actual = Event::factory()->create([
+            'user_id' => $this->organizer->id,
+            'template_id' => Template::factory()->create(['view_path' => null])->id,
+        ]);
+
+        $deAhora = Guest::factory()->create([
+            'user_id' => $this->organizer->id,
+            'name' => 'Betsy Torres',
+        ]);
+        $deAhora->events()->attach($actual->id, [
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'max_passes' => 1,
+        ]);
+
+        return [$deAntes, $deAhora];
+    }
+
     public function test_busca_por_nombre_correo_o_telefono(): void
     {
         $this->addGuest($this->organizer, ['name' => 'Betsy Torres', 'phone' => '+528119125833']);
@@ -110,7 +177,7 @@ class OrganizerGuestManagementTest extends TestCase
             ->assertSessionHasErrors('phone');
     }
 
-    public function test_el_correo_es_unico_por_organizador_y_no_global(): void
+    public function test_el_correo_es_unico_dentro_de_la_boda_y_no_global(): void
     {
         [$otro] = $this->makeOrganizerWithEvent();
         $this->addGuest($otro, ['email' => 'betsy@correo.com']);
@@ -120,10 +187,40 @@ class OrganizerGuestManagementTest extends TestCase
             ->post(route('organizer.guests.store'), $this->payload(['email' => 'betsy@correo.com']))
             ->assertSessionHasNoErrors();
 
-        // Repetido dentro del mismo organizador: no.
+        // Repetido dentro de la misma boda: no.
         $this->actingAs($this->organizer)
             ->post(route('organizer.guests.store'), $this->payload(['name' => 'Otra', 'email' => 'betsy@correo.com']))
             ->assertSessionHasErrors('email');
+    }
+
+    /**
+     * A quien invitaste a tu boda anterior lo puedes volver a invitar a la
+     * nueva: es lo normal, y antes la regla de correo único —que miraba todos
+     * los invitados del organizador— lo impedía.
+     */
+    public function test_se_puede_reinvitar_a_alguien_de_una_boda_anterior(): void
+    {
+        $deAntes = Guest::factory()->create([
+            'user_id' => $this->organizer->id,
+            'email' => 'aldair.canalla.agency@gmail.com',
+        ]);
+        $deAntes->events()->attach($this->event->id, [
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'max_passes' => 1,
+        ]);
+
+        // La nueva boda, que pasa a ser la que manda.
+        Event::factory()->create([
+            'user_id' => $this->organizer->id,
+            'template_id' => Template::factory()->create(['view_path' => null])->id,
+        ]);
+
+        $this->actingAs($this->organizer)
+            ->post(route('organizer.guests.store'), $this->payload([
+                'name' => 'Aldair',
+                'email' => 'aldair.canalla.agency@gmail.com',
+            ]))
+            ->assertSessionHasNoErrors();
     }
 
     /* ---------------------------------------------------------------------

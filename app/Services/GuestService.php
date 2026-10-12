@@ -29,18 +29,33 @@ class GuestService
         return $user->currentEvent();
     }
 
-    public function paginateForUser(User $user, ?string $search = null, int $perPage = 15): LengthAwarePaginator
+    /**
+     * Los invitados de la boda que el organizador tiene en pie.
+     *
+     * La lista es por evento y no por organizador: cada boda lleva la suya. Un
+     * invitado de una boda anterior sigue existiendo —su confirmación y sus
+     * envíos son historia de aquella—, pero no se mezcla con ésta. Si apareciera
+     * aquí, se vería a medias: sin tope de acompañantes y sin enlace, porque
+     * esos datos cuelgan de la unión con el evento, no del invitado.
+     */
+    private function guestsOfEvent(User $user, ?Event $event)
     {
-        $event = $this->eventFor($user);
+        $id = $event?->id ?? 0;
 
         return $user->guests()
+            ->whereHas('events', fn ($query) => $query->whereKey($id))
+            ->with(['events' => fn ($query) => $query->whereKey($id)]);
+    }
+
+    public function paginateForUser(User $user, ?string $search = null, int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->guestsOfEvent($user, $this->eventFor($user))
             ->when($search, function ($query, $search) {
                 $term = '%' . $search . '%';
                 $query->where(fn ($q) => $q->where('name', 'like', $term)
                     ->orWhere('email', 'like', $term)
                     ->orWhere('phone', 'like', $term));
             })
-            ->with(['events' => fn ($query) => $query->whereKey($event?->id ?? 0)])
             ->orderBy('name')
             ->paginate($perPage)
             ->withQueryString();
@@ -51,11 +66,9 @@ class GuestService
      */
     public function findForUser(User $user, int $id): Guest
     {
-        $event = $this->eventFor($user);
-
-        return $user->guests()
-            ->with(['events' => fn ($query) => $query->whereKey($event?->id ?? 0)])
-            ->findOrFail($id);
+        // Mismo filtro que la lista: un invitado de otra boda da 404, no se abre
+        // desde aquí para editarlo o borrarlo por error.
+        return $this->guestsOfEvent($user, $this->eventFor($user))->findOrFail($id);
     }
 
     public function createForUser(User $user, GuestDTO $dto): Guest
@@ -141,7 +154,15 @@ class GuestService
 
         $created = 0;
         $errors = [];
-        $existingEmails = $user->guests()->whereNotNull('email')->pluck('email')
+        /*
+        | Se compara contra los de ESTA boda, no contra todos los del
+        | organizador: si no, alguien que ya invitó a su boda anterior saldría
+        | rechazado por duplicado al importarlo en la nueva, donde todavía no
+        | está. Cada boda lleva su lista, así que el mismo correo puede repetirse
+        | entre bodas distintas.
+        */
+        $existingEmails = $this->guestsOfEvent($user, $this->eventFor($user))
+            ->whereNotNull('email')->pluck('email')
             ->map(fn ($email) => mb_strtolower($email))->flip()->all();
 
         foreach ($rows as $index => $row) {
@@ -167,7 +188,7 @@ class GuestService
 
             $emailKey = $data['email'] ? mb_strtolower($data['email']) : null;
             if ($emailKey && isset($existingEmails[$emailKey])) {
-                $errors[] = "Fila {$line}: el correo {$data['email']} ya está en tu lista.";
+                $errors[] = "Fila {$line}: el correo {$data['email']} ya está invitado a esta boda.";
                 continue;
             }
 

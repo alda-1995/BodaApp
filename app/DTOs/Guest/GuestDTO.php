@@ -39,7 +39,7 @@ final class GuestDTO
 
     /**
      * Reglas compartidas por el formulario y la importación.
-     * La unicidad del correo (por organizador) la agrega el FormRequest.
+     * La unicidad del correo (dentro de la boda en curso) la agrega el FormRequest.
      */
     public static function rules(): array
     {
@@ -62,7 +62,7 @@ final class GuestDTO
 
             'email.email' => 'El correo electrónico no es válido.',
             'email.max' => 'El correo electrónico no debe exceder los :max caracteres.',
-            'email.unique' => 'Ya tienes un invitado con este correo electrónico.',
+            'email.unique' => 'Ya invitaste a esta boda a alguien con ese correo electrónico.',
 
             'max_passes.required' => 'Indica cuántos acompañantes puede llevar.',
             'max_passes.integer' => 'El tope de acompañantes debe ser un número entero.',

@@ -61,8 +61,16 @@ class NotificationController extends Controller
             return back()->with('error', 'Necesitas un evento para enviar notificaciones.');
         }
 
-        // Sólo invitados del organizador: ids ajenos simplemente no se encuentran.
-        $guests = $user->guests()->whereIn('id', $request->validated('guest_ids'))->get();
+        /*
+        | Sólo invitados de ESTA boda: ids ajenos, o de una boda anterior del
+        | mismo organizador, simplemente no se encuentran. Con el filtro sólo
+        | por organizador, una petición armada a mano podía mandar el aviso de
+        | esta boda a quien estaba invitado a otra.
+        */
+        $guests = $user->guests()
+            ->whereHas('events', fn ($query) => $query->whereKey($event->id))
+            ->whereIn('id', $request->validated('guest_ids'))
+            ->get();
 
         if ($guests->isEmpty()) {
             return back()->with('error', 'No se encontraron los invitados seleccionados.');
