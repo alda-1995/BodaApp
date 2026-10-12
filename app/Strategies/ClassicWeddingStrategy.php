@@ -61,35 +61,35 @@ class ClassicWeddingStrategy extends DefaultTemplateStrategy
                     ->default('Los invitamos a celebrar')
                     ->nullable()
                     ->rules(['string', 'max:60']))
-                ->add('cover_photo', $this->photo('cover_photo', 'Foto de portada')
-                    ->help('Vertical. Es lo primero que se ve, detrás de los nombres.'))
                 /*
-                | La banda ancha que cierra la portada y da paso al itinerario.
-                | Va aparte de la de portada porque se recorta muy distinto: ésta
-                | es apaisada y de borde a borde.
+                | La única foto de la portada es la banda ancha que la cierra y
+                | da paso al itinerario. La tarjeta de relieve donde se leen los
+                | nombres no se pide: es parte del diseño, como la textura del
+                | panel, y va fija en el bloque.
                 */
                 ->add('band_photo', $this->photo('band_photo', 'Foto de ancho completo')
                     ->help('Apaisada y de borde a borde. Separa la portada del itinerario.'))
                 // Esta portada no los pinta en ningún lado.
                 ->drop('family_parents')
-                ->first('invitation_line', 'cover_photo', 'band_photo')
+                ->first('invitation_line', 'band_photo')
                 ->example([
                     'invitation_line' => 'Los invitamos a celebrar',
-                    'cover_photo' => asset(self::IMG . 'portada.png'),
                     'band_photo' => asset(self::IMG . 'banda-2.jpg'),
                 ]),
 
             /*
-            | Ceremonia y recepción, cada una con su foto. Es un repetidor: el
-            | diseño enseña dos momentos, pero una boda con misa, cóctel y fiesta
-            | añade los suyos sin que nadie toque la plantilla.
+            | Ceremonia y recepción. Es un repetidor: el diseño enseña dos
+            | momentos, pero una boda con misa, cóctel y fiesta añade los suyos
+            | sin que nadie toque la plantilla.
+            |
+            | Aquí sólo se piden los datos. Las tarjetas de relieve en las que se
+            | leen son del diseño y van fijas en el bloque, que las va alternando
+            | tal como aparecen; el organizador no sube ninguna.
             |
             | Sin título de sección: cada momento se nombra solo ("Ceremonia",
             | "Recepción"), así que un encabezado encima no diría nada nuevo.
             */
             $this->section(ItinerarySection::class)
-                ->addTo('events', $this->photo('photo', 'Foto del momento')
-                    ->help('Acompaña a este momento. El diseño las alterna de lado.'))
                 /*
                 | El ejemplo va en la forma de los datos ya resueltos ('moments'),
                 | no en la de los campos del wizard ('events'): es lo que recibe
@@ -103,7 +103,6 @@ class ClassicWeddingStrategy extends DefaultTemplateStrategy
                             'location' => 'Centro Histórico, Santiago de Querétaro',
                             'maps' => 'https://maps.google.com/?q=Templo+de+San+Francisco+de+Asis',
                             'time' => '5:00 pm',
-                            'photo' => asset(self::IMG . 'ceremonia.png'),
                         ],
                         [
                             'name' => 'Recepción',
@@ -111,7 +110,6 @@ class ClassicWeddingStrategy extends DefaultTemplateStrategy
                             'location' => 'El Marqués, Querétaro',
                             'maps' => 'https://maps.google.com/?q=Hacienda+Viborillas',
                             'time' => '6:30 pm',
-                            'photo' => asset(self::IMG . 'recepcion.png'),
                         ],
                     ],
                 ]),
@@ -126,7 +124,12 @@ class ClassicWeddingStrategy extends DefaultTemplateStrategy
                     ->placeholder('Unas palabras sobre estas fotos, o sobre ustedes.')
                     ->help('Se lee centrado debajo del collage. Déjalo vacío y sólo se ven las fotos.')
                     ->nullable()
-                    ->rules(['string', 'max:600']))
+                    /*
+                    | Aquí se cuenta la historia de la pareja, así que da sitio
+                    | para varios párrafos: el bloque crece hacia abajo y no hay
+                    | nada que se deforme por escribir de más.
+                    */
+                    ->rules(['string', 'max:2000']))
                 // Las fotos caen en collage; no hay dónde pedirle fotos a nadie.
                 ->drop('guest_photos_message')
                 ->first('intro')
@@ -147,10 +150,15 @@ class ClassicWeddingStrategy extends DefaultTemplateStrategy
             | que se preguntan las dos pero se leen juntas.
             */
             $this->section(DressCodeSection::class)
-                ->first('dress_code_type', 'reference_image', 'men_attire', 'women_attire', 'color_or_theme')
+                /*
+                | Aquí no se sube ninguna imagen de referencia: la etiqueta
+                | colgante donde se lee el código es del diseño y va fija en el
+                | bloque, así que el catálogo la pediría para nada.
+                */
+                ->drop('reference_image')
+                ->first('dress_code_type', 'men_attire', 'women_attire', 'color_or_theme')
                 ->example([
                     'type' => 'Formal Romántico',
-                    'reference_image' => asset(self::IMG . 'vestimenta.png'),
                     'men_attire' => 'Caballeros: traje o esmoquin.',
                     'women_attire' => 'Damas: vestido largo o de cóctel elegante.',
                 ]),
@@ -177,14 +185,13 @@ class ClassicWeddingStrategy extends DefaultTemplateStrategy
                     ],
                 ]),
 
+            /*
+            | Aquí no se sube ninguna foto: el papel de relieve sobre el que se
+            | escribe el formulario es del diseño y va fijo en el bloque.
+            */
             $this->section(RsvpSection::class)
                 ->blade('contact-form')
-                ->add('photo', $this->photo('photo', 'Foto junto al formulario')
-                    ->help('Vertical. Va a un lado del formulario de confirmación.'))
-                ->first('photo', 'rsvp_deadline', 'welcome_message', 'thank_you_message')
-                ->example([
-                    'photo' => asset(self::IMG . 'rsvp.jpg'),
-                ]),
+                ->first('rsvp_deadline', 'welcome_message', 'thank_you_message'),
 
             $this->section(FaqSection::class)
                 ->example([

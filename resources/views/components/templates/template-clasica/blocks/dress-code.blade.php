@@ -1,7 +1,6 @@
 @props(['section', 'context'])
 
 @php
-    $foto = $section->get('reference_image');
     $tipo = $section->get('type');
     $tema = $section->get('color_or_theme');
 
@@ -20,9 +19,9 @@
     style="--tc-textura: url('{{ asset('images/assets-clasica/banda-1.jpg') }}')">
 
     <div class="tc-dress__etiqueta">
-        @if ($foto)
-            <img class="tc-dress__foto" src="{{ $foto }}" alt="" loading="lazy">
-        @endif
+        {{-- La etiqueta es del diseño y va fija: no se pide en el wizard. --}}
+        <img class="tc-dress__foto" alt="" loading="lazy"
+            src="{{ asset('images/assets-clasica/vestimenta.png') }}">
 
         <div class="tc-dress__texto">
             <p class="tc-dress__rotulo">Código de vestimenta</p>

@@ -4,7 +4,6 @@
     $guest = $context->guest;
     $maxPasses = (int) ($guest->max_passes ?? $section->get('open_link_max_passes', 1));
     $deadline = $section->get('deadline');
-    $foto = $section->get('photo');
 
     /*
     | Con la liga abierta apagada sólo confirma quien llegó por su invitación
@@ -30,11 +29,15 @@
     invitation.rsvp por fetch y rsvp.js deja visible la capa que toca. El nombre
     va partido en dos campos y rsvp.js los junta al enviar.
 --}}
-{{-- El papel viaja en una variable: el CSS lo pinta en la tarjeta del centro. --}}
+{{--
+    El papel es del diseño y va fijo. Viaja en una variable y no en el CSS
+    porque con el servidor de Vite en marcha un url() absoluto se resuelve
+    contra el origen de Vite, que no sirve public/, y la imagen desaparece.
+--}}
 <section class="tc-rsvp" id="confirmacion" data-rsvp
     data-url="{{ $context->rsvpUrl }}"
     data-demo="{{ $context->isDemo ? '1' : '' }}"
-    @if ($foto) style="--tc-papel-rsvp: url('{{ $foto }}')" @endif>
+    style="--tc-papel-rsvp: url('{{ asset('images/assets-clasica/rsvp.jpg') }}')">
 
     <div class="tc-rsvp__panel">
         <h2 class="tc-rsvp__titulo">RSVP</h2>

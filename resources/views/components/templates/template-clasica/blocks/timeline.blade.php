@@ -2,6 +2,13 @@
 
 @php
     $momentos = $section->get('moments', []);
+
+    /*
+    | Las tarjetas de relieve son del diseño, no fotos que suba el organizador:
+    | una apaisada y una vertical, que se van turnando. Una boda con un tercer
+    | momento vuelve a la primera, y así el vaivén nunca se queda sin tarjeta.
+    */
+    $tarjetas = ['ceremonia.png', 'recepcion.png'];
 @endphp
 
 {{--
@@ -18,11 +25,10 @@
 --}}
 <section class="tc-timeline" id="itinerario"
     style="--tc-textura: url('{{ asset('images/assets-clasica/banda-1.jpg') }}')">
-    @foreach ($momentos as $momento)
+    @foreach ($momentos as $i => $momento)
         <article class="tc-timeline__momento">
-            @if ($momento['photo'] ?? null)
-                <img class="tc-timeline__foto" src="{{ $momento['photo'] }}" alt="" loading="lazy">
-            @endif
+            <img class="tc-timeline__foto" alt="" loading="lazy"
+                src="{{ asset('images/assets-clasica/' . $tarjetas[$i % count($tarjetas)]) }}">
 
             <div class="tc-timeline__datos">
                 @if ($momento['name'] ?? null)

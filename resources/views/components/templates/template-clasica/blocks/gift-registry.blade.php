@@ -66,6 +66,11 @@
                         @foreach ($datos as $dato)
                             <p class="tc-gifts__dato">{{ $dato }}</p>
                         @endforeach
+
+                        {{-- Cómo quiso el organizador que se lea el botón. --}}
+                        @if ($liga && filled($opcion['link_text'] ?? ''))
+                            <p class="tc-gifts__ir">{{ $opcion['link_text'] }}</p>
+                        @endif
                     </{{ $liga ? 'a' : 'div' }}>
                 </li>
             @endforeach

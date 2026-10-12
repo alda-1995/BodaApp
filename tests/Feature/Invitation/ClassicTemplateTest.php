@@ -7,7 +7,7 @@ use App\Services\Template\TemplateDiscoveryService;
 use App\Strategies\ClassicWeddingStrategy;
 use App\Templates\BlockType;
 use App\Templates\SectionView;
-use App\Templates\Sections\Catalog\ItinerarySection;
+use App\Templates\Sections\Catalog\GiftRegistrySection;
 use App\Templates\TemplateContext;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Blade;
@@ -81,40 +81,91 @@ class ClassicTemplateTest extends TestCase
      | Lo que pide cada paso
      * -------------------------------------------------------------------*/
 
-    public function test_la_portada_pide_su_linea_y_sus_dos_fotos(): void
+    public function test_la_portada_pide_su_linea_y_una_sola_foto(): void
     {
         $campos = array_keys($this->seccion('general')->fields());
 
         $this->assertContains('invitation_line', $campos);
-        $this->assertContains('cover_photo', $campos);
         $this->assertContains('band_photo', $campos);
-        // Esta portada no pinta a los padres.
+
+        /*
+        | La tarjeta de relieve donde se leen los nombres es del diseño, no una
+        | foto del organizador: no se pide en el wizard.
+        */
+        $this->assertNotContains('cover_photo', $campos);
+
+        // Esta portada tampoco pinta a los padres.
         $this->assertNotContains('family_parents', $campos);
     }
 
     /**
-     * Cada momento lleva su propia foto. Es un campo del repetidor, no de la
-     * sección: una boda con tres momentos sube tres fotos.
+     * Y aun así se pinta: la tarjeta sale fija del bloque, no de lo capturado.
+     *
+     * Por eso el bloque se pinta aquí sin ningún dato: si la tarjeta dependiera
+     * de una foto del organizador, no aparecería nada.
      */
-    public function test_cada_momento_del_itinerario_pide_su_foto(): void
+    public function test_la_tarjeta_de_la_portada_se_pinta_sin_datos(): void
+    {
+        $seccion = new SectionView(
+            key: 'general',
+            title: 'Portada',
+            blockType: BlockType::BANNER,
+            component: 'templates.template-clasica.blocks.banner',
+            data: [],
+        );
+
+        $html = Blade::render(
+            '<x-templates.template-clasica.blocks.banner :section="$section" :context="$context" />',
+            ['section' => $seccion, 'context' => $this->contexto()],
+        );
+
+        $this->assertStringContainsString('images/assets-clasica/portada.png', $html);
+        $this->assertStringContainsString('Ana &amp; Luis', $html);
+    }
+
+    /**
+     * El código de vestimenta se escribe, no se ilustra: la etiqueta colgante
+     * en la que se lee es del diseño y va fija en el bloque.
+     */
+    public function test_la_vestimenta_no_pide_imagen_de_referencia(): void
+    {
+        $campos = array_keys($this->seccion('dress_code')->fields());
+
+        $this->assertNotContains('reference_image', $campos);
+        $this->assertContains('dress_code_type', $campos);
+    }
+
+    /** Y la etiqueta se pinta igual, sin datos de por medio. */
+    public function test_la_etiqueta_de_la_vestimenta_se_pinta_sin_datos(): void
+    {
+        $seccion = new SectionView(
+            key: 'dress_code',
+            title: 'Código de vestimenta',
+            blockType: BlockType::DRESS_CODE,
+            component: 'templates.template-clasica.blocks.dress-code',
+            data: [],
+        );
+
+        $html = Blade::render(
+            '<x-templates.template-clasica.blocks.dress-code :section="$section" :context="$context" />',
+            ['section' => $seccion, 'context' => $this->contexto()],
+        );
+
+        $this->assertStringContainsString('images/assets-clasica/vestimenta.png', $html);
+    }
+
+    /**
+     * De cada momento sólo se piden sus datos: la tarjeta de relieve en la que
+     * se leen es del diseño y va fija en el bloque.
+     */
+    public function test_cada_momento_del_itinerario_solo_pide_sus_datos(): void
     {
         $repetidor = $this->seccion('itinerary')->fields()['events'];
 
         $subcampos = array_map(fn ($campo) => $campo->getName(), $repetidor->getSchema());
 
-        $this->assertContains('photo', $subcampos);
-        $this->assertContains('location_maps', $subcampos, 'El diseño pone "Ver en mapa" en cada momento.');
-    }
-
-    /** La foto del momento es del repetidor y las demás plantillas no la piden. */
-    public function test_las_otras_plantillas_no_heredan_esa_foto(): void
-    {
-        $subcampos = array_map(
-            fn ($campo) => $campo->getName(),
-            (new ItinerarySection())->fields()['events']->getSchema(),
-        );
-
         $this->assertNotContains('photo', $subcampos);
+        $this->assertContains('location_maps', $subcampos, 'El diseño pone "Ver en mapa" en cada momento.');
     }
 
     public function test_la_galeria_pide_sus_fotos_y_el_texto_que_las_acompana(): void
@@ -125,6 +176,17 @@ class ClassicTemplateTest extends TestCase
         $this->assertContains('intro', $campos);
         // El collage no deja sitio para pedirle fotos a los invitados.
         $this->assertNotContains('guest_photos_message', $campos);
+    }
+
+    /**
+     * Debajo del collage se cuenta la historia de la pareja, así que ahí sí se
+     * pueden explayar: varios párrafos, no un pie de foto.
+     */
+    public function test_el_texto_bajo_las_fotos_admite_varios_parrafos(): void
+    {
+        $reglas = $this->seccion('gallery')->fields()['intro']->getRules();
+
+        $this->assertContains('max:2000', $reglas);
     }
 
     /* ---------------------------------------------------------------------
@@ -220,15 +282,46 @@ class ClassicTemplateTest extends TestCase
         $this->assertStringContainsString('El gran día llega en', $html);
     }
 
-    public function test_cada_momento_pinta_su_foto_y_su_liga_de_mapa(): void
+    public function test_cada_momento_pinta_su_tarjeta_y_su_liga_de_mapa(): void
     {
         $html = $this->preview();
 
-        preg_match_all('/tc-timeline__foto" src="([^"]+)"/', $html, $fotos);
+        preg_match_all('/tc-timeline__foto[^>]+src="([^"]+)"/', $html, $tarjetas);
 
-        $this->assertCount(2, $fotos[1], 'El ejemplo trae ceremonia y recepción.');
-        $this->assertNotSame($fotos[1][0], $fotos[1][1], 'Cada momento tiene la suya.');
+        $this->assertCount(2, $tarjetas[1], 'El ejemplo trae ceremonia y recepción.');
+        $this->assertStringContainsString('ceremonia.png', $tarjetas[1][0]);
+        $this->assertStringContainsString('recepcion.png', $tarjetas[1][1]);
         $this->assertStringContainsString('Ver en mapa', $html);
+    }
+
+    /**
+     * Sólo hay dos tarjetas, así que a partir del tercer momento se vuelven a
+     * turnar: una boda con misa, cóctel y fiesta no se queda con un hueco.
+     */
+    public function test_con_mas_de_dos_momentos_las_tarjetas_se_turnan(): void
+    {
+        $seccion = new SectionView(
+            key: 'itinerary',
+            title: 'Itinerario',
+            blockType: BlockType::TIMELINE,
+            component: 'templates.template-clasica.blocks.timeline',
+            data: ['moments' => [
+                ['name' => 'Civil'],
+                ['name' => 'Ceremonia'],
+                ['name' => 'Fiesta'],
+            ]],
+        );
+
+        $html = Blade::render(
+            '<x-templates.template-clasica.blocks.timeline :section="$section" :context="$context" />',
+            ['section' => $seccion, 'context' => $this->contexto()],
+        );
+
+        preg_match_all('/tc-timeline__foto[^>]+src="([^"]+)"/', $html, $tarjetas);
+
+        $this->assertCount(3, $tarjetas[1]);
+        $this->assertSame($tarjetas[1][0], $tarjetas[1][2], 'El tercero repite la primera.');
+        $this->assertNotSame($tarjetas[1][0], $tarjetas[1][1]);
     }
 
     public function test_cada_foto_de_la_galeria_se_puede_abrir(): void
@@ -237,6 +330,63 @@ class ClassicTemplateTest extends TestCase
 
         $this->assertStringContainsString('data-visor', $html);
         $this->assertSame(5, substr_count($html, 'tc-gallery__enlace'));
+    }
+
+    /**
+     * El texto del botón se lee como la llamada del enlace, no como un dato más
+     * de la tarjeta: antes salía escrito "Texto del bóton: Ingresa aquí".
+     */
+    public function test_la_mesa_de_regalos_usa_el_texto_del_boton_como_enlace(): void
+    {
+        $datos = app(GiftRegistrySection::class)->data([
+            'registries' => [[
+                'type' => 'amazon',
+                'nombre_de_la_tienda' => 'Amazon',
+                'url_de_la_lista_de_regalos' => 'https://amazon.com.mx/wedding/registry/ABC123',
+                'texto_del_boton' => 'Ingresa aquí',
+            ]],
+        ], []);
+
+        $seccion = new SectionView(
+            key: 'gift_registry',
+            title: 'Mesa de regalos',
+            blockType: BlockType::GIFT_REGISTRY,
+            component: 'templates.template-clasica.blocks.gift-registry',
+            data: $datos,
+        );
+
+        $html = Blade::render(
+            '<x-templates.template-clasica.blocks.gift-registry :section="$section" :context="$context" />',
+            ['section' => $seccion, 'context' => $this->contexto()],
+        );
+
+        $this->assertStringContainsString('tc-gifts__ir">Ingresa aquí', $html);
+        $this->assertStringNotContainsString('Texto del b', $html);
+    }
+
+    /**
+     * El papel del RSVP tampoco se pide: es del diseño y va fijo en el bloque,
+     * así que se pinta aunque la sección no traiga nada.
+     */
+    public function test_la_confirmacion_no_pide_foto_y_pinta_su_papel(): void
+    {
+        $this->assertNotContains('photo', array_keys($this->seccion('rsvp')->fields()));
+
+        $seccion = new SectionView(
+            key: 'rsvp',
+            title: 'Confirmación',
+            blockType: BlockType::CONTACT_FORM,
+            component: 'templates.template-clasica.blocks.contact-form',
+            data: [],
+        );
+
+        $html = Blade::render(
+            '<x-templates.template-clasica.blocks.contact-form :section="$section" :context="$context" />',
+            ['section' => $seccion, 'context' => $this->contexto()],
+        );
+
+        $this->assertStringContainsString('--tc-papel-rsvp', $html);
+        $this->assertStringContainsString('images/assets-clasica/rsvp.jpg', $html);
     }
 
     /** Las preguntas van numeradas, como en el diseño. */
@@ -278,17 +428,21 @@ class ClassicTemplateTest extends TestCase
             data: ['images' => $fotos],
         );
 
-        $contexto = new TemplateContext(
+        return Blade::render(
+            '<x-templates.template-clasica.blocks.countdown :section="$section" :context="$context" />',
+            ['section' => $seccion, 'context' => $this->contexto()],
+        );
+    }
+
+    /** Lo mínimo que necesita un bloque suelto: los novios y la fecha. */
+    private function contexto(): TemplateContext
+    {
+        return new TemplateContext(
             wifeName: 'Ana',
             husbandName: 'Luis',
             eventDate: Carbon::now()->addDays(30),
             parents: null,
             theme: [],
-        );
-
-        return Blade::render(
-            '<x-templates.template-clasica.blocks.countdown :section="$section" :context="$context" />',
-            ['section' => $seccion, 'context' => $contexto],
         );
     }
 

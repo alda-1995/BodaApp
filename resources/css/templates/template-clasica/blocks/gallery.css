@@ -1,14 +1,15 @@
 /*
  * Galería: un moodboard sobre papel.
  *
- * Las fotos caen en columnas —así entran las que sean, no cinco fijas— pero con
- * un giro leve y un borde blanco que las hace parecer pegadas a mano. Los
- * adornos van encima en posiciones del diseño; son decorativos, así que no
- * reciben clics y el visor sigue abriéndose al tocar una foto.
+ * Las fotos caen en columnas —así entran las que sean, no cinco fijas— con un
+ * giro leve que las hace parecer pegadas a mano, sin marco: directas sobre el
+ * papel. Los adornos van encima en posiciones del diseño; son decorativos, así
+ * que no reciben clics y el visor sigue abriéndose al tocar una foto.
  */
 
 .tc-gallery {
     padding-block: clamp(2rem, 5vw, 4rem);
+    padding-bottom: 0;
 }
 
 /* El tablero sangra un poco por los lados, como en el diseño. */
@@ -16,6 +17,8 @@
     position: relative;
     padding: clamp(2rem, 5vw, 4.5rem) clamp(1.25rem, 4vw, 3.5rem);
     background: var(--tc-papel) center / cover;
+    /* Para que la nota pueda medir su alto mínimo contra este ancho (cqw). */
+    container-type: inline-size;
 }
 
 .tc-gallery__collage {
@@ -42,8 +45,10 @@
     /* Sin esto una foto se partiría entre el final de una columna y la siguiente. */
     break-inside: avoid;
     margin-bottom: clamp(1rem, 2.5vw, 2.25rem);
-    padding: clamp(0.4rem, 0.9vw, 0.75rem);
-    background: #fdfcf9;
+    /*
+     * Sin marco: las fotos van directas sobre el papel, no montadas en una
+     * cartulina blanca. La sombra se queda, que es lo que las despega del fondo.
+     */
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
     transition: transform 0.25s ease;
 }
@@ -63,6 +68,8 @@
 }
 
 .tc-gallery__foto {
+    /* 'block' quita el hueco de línea base que dejaría la foto como texto. */
+    display: block;
     width: 100%;
     height: auto;
 }
@@ -78,17 +85,26 @@
 
 .tc-gallery__adorno {
     position: absolute;
-    width: clamp(3rem, 9vw, 7rem);
     height: auto;
     filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.18));
 }
 
-/* Las posiciones salen del Figma, en porcentaje del tablero. */
-.tc-gallery__adorno--1 { top: 7%;  left: 21%; width: clamp(2rem, 4.5vw, 3.5rem); }
-.tc-gallery__adorno--2 { top: 19%; left: 41%; }
-.tc-gallery__adorno--3 { top: 7%;  left: 2%;  width: clamp(4rem, 12vw, 9rem); }
-.tc-gallery__adorno--4 { top: 65%; left: 24%; }
-.tc-gallery__adorno--5 { top: 43%; left: 75%; width: clamp(2.5rem, 5vw, 4rem); }
+/*
+ * Posiciones y tamaños salen del Figma, los dos en tanto por ciento del
+ * tablero: así el adorno guarda su proporción con las fotos en cualquier
+ * pantalla. Los anchos son los del diseño sobre sus 1280 —136, 261, 383, 268
+ * y 158 px—, que es lo que los hace verse grandes y no como pegatinas.
+ */
+.tc-gallery__adorno--1 { top: 7%;  left: 21%; width: 10.6%; }
+.tc-gallery__adorno--2 { top: 19%; left: 41%; width: 20.4%; }
+.tc-gallery__adorno--3 { top: 7%;  left: 2%;  width: 29.9%; }
+.tc-gallery__adorno--4 { top: 65%; left: 24%; width: 20.9%; }
+/*
+ * El alfiler va sobre una foto, como en el diseño. Más abajo caía encima de la
+ * nota de papel, que aquí sube más que en el Figma porque el collage lleva
+ * menos fotos, y quedaba tapado del todo.
+ */
+.tc-gallery__adorno--5 { top: 28%; left: 75%; width: 12.3%; }
 
 @media (max-width: 700px) {
     /* En el celular estorban más de lo que aportan. */
@@ -108,9 +124,32 @@
     margin-inline: auto 0;
     /* Se mete un poco entre las fotos, como pegada encima. */
     margin-top: clamp(-4rem, -4vw, -1rem);
-    padding: clamp(2rem, 5vw, 3.5rem);
-    aspect-ratio: 622 / 530;
-    background: var(--tc-nota) center / cover;
+    /*
+     * Arriba y abajo hay que dejar sitio para los bordes rasgados, que miden
+     * 176 y 146 de los 651 de ancho de la pieza: el texto no se mete en ellos.
+     */
+    padding: clamp(3.5rem, 8vw, 5.5rem) clamp(2rem, 5vw, 3.5rem);
+    /*
+     * Con un texto corto la hoja guarda la proporción del diseño (562 de alto
+     * por 651 de ancho); con uno largo manda el texto y la nota se alarga.
+     *
+     * Va en 'cqw' —el ancho del tablero— y no en '%', porque un alto en tanto
+     * por ciento se mide contra la altura del padre, que aquí es automática, y
+     * se quedaría en cero. Es la misma pareja de topes que el ancho de arriba.
+     */
+    box-sizing: border-box;
+    min-height: min(86.33cqw, 29.35rem);
+    /*
+     * La nota en tres piezas, todas a escala del ancho —'100% auto'— para que
+     * nada se deforme por mucho que crezca: el sello y los dos rasgados se
+     * pintan una vez, arriba y abajo, y el papel liso del centro se repite en
+     * mosaico. Esa pieza está duplicada en espejo, así que el mosaico no deja
+     * costura. Un texto de varios párrafos alarga la hoja en vez de salirse.
+     */
+    background:
+        var(--tc-nota-arriba) top center / 100% auto no-repeat,
+        var(--tc-nota-abajo) bottom center / 100% auto no-repeat,
+        var(--tc-nota-medio) top center / 100% auto repeat-y;
     transform: rotate(-5deg);
 }
 

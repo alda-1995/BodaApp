@@ -20,11 +20,8 @@
      * y la tarjeta se estira, el papel se acerca por los lados en vez de
      * deformar el grano o repetirse dejando una costura a media altura.
      * Anclado arriba para que el relieve de la cabecera siempre se vea.
-     *
-     * La foto la sube el organizador, así que esto vale para cualquier imagen;
-     * sin foto la tarjeta se queda en crema y el formulario se lee igual.
      */
-    background: var(--tc-papel-rsvp, none) top center / cover no-repeat;
+    background: var(--tc-papel-rsvp) top center / cover no-repeat;
     width: min(100%, 41rem);
     margin-inline: auto;
     padding-block: clamp(2.5rem, 6vw, 5rem);

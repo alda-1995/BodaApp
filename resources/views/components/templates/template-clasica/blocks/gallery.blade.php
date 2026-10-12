@@ -21,10 +21,16 @@
 
     El párrafo cierra sobre una nota de papel rasgado. No lleva título: en el
     diseño cuelga de las fotos, no es una sección aparte.
+
+    La nota viaja en tres piezas —el sello y el borde de arriba, el papel liso
+    del centro y el borde de abajo— para que crezca con el texto sin deformar
+    ni el sello ni los rasgados. El CSS las monta; aquí sólo se nombran.
 --}}
 <section class="tc-gallery" id="galeria"
     style="--tc-papel: url('{{ asset('images/assets-clasica/textura-galeria.jpg') }}');
-           --tc-nota: url('{{ asset('images/assets-clasica/nota.png') }}')">
+           --tc-nota-arriba: url('{{ asset('images/assets-clasica/nota-arriba.png') }}');
+           --tc-nota-medio: url('{{ asset('images/assets-clasica/nota-medio.png') }}');
+           --tc-nota-abajo: url('{{ asset('images/assets-clasica/nota-abajo.png') }}')">
 
     <div class="tc-gallery__tablero">
         @if ($fotos)

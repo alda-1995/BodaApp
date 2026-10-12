@@ -2,7 +2,6 @@
 
 @php
     $linea = $section->get('invitation_line');
-    $portada = $section->get('cover_photo');
     $banda = $section->get('band_photo');
 @endphp
 
@@ -25,9 +24,9 @@
     style="--tc-textura: url('{{ asset('images/assets-clasica/banda-1.jpg') }}')">
     <div class="tc-banner__panel">
         <div class="tc-banner__tarjeta">
-            @if ($portada)
-                <img class="tc-banner__photo" src="{{ $portada }}" alt="" loading="eager">
-            @endif
+            {{-- La tarjeta de relieve es del diseño y va fija: no se pide en el wizard. --}}
+            <img class="tc-banner__photo" src="{{ asset('images/assets-clasica/portada.png') }}"
+                alt="" loading="eager">
 
             <div class="tc-banner__texto">
                 @if ($linea)

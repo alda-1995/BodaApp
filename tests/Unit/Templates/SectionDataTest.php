@@ -181,6 +181,47 @@ class SectionDataTest extends TestCase
         $this->assertSame('cuenta_bancaria', $option['type_value']);
     }
 
+    /**
+     * El texto del botón no es un dato de la mesa: es cómo se quiere que se lea
+     * el enlace. Si se quedara entre los detalles, la tarjeta lo escribiría como
+     * una línea más ("Texto del bóton: Ingresa aquí").
+     */
+    public function test_el_texto_del_boton_viaja_aparte_y_no_entre_los_datos(): void
+    {
+        $section = new GiftRegistrySection($this->sectionsWithSchema([
+            ['key' => 'nombre_de_la_tienda', 'label' => 'Nombre de la tienda', 'type' => 'text'],
+            ['key' => 'url_de_la_lista_de_regalos', 'label' => 'URL de la lista', 'type' => 'url'],
+            ['key' => 'texto_del_boton', 'label' => 'Texto del bóton', 'type' => 'text'],
+        ]));
+
+        $option = $section->data([
+            'registries' => [
+                [
+                    'type' => 'amazon',
+                    'nombre_de_la_tienda' => 'Amazon',
+                    'url_de_la_lista_de_regalos' => 'https://amazon.com/lista',
+                    'texto_del_boton' => 'Ingresa aquí',
+                ],
+            ],
+        ], [])['options'][0];
+
+        $this->assertSame('Ingresa aquí', $option['link_text']);
+        $this->assertNotContains('texto_del_boton', array_column($option['details'], 'key'));
+        $this->assertSame(['Amazon', 'https://amazon.com/lista'], array_column($option['details'], 'value'));
+    }
+
+    /** Sin ese campo la tarjeta no se queda con un botón a medias. */
+    public function test_sin_texto_del_boton_la_opcion_lo_entrega_vacio(): void
+    {
+        $option = (new GiftRegistrySection())->data([
+            'registries' => [
+                ['type' => 'cuenta_bancaria', 'banco' => 'BBVA'],
+            ],
+        ], [])['options'][0];
+
+        $this->assertSame('', $option['link_text']);
+    }
+
     private function sectionsWithSchema(array $schema): SystemSectionService
     {
         $section = new SystemSection(['key' => 'registries', 'schema' => $schema]);

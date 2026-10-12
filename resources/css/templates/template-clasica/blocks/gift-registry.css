@@ -73,3 +73,14 @@ a.tc-gifts__tarjeta:focus-visible {
     font-size: clamp(0.6875rem, 1.1vw, 1rem);
     color: var(--tc-muted);
 }
+
+/* La llamada del enlace, al pie de la tarjeta y en versales. */
+.tc-gifts__ir {
+    margin-top: 0.9rem;
+    font-family: var(--font-secondary);
+    font-size: clamp(0.625rem, 0.95vw, 0.875rem);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+}

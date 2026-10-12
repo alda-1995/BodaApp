@@ -19,6 +19,15 @@ use App\Templates\BlockType;
  */
 class GiftRegistrySection extends Section
 {
+    /**
+     * La llave con la que el superadmin nombra el texto del enlace.
+     *
+     * No es un dato de la mesa: es cómo se quiere que se lea el botón que lleva
+     * a ella ("Ingresa aquí"). Sale de 'details' y viaja aparte, porque si no
+     * las plantillas lo escriben como una línea más de la tarjeta.
+     */
+    private const LINK_TEXT = 'texto_del_boton';
+
     public function __construct(private readonly ?SystemSectionService $sections = null)
     {
     }
@@ -95,7 +104,7 @@ class GiftRegistrySection extends Section
                 // plantilla decide su diseño con él (una cuenta bancaria no se
                 // pinta como una tienda) y la etiqueta puede cambiar.
                 'type_value' => (string) ($row['type'] ?? ''),
-                'details' => $this->details($schema, $row),
+                ...$this->withLinkText($this->details($schema, $row)),
             ])
             ->filter(fn (array $option) => filled($option['type']) || $option['details'] !== [])
             ->values()
@@ -128,7 +137,7 @@ class GiftRegistrySection extends Section
             ->map(fn (array $type) => [
                 'type' => (string) ($type['label'] ?? $type['value'] ?? ''),
                 'type_value' => (string) ($type['value'] ?? ''),
-                'details' => $this->demoDetails($schema, (string) ($type['value'] ?? '')),
+                ...$this->withLinkText($this->demoDetails($schema, (string) ($type['value'] ?? ''))),
             ])
             ->filter(fn (array $option) => $option['details'] !== [])
             ->values()
@@ -212,12 +221,12 @@ class GiftRegistrySection extends Section
             }
 
             $details[] = [
+                'key' => $key,
                 'label' => (string) ($field['label'] ?? $this->humanize($key)),
                 'value' => $value,
                 // El tipo que declaró el superadmin. La plantilla lo usa para
                 // saber qué es cada dato sin tener que adivinarlo del valor.
                 'type' => (string) ($field['type'] ?? 'text'),
-
             ];
         }
 
@@ -254,6 +263,34 @@ class GiftRegistrySection extends Section
     }
 
     /**
+     * Saca el texto del enlace de entre los datos y lo devuelve aparte.
+     *
+     * El superadmin lo pregunta como un campo más de la fila, pero no es algo
+     * que la tarjeta tenga que escribir: es cómo quiere el organizador que se
+     * lea el botón. Si se quedara en 'details', las plantillas lo pintarían
+     * como una línea ("Texto del bóton: Ingresa aquí").
+     *
+     * @param  array<int, array<string, mixed>>  $details
+     * @return array{details: array<int, array<string, mixed>>, link_text: string}
+     */
+    private function withLinkText(array $details): array
+    {
+        $linkText = '';
+
+        $details = array_values(array_filter($details, function (array $detail) use (&$linkText) {
+            if (($detail['key'] ?? '') !== self::LINK_TEXT) {
+                return true;
+            }
+
+            $linkText = (string) ($detail['value'] ?? '');
+
+            return false;
+        }));
+
+        return ['details' => $details, 'link_text' => $linkText];
+    }
+
+    /**
      * Pares etiqueta/valor de la fila, saltando los campos que no aplican a su
      * tipo (un dato de tienda no se muestra en una cuenta bancaria).
      *
@@ -279,10 +316,10 @@ class GiftRegistrySection extends Section
             }
 
             $details[] = [
+                'key' => (string) $key,
                 'label' => (string) ($field['label'] ?? $this->humanize((string) $key)),
                 'value' => $value,
                 'type' => (string) ($field['type'] ?? 'text'),
-
             ];
         }
 
