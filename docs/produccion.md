@@ -196,33 +196,60 @@ Sin él los mensajes salen, pero no se registra si llegaron o fallaron.
 Desde tu máquina, en Git Bash y en la raíz del proyecto:
 
 ```bash
-./deploy.sh
+./deploy.sh                # normal
+./deploy.sh --imagenes     # además las imágenes de las plantillas (80 MB)
+./deploy.sh --volver       # deshace el último despliegue
+./deploy.sh --preparar     # una sola vez, antes del primero
 ```
 
-Compila el front, sube el código a `app_tamira` y los assets a `public_html`,
-deja el servidor listo y comprueba que el sitio sigue en pie. Pide confirmación
-escrita antes de tocar nada.
+### Cómo funciona
 
-Si añadiste o cambiaste imágenes de alguna plantilla:
+El árbol nuevo se arma **aparte** y al final se intercambia de un golpe:
 
-```bash
-./deploy.sh --imagenes
+```
+app_tamira.nuevo   → se arma aquí, con composer ya instalado
+app_tamira         → el que está sirviendo
+app_tamira.anterior→ el de antes, para volver atrás
+compartido/        → .env y storage/, enlazados desde el árbol
 ```
 
-Por omisión no viajan: son 78 de los 80 MB de la raíz web y cambian muy de vez
-en cuando, así que un despliegue normal mueve 1,2 MB en vez de 80.
+Eso da tres cosas:
 
-### De qué te protege el script
+- **Árbol limpio.** Lo que borras del repo desaparece del servidor. Con el
+  método anterior —superponer archivos— los restos se quedaban: así
+  aparecieron seis migraciones fantasma de febrero que `migrate:status` daba
+  por pendientes y que, de haberse corrido, habrían intentado crear tablas que
+  ya existían.
+- **Vuelta atrás.** `./deploy.sh --volver` restaura el árbol anterior.
+- **Un solo apagón corto.** El sitio está en mantenimiento durante un `mv`, no
+  durante los minutos que tarda la subida y el `composer install`.
+
+El `.env` y `storage/` viven en `compartido/` y cada árbol los enlaza: las
+fotos de los organizadores y las claves no viajan nunca ni se pierden al
+intercambiar.
+
+### De qué te protege
 
 | comprobación | por qué |
 |---|---|
 | se niega si existe `public/hot` | ese archivo apunta los assets al Vite de tu máquina; en producción deja el sitio sin estilos **para todo el mundo** |
 | se niega si hay cambios sin confirmar en git | si hay que volver atrás, no habría a dónde |
+| se niega si el servidor no está preparado | sin `compartido/`, un despliegue se llevaría por delante `storage/` |
 | avisa si no estás en `main` | |
 | no sube `index.php` ni `.htaccess` | los del servidor están personalizados; los del repo tumban el sitio |
-| no sube `storage/` ni `.env` | ahí viven las fotos de los organizadores y las claves del servidor |
-| levanta el sitio si algo falla a media faena | lo peor es dejarlo en mantenimiento sin querer |
-| comprueba al final que responde 200 y que `/.env` no se lee | |
+| no sube `storage/` ni `.env` | viven en `compartido/` |
+| una sola sesión SSH | siete conexiones seguidas disparan el cortafuegos, y eso cortó el primer despliegue a media faena |
+| levanta el sitio si algo falla | lo peor es dejarlo en mantenimiento sin querer |
+| comprueba que responde 200 y que `/.env` no se lee | |
+
+### Si el despliegue sale mal
+
+```bash
+./deploy.sh --volver
+```
+
+Restaura el árbol anterior, rehace las cachés y levanta el sitio. Sólo hay un
+nivel: el penúltimo despliegue ya no está.
 
 ### A mano, si alguna vez hace falta
 

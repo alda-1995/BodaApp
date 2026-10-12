@@ -4,68 +4,165 @@
 #
 # Se corre desde tu máquina, en Git Bash, estando en la raíz del proyecto:
 #
-#     ./deploy.sh
+#     ./deploy.sh                 despliegue normal
+#     ./deploy.sh --imagenes      además sube las imágenes de las plantillas
+#     ./deploy.sh --preparar      prepara el servidor (una sola vez)
+#     ./deploy.sh --volver        deshace el último despliegue
 #
-# Compila el front, sube el código y los assets a sus dos destinos y deja el
-# servidor listo. No toca la base de datos ni corre migraciones: si alguna vez
-# hacen falta, se hacen a mano y con respaldo tomado antes.
+# CÓMO FUNCIONA
+#
+# El árbol nuevo se arma aparte y al final se intercambia de un golpe. Eso da
+# tres cosas que la versión anterior no tenía:
+#
+#   · un árbol limpio   — lo que borraste del repo desaparece del servidor, en
+#                         vez de quedarse ahí acumulándose
+#   · vuelta atrás      — el árbol anterior se conserva; '--volver' lo restaura
+#   · un solo apagón    — el cambio es un 'mv', no una subida de minutos
+#
+# El .env y storage/ viven fuera del árbol, en 'compartido/', y cada despliegue
+# los enlaza. Así las fotos de los organizadores y las claves no viajan nunca ni
+# se pierden al intercambiar.
 #
 # El detalle del montaje está en docs/produccion.md.
 #
 set -euo pipefail
 
-# -----------------------------------------------------------------------------
-#  Dónde va cada cosa
-# -----------------------------------------------------------------------------
-#
-#  El proyecto vive fuera de la raíz web y 'public_html' hace de public/. Son
-#  dos destinos distintos y no se pueden mezclar.
-#
 readonly SERVIDOR="tamira"
-readonly APP="/home/tamira/app_tamira"
-readonly WEB="/home/tamira/public_html"
+readonly RAIZ="/home/tamira"
+readonly APP="$RAIZ/app_tamira"
+readonly ANTERIOR="$RAIZ/app_tamira.anterior"
+readonly NUEVO="$RAIZ/app_tamira.nuevo"
+readonly COMPARTIDO="$RAIZ/compartido"
+readonly WEB="$RAIZ/public_html"
 readonly SITIO="https://tamira.app"
-
-#
-# Las imágenes de diseño de las plantillas pesan 78 de los 80 MB de la raíz web
-# y cambian de higos a brevas, así que por omisión no viajan: un despliegue
-# normal mueve 2 MB en vez de 80. Si tocaste o añadiste alguna:
-#
-#     ./deploy.sh --imagenes
-#
-subir_imagenes=0
-for argumento in "$@"; do
-    case "$argumento" in
-        --imagenes) subir_imagenes=1 ;;
-        *) echo "Opción desconocida: $argumento"; echo "Uso: ./deploy.sh [--imagenes]"; exit 1 ;;
-    esac
-done
 
 rojo()  { printf '\033[31m%s\033[0m\n' "$*"; }
 verde() { printf '\033[32m%s\033[0m\n' "$*"; }
 paso()  { printf '\n\033[1m▸ %s\033[0m\n' "$*"; }
 
+subir_imagenes=0
+modo="desplegar"
+
+for argumento in "$@"; do
+    case "$argumento" in
+        --imagenes) subir_imagenes=1 ;;
+        --preparar) modo="preparar" ;;
+        --volver)   modo="volver" ;;
+        *) echo "Uso: ./deploy.sh [--imagenes] | --preparar | --volver"; exit 1 ;;
+    esac
+done
+
+# -----------------------------------------------------------------------------
+#  Preparar el servidor (una sola vez)
+# -----------------------------------------------------------------------------
+#
+#  Saca el .env y storage/ del árbol de la aplicación y los deja en
+#  'compartido/', con enlaces desde el árbol actual. A partir de ahí cada
+#  despliegue puede tirar el árbol entero sin llevarse por delante las fotos de
+#  los organizadores ni las claves del servidor.
+#
+if [[ "$modo" == "preparar" ]]; then
+    paso "Preparando el servidor"
+
+    ssh "$SERVIDOR" bash -s <<PREPARAR
+set -euo pipefail
+mkdir -p "$COMPARTIDO"
+
+# El .env: se mueve una vez y se deja un enlace en su sitio.
+if [[ -f "$APP/.env" && ! -L "$APP/.env" ]]; then
+    mv "$APP/.env" "$COMPARTIDO/.env"
+    ln -sfn "$COMPARTIDO/.env" "$APP/.env"
+    echo "  .env movido a compartido/"
+else
+    echo "  .env ya estaba compartido"
+fi
+chmod 600 "$COMPARTIDO/.env"
+
+# storage/: aquí viven las fotos que suben los organizadores. Se mueve entero.
+if [[ -d "$APP/storage" && ! -L "$APP/storage" ]]; then
+    rm -rf "$COMPARTIDO/storage"
+    mv "$APP/storage" "$COMPARTIDO/storage"
+    ln -sfn "$COMPARTIDO/storage" "$APP/storage"
+    echo "  storage/ movido a compartido/"
+else
+    echo "  storage/ ya estaba compartido"
+fi
+chmod -R 775 "$COMPARTIDO/storage"
+
+# public/ apunta a la raíz web: es lo que hace que public_path() resuelva bien.
+ln -sfn "$WEB" "$APP/public"
+
+echo
+echo "  compartido/:"
+ls -la "$COMPARTIDO" | tail -n +4 | awk '{print "    ", \$1, \$9, \$10, \$11}'
+echo "  enlaces en el árbol:"
+ls -la "$APP/.env" "$APP/storage" "$APP/public" | awk '{print "    ", \$9, \$10, \$11}'
+PREPARAR
+
+    verde ""
+    verde "Servidor preparado. Ya puedes desplegar con ./deploy.sh"
+    exit 0
+fi
+
+# -----------------------------------------------------------------------------
+#  Volver atrás
+# -----------------------------------------------------------------------------
+
+if [[ "$modo" == "volver" ]]; then
+    paso "Deshaciendo el último despliegue"
+
+    read -rp "Esto restaura el árbol anterior en PRODUCCIÓN. ¿Seguro? (escribe: volver) " ok
+    [[ "$ok" == "volver" ]] || { echo "Cancelado."; exit 1; }
+
+    ssh "$SERVIDOR" bash -s <<VOLVER
+set -euo pipefail
+[[ -d "$ANTERIOR" ]] || { echo "No hay árbol anterior que restaurar."; exit 1; }
+
+php "$APP/artisan" down --retry=60 || true
+
+rm -rf "$NUEVO"
+mv "$APP" "$NUEVO"
+mv "$ANTERIOR" "$APP"
+rm -rf "$NUEVO"
+
+cd "$APP"
+php artisan config:clear
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan queue:restart
+php artisan up
+VOLVER
+
+    verde ""
+    verde "Restaurado. El sitio responde $(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "$SITIO")"
+    exit 0
+fi
+
 # -----------------------------------------------------------------------------
 #  Red de seguridad
 # -----------------------------------------------------------------------------
-#
-#  Si algo falla después de poner el sitio en mantenimiento, hay que levantarlo
-#  igual: lo peor de un despliegue a medias es dejarlo caído sin querer.
-#
+
 mantenimiento_puesto=0
+paquete=""
 
 al_salir() {
     local salida=$?
+
+    [[ -n "$paquete" ]] && rm -f "$paquete" "${paquete%.gz}"
 
     if [[ $salida -ne 0 ]]; then
         rojo ""
         rojo "El despliegue falló (código $salida)."
 
         if [[ $mantenimiento_puesto -eq 1 ]]; then
-            rojo "Quitando el cartel de mantenimiento para no dejar el sitio caído..."
-            ssh "$SERVIDOR" "cd $APP && php artisan up" || \
-                rojo "NO SE PUDO. Entra y corre a mano:  ssh $SERVIDOR 'cd $APP && php artisan up'"
+            rojo "Levantando el sitio para no dejarlo caído..."
+            ssh "$SERVIDOR" "php $APP/artisan up" 2>/dev/null \
+                || rojo "NO SE PUDO. Entra y corre:  ssh $SERVIDOR 'php $APP/artisan up'"
         fi
+
+        rojo ""
+        rojo "El árbol anterior sigue en el servidor. Para deshacer:  ./deploy.sh --volver"
     fi
 }
 trap al_salir EXIT
@@ -80,23 +177,18 @@ paso "Revisando que se pueda desplegar"
 
 #
 # 'public/hot' lo escribe el servidor de desarrollo de Vite. Si viaja al
-# servidor, Laravel pide el CSS y el JS a http://[::1]:5173 —la máquina de
-# quien desplegó— y el sitio se queda sin estilos para todo el mundo. Es el
-# error más caro y el más fácil de cometer, así que aquí se para en seco.
+# servidor, Laravel pide el CSS y el JS a la máquina de quien desplegó y el
+# sitio se queda sin estilos para todo el mundo.
 #
 if [[ -f public/hot ]]; then
     rojo "public/hot existe: el servidor de Vite está corriendo."
-    rojo "Párarlo (Ctrl+C donde corre 'npm run dev') y volver a intentar."
+    rojo "Páralo (Ctrl+C donde corre 'npm run dev') y vuelve a intentar."
     exit 1
 fi
 
-# Desplegar con cambios sin guardar es desplegar algo que no está en ninguna
-# parte: si hay que volver atrás, no hay a dónde.
 if [[ -n "$(git status --porcelain)" ]]; then
     rojo "Hay cambios sin confirmar en git:"
     git status --short
-    rojo ""
-    rojo "Confírmalos o guárdalos antes de desplegar."
     exit 1
 fi
 
@@ -109,9 +201,9 @@ fi
 
 # Un solo intento: cada fallo suma para el cortafuegos del servidor.
 paso "Probando la conexión"
-ssh -o ConnectTimeout=15 "$SERVIDOR" "test -d $APP && test -d $WEB && command -v tar >/dev/null" \
-    || { rojo "No se pudo entrar, o faltan $APP / $WEB / tar en el servidor."; exit 1; }
-verde "  conexión y rutas correctas"
+ssh -o ConnectTimeout=15 "$SERVIDOR" "test -L $APP/.env && test -L $APP/storage" 2>/dev/null \
+    || { rojo "El servidor no está preparado. Corre primero:  ./deploy.sh --preparar"; exit 1; }
+verde "  conexión correcta y estado compartido en su sitio"
 
 # -----------------------------------------------------------------------------
 #  Confirmación
@@ -123,9 +215,8 @@ cat <<FIN
 
   ─────────────────────────────────────────────────
    Destino : $SITIO
-   Código  : $APP
-   Assets  : $WEB
    Commit  : $commit
+   Imágenes: $([[ $subir_imagenes -eq 1 ]] && echo "sí (80 MB)" || echo "no (--imagenes para incluirlas)")
   ─────────────────────────────────────────────────
 
 FIN
@@ -134,118 +225,139 @@ read -rp "Esto toca PRODUCCIÓN. ¿Continuar? (escribe: desplegar) " confirmacio
 [[ "$confirmacion" == "desplegar" ]] || { echo "Cancelado."; exit 1; }
 
 # -----------------------------------------------------------------------------
-#  1. Compilar el front
+#  1. Compilar
 # -----------------------------------------------------------------------------
 
 paso "Compilando el front"
 npm run build
-
 [[ -f public/build/manifest.json ]] || { rojo "No se generó public/build/manifest.json."; exit 1; }
 verde "  build listo"
 
 # -----------------------------------------------------------------------------
-#  2. Subir el código de la aplicación
+#  2. Un solo paquete con todo
 # -----------------------------------------------------------------------------
 #
-#  Fuera de la maleta:
-#    storage/   lo que subieron los organizadores y los logs viven ahí; subirlo
-#               borraría sus fotos
-#    .env       el del servidor manda, y cada entorno tiene el suyo
-#    vendor/    se instala allá con composer, pesa menos que mandarlo
-#    public/    va aparte, al otro destino
+#  Se manda en un envío y no en dos: cada conexión SSH extra es una ocasión de
+#  que el cortafuegos corte a media faena, que es justo lo que pasó la primera
+#  vez que se usó este script.
 #
-paso "Subiendo el código"
+paso "Armando el paquete"
 
-tar czf - \
-    --exclude=.git \
-    --exclude=node_modules \
-    --exclude=vendor \
-    --exclude=storage \
-    --exclude=public \
-    --exclude=tests \
-    --exclude='.env*' \
-    --exclude='*.log' \
-    --exclude=.phpunit.cache \
-    --exclude=.phpunit.result.cache \
-    . | ssh "$SERVIDOR" "tar xzf - -C $APP"
-
-verde "  código arriba"
-
-# -----------------------------------------------------------------------------
-#  3. Subir los assets a la raíz web
-# -----------------------------------------------------------------------------
-#
-#  Fuera de la maleta, y esto es lo delicado:
-#    index.php   el del servidor está editado para apuntar a ../app_tamira; el
-#                del repo apunta al directorio de al lado y tumba el sitio
-#    .htaccess   el del servidor está personalizado (909 bytes contra 603)
-#    hot         el marcador de Vite, que ya se comprobó arriba
-#    storage     es un enlace a app_tamira/storage/app/public
-#
 excluir_imagenes=(--exclude=./images)
+[[ $subir_imagenes -eq 1 ]] && excluir_imagenes=()
 
-if [[ $subir_imagenes -eq 1 ]]; then
-    excluir_imagenes=()
-    paso "Subiendo los assets, imágenes incluidas (78 MB, tarda)"
-else
-    paso "Subiendo los assets"
-fi
+#
+# Se arma sin comprimir y se comprime al final: 'tar r' —añadir a un archivo ya
+# creado— no funciona sobre uno comprimido, y aquí hacen falta dos pasadas
+# porque el código y los assets salen de carpetas distintas y van a destinos
+# distintos.
+#
+# Fuera del paquete:
+#   storage/ .env   viven en compartido/, no viajan nunca
+#   vendor/         se instala allá
+#   index.php
+#   .htaccess       los del servidor están editados a mano; los del repo lo tumban
+#
+plano="$(mktemp -t tamira-XXXXXX.tar)"
+paquete="$plano.gz"
 
-tar czf - \
-    --exclude=index.php \
-    --exclude=.htaccess \
-    --exclude=hot \
-    --exclude=storage \
+tar cf "$plano" \
+    --transform='s,^\./,codigo/,' \
+    --exclude=.git --exclude=node_modules --exclude=vendor \
+    --exclude=storage --exclude=public --exclude=tests \
+    --exclude='.env*' --exclude='*.log' \
+    --exclude=.phpunit.cache --exclude=.phpunit.result.cache \
+    ./
+
+tar rf "$plano" \
+    --transform='s,^\./,publico/,' \
+    --exclude=index.php --exclude=.htaccess --exclude=hot --exclude=storage \
     "${excluir_imagenes[@]}" \
-    -C public . | ssh "$SERVIDOR" "tar xzf - -C $WEB"
+    -C public ./
 
-verde "  assets arriba"
+gzip -1 -f "$plano"
 
-if [[ $subir_imagenes -eq 0 ]]; then
-    echo "  (las imágenes de las plantillas no viajaron; si añadiste o cambiaste"
-    echo "   alguna, vuelve a desplegar con:  ./deploy.sh --imagenes)"
-fi
+verde "  paquete listo ($(du -h "$paquete" | cut -f1))"
 
 # -----------------------------------------------------------------------------
-#  4. Dejar el servidor listo
+#  3. Una sola sesión SSH: subir, armar el árbol nuevo, intercambiar
 # -----------------------------------------------------------------------------
 
-paso "Preparando el servidor"
+paso "Desplegando"
 mantenimiento_puesto=1
 
-ssh "$SERVIDOR" "cd $APP && php artisan down --retry=60"
+cat "$paquete" | ssh -o ServerAliveInterval=30 "$SERVIDOR" bash -s <<DESPLIEGUE
+set -euo pipefail
 
-ssh "$SERVIDOR" "cd $APP && composer install --no-dev --optimize-autoloader --no-interaction"
+paquete=\$(mktemp)
+cat > "\$paquete"
 
+echo "  recibido: \$(du -h "\$paquete" | cut -f1)"
+
+# --- El árbol nuevo, desde cero -------------------------------------------
 #
-# Cachear después de limpiar, nunca sólo cachear: si queda caché vieja de la
-# configuración, el .env nuevo no se lee y los cambios no tienen efecto.
+# '--strip-components=1' deja el contenido de codigo/ directamente en el árbol,
+# sin tener que mover nada después.
 #
-ssh "$SERVIDOR" "cd $APP && php artisan config:clear && php artisan config:cache && php artisan route:cache && php artisan view:cache"
+rm -rf "$NUEVO"
+mkdir -p "$NUEVO"
+tar xzf "\$paquete" -C "$NUEVO" --strip-components=1 codigo
 
-# El worker tiene el código viejo cargado en memoria hasta que se le avisa.
-ssh "$SERVIDOR" "cd $APP && php artisan queue:restart"
+# Los assets sí se superponen sobre la raíz web: ahí conviven con index.php y
+# .htaccess, que son del servidor y no del repositorio.
+temporal=\$(mktemp -d)
+tar xzf "\$paquete" -C "\$temporal" --strip-components=1 publico
+cp -a "\$temporal/." "$WEB/"
+rm -rf "\$temporal" "\$paquete"
 
-ssh "$SERVIDOR" "cd $APP && php artisan up"
+# --- Lo compartido, enlazado ----------------------------------------------
+ln -sfn "$COMPARTIDO/.env"    "$NUEVO/.env"
+ln -sfn "$COMPARTIDO/storage" "$NUEVO/storage"
+ln -sfn "$WEB"                "$NUEVO/public"
+
+# vendor/ del árbol vivo, para que composer sólo instale lo que cambió.
+[[ -d "$APP/vendor" ]] && cp -a "$APP/vendor" "$NUEVO/vendor"
+
+cd "$NUEVO"
+echo "  composer..."
+composer install --no-dev --optimize-autoloader --no-interaction 2>&1 | tail -3
+
+# --- El cambio: aquí empieza el apagón, y dura un 'mv' ---------------------
+php "$APP/artisan" down --retry=60 2>/dev/null || true
+
+rm -rf "$ANTERIOR"
+mv "$APP" "$ANTERIOR"
+mv "$NUEVO" "$APP"
+
+cd "$APP"
+php artisan config:clear
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan queue:restart
+php artisan up
+
+echo "  árbol intercambiado"
+DESPLIEGUE
+
 mantenimiento_puesto=0
-
-verde "  servidor listo"
+verde "  desplegado"
 
 # -----------------------------------------------------------------------------
-#  5. Comprobar que quedó en pie
+#  4. Comprobar
 # -----------------------------------------------------------------------------
 
 paso "Comprobando"
 
 codigo="$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "$SITIO")"
 if [[ "$codigo" != "200" ]]; then
-    rojo "  $SITIO responde $codigo (se esperaba 200)."
-    rojo "  Revisa:  ssh $SERVIDOR 'tail -40 $APP/storage/logs/laravel.log'"
+    rojo "  $SITIO responde $codigo."
+    rojo "  Para deshacer:  ./deploy.sh --volver"
+    rojo "  Para mirar:     ssh $SERVIDOR 'tail -40 $COMPARTIDO/storage/logs/laravel.log'"
     exit 1
 fi
 verde "  el sitio responde 200"
 
-# El .env nunca debe poder leerse desde internet.
 env_publico="$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$SITIO/.env")"
 if [[ "$env_publico" == "200" ]]; then
     rojo "  ¡ALERTA! $SITIO/.env se descarga desde internet."
@@ -256,3 +368,5 @@ verde "  el .env no se lee desde fuera ($env_publico)"
 paso "Despliegue terminado"
 echo "  $commit"
 echo "  $SITIO"
+echo
+echo "  Si algo sale mal en los próximos minutos:  ./deploy.sh --volver"
