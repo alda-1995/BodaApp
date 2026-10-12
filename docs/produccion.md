@@ -251,6 +251,35 @@ intercambiar.
 Restaura el árbol anterior, rehace las cachés y levanta el sitio. Sólo hay un
 nivel: el penúltimo despliegue ya no está.
 
+El script distingue tres situaciones al fallar, y conviene leer cuál es antes
+de actuar:
+
+- **«Falló antes de tocar el servidor»** — el árbol vivo es el de siempre. No
+  hay nada que deshacer; `--volver` restauraría uno más viejo sin razón.
+- **«El árbol SÍ se intercambió»** — `--volver` es lo que toca.
+- **«No se sabe si llegó a intercambiar»** — se cortó a media faena. El propio
+  mensaje trae el comando para comprobarlo antes de decidir.
+
+### Permisos de la raíz web
+
+`public_html` tiene que ser legible por el usuario con el que corre Apache. Si
+queda en `700`, **el sitio entero responde 403**, sin más pista.
+
+El script anota sus permisos antes de copiar los assets y los repone después,
+porque `cp -a` arrastra los del origen y un tar armado en Windows los trae mal.
+
+Si alguna vez ves un 403 en todo el sitio:
+
+```bash
+ssh tamira 'stat -c %a ~/public_html'     # debe ser 755
+ssh tamira 'chmod 755 ~/public_html'
+```
+
+> El grupo de `public_html` era `nobody` y ahora es `tamira`: el jailed shell no
+> permite `chgrp`, así que se compensó con `755` en vez de `750`. Funciona
+> igual; si quieres volver al original, hay que hacerlo desde WHM o pedirlo a
+> soporte.
+
 ### A mano, si alguna vez hace falta
 
 ```bash

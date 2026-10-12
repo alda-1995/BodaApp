@@ -143,7 +143,13 @@ fi
 #  Red de seguridad
 # -----------------------------------------------------------------------------
 
-mantenimiento_puesto=0
+#
+# Qué sabemos del servidor cuando algo falla. Decirlo mal es peor que no
+# decirlo: ofrecer '--volver' cuando no se tocó nada restauraría un árbol viejo
+# sin razón, y callarlo cuando sí se intercambió deja al sitio roto.
+#
+remoto_iniciado=0   # se mandó el bloque que acaba intercambiando el árbol
+remoto_ok=0         # ese bloque terminó bien, así que el intercambio se hizo
 paquete=""
 
 al_salir() {
@@ -155,22 +161,19 @@ al_salir() {
         rojo ""
         rojo "El despliegue falló (código $salida)."
 
-        if [[ $mantenimiento_puesto -eq 1 ]]; then
+        if [[ $remoto_iniciado -eq 1 ]]; then
             rojo "Levantando el sitio para no dejarlo caído..."
             ssh "$SERVIDOR" "php $APP/artisan up" 2>/dev/null \
                 || rojo "NO SE PUDO. Entra y corre:  ssh $SERVIDOR 'php $APP/artisan up'"
         fi
 
-        #
-        # Sólo tiene sentido ofrecer la vuelta atrás si el intercambio llegó a
-        # hacerse. Si falló antes, el árbol que está sirviendo es el de siempre
-        # y '--volver' restauraría uno más viejo sin ninguna razón.
-        #
-        if [[ $mantenimiento_puesto -eq 1 ]]; then
-            rojo ""
-            rojo "Para deshacer el intercambio:  ./deploy.sh --volver"
+        rojo ""
+        if [[ $remoto_ok -eq 1 ]]; then
+            rojo "El árbol SÍ se intercambió. Para deshacerlo:  ./deploy.sh --volver"
+        elif [[ $remoto_iniciado -eq 1 ]]; then
+            rojo "No se sabe si llegó a intercambiar. Compruébalo antes de decidir:"
+            rojo "   ssh $SERVIDOR 'ls -d $ANTERIOR 2>/dev/null && echo INTERCAMBIADO || echo INTACTO'"
         else
-            rojo ""
             rojo "Falló antes de tocar el servidor: sigue sirviendo el árbol de siempre."
         fi
     fi
@@ -294,7 +297,7 @@ verde "  paquete listo ($(du -h "$paquete" | cut -f1))"
 # -----------------------------------------------------------------------------
 
 paso "Desplegando"
-mantenimiento_puesto=1
+remoto_iniciado=1
 
 #
 # Dos envíos y no uno: el paquete viaja por la entrada estándar de un comando
@@ -326,10 +329,21 @@ tar xzf "\$paquete" -C "$NUEVO" --strip-components=1 codigo
 
 # Los assets sí se superponen sobre la raíz web: ahí conviven con index.php y
 # .htaccess, que son del servidor y no del repositorio.
+#
+# Los permisos de la raíz web se anotan antes y se reponen después: 'cp -a'
+# arrastra los del origen, y los que trae un tar armado en Windows dejaron el
+# directorio en 700. Apache corre con otro usuario, así que el sitio entero
+# respondió 403 hasta que se repusieron.
+#
+permisos_web=\$(stat -c %a "$WEB")
+
 temporal=\$(mktemp -d)
 tar xzf "\$paquete" -C "\$temporal" --strip-components=1 publico
 cp -a "\$temporal/." "$WEB/"
 rm -rf "\$temporal" "\$paquete"
+
+chmod "\$permisos_web" "$WEB"
+echo "  raíz web en \$(stat -c %a "$WEB")"
 
 # --- Lo compartido, enlazado ----------------------------------------------
 ln -sfn "$COMPARTIDO/.env"    "$NUEVO/.env"
@@ -361,7 +375,7 @@ php artisan up
 echo "  árbol intercambiado"
 DESPLIEGUE
 
-mantenimiento_puesto=0
+remoto_ok=1
 verde "  desplegado"
 
 # -----------------------------------------------------------------------------
