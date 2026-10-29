@@ -464,19 +464,21 @@ tar xzf "\$paquete" -C "$NUEVO" --strip-components=1 codigo
 # Los assets sí se superponen sobre la raíz web: ahí conviven con index.php y
 # .htaccess, que son del servidor y no del repositorio.
 #
-# Los permisos de la raíz web se anotan antes y se reponen después: 'cp -a'
-# arrastra los del origen, y los que trae un tar armado en Windows dejaron el
-# directorio en 700. Apache corre con otro usuario, así que el sitio entero
-# respondió 403 hasta que se repusieron.
+# Apache corre con un usuario distinto de 'tamira' y la raíz web quedó con
+# grupo 'tamira' —el jailed shell no permite devolverla a 'nobody'—, así que la
+# única forma de que pueda entrar es por los permisos de "otros": 755.
 #
-permisos_web=\$(stat -c %a "$WEB")
-
+# Se FIJA, no se repone lo que hubiera: 'cp -a' arrastra los permisos del
+# origen y un tar armado en Windows deja el directorio en 700, pero además
+# cPanel lo devuelve a 750 por su cuenta cada cierto tiempo. Reponer "lo que
+# había" reponía justamente el 750 que deja el sitio en 403.
+#
 temporal=\$(mktemp -d)
 tar xzf "\$paquete" -C "\$temporal" --strip-components=1 publico
 cp -a "\$temporal/." "$WEB/"
 rm -rf "\$temporal" "\$paquete"
 
-chmod "\$permisos_web" "$WEB"
+chmod 755 "$WEB"
 echo "  raíz web en \$(stat -c %a "$WEB")"
 
 # --- Lo compartido, enlazado ----------------------------------------------
@@ -519,6 +521,19 @@ verde "  desplegado"
 paso "Comprobando"
 
 codigo="$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "$SITIO")"
+
+#
+# Un 403 en todo el sitio casi siempre son los permisos de la raíz web, no el
+# código: no tiene sentido mandar a deshacer el despliegue por eso. Se intenta
+# arreglar y se vuelve a mirar antes de dar nada por perdido.
+#
+if [[ "$codigo" == "403" ]]; then
+    rojo "  Responde 403: suele ser la raíz web sin permisos. Corrigiendo..."
+    ssh "$SERVIDOR" "chmod 755 '$WEB'"
+    codigo="$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "$SITIO")"
+    [[ "$codigo" == "200" ]] && verde "  corregido"
+fi
+
 if [[ "$codigo" != "200" ]]; then
     rojo "  $SITIO responde $codigo."
     rojo "  Para deshacer:  ./deploy.sh --volver"
