@@ -7,8 +7,11 @@ use App\Templates\Sections\Section;
 use App\FormBuilder\Controls\DateTimeField;
 use App\FormBuilder\Controls\TextareaField;
 use App\FormBuilder\Controls\TextField;
+use App\Models\Event;
 use App\Templates\BlockType;
 use Carbon\Carbon;
+use Closure;
+use Exception;
 
 /**
  * Portada: los nombres de la pareja, sus padres y la fecha.
@@ -52,6 +55,46 @@ class GeneralSection extends Section
                 ->placeholder('Seleccionar fecha y hora...')
                 ->help('Tu invitación seguirá activa :days días después de la fecha del evento:until. Después se deshabilitará.')
                 ->required(),
+        ];
+    }
+
+    /**
+     * La boda no puede ponerse en una fecha que ya pasó.
+     *
+     * No basta con 'after_or_equal:today': cuando la boda ya ocurrió y la
+     * invitación sigue en pie —corren los días de vigencia posteriores—, el
+     * organizador todavía entra a su panel, y al guardar este paso esa regla le
+     * rechazaría su propia fecha, dejándolo sin poder tocar nada más. Así que
+     * conservar la que ya tenía se permite; moverla al pasado, no.
+     */
+    public function rulesFor(Event $event): array
+    {
+        $guardada = $event->event_date?->toDateTimeString();
+
+        return [
+            'date_event_person' => [
+                function (string $attribute, $value, Closure $fail) use ($guardada) {
+                    if (blank($value)) {
+                        return; // de lo vacío ya se queja el 'required'.
+                    }
+
+                    try {
+                        $fecha = Carbon::parse($value);
+                    } catch (Exception) {
+                        return; // de lo que no es fecha ya se queja el 'date'.
+                    }
+
+                    if ($fecha->isToday() || $fecha->isFuture()) {
+                        return;
+                    }
+
+                    if ($guardada !== null && $fecha->toDateTimeString() === $guardada) {
+                        return; // es la que ya tenía: se le deja conservarla.
+                    }
+
+                    $fail('La fecha del evento no puede ser anterior a hoy.');
+                },
+            ],
         ];
     }
 

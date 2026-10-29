@@ -110,6 +110,59 @@ class RsvpDeadlineRuleTest extends TestCase
     }
 
     /* =====================================================================
+     | Ni la boda ni el límite pueden quedar en el pasado
+     |
+     | Elegir ayer no es una decisión, es un descuido: la boda ya no se puede
+     | celebrar y el límite cierra las confirmaciones en el acto. Pero cuando ya
+     | pasaron de verdad, conservarlas sí se permite — si no, el organizador se
+     | quedaría sin poder tocar ningún otro campo de esos pasos.
+     * ===================================================================*/
+
+    public function test_la_boda_no_se_puede_poner_en_el_pasado(): void
+    {
+        $this->guardarGeneral(now()->subDay()->format('Y-m-d H:i:s'))
+            ->assertSessionHasErrors('date_event_person');
+
+        // La que tenía se queda como estaba.
+        $this->assertSame('2026-12-01 18:00:00', $this->event->fresh()->event_date->toDateTimeString());
+    }
+
+    public function test_la_boda_puede_ser_hoy(): void
+    {
+        $this->guardarGeneral(now()->addHours(3)->format('Y-m-d H:i:s'))
+            ->assertSessionHasNoErrors();
+    }
+
+    /** Boda ya celebrada y dentro de su vigencia: editar el paso no se bloquea. */
+    public function test_conservar_una_fecha_de_boda_ya_pasada_si_se_permite(): void
+    {
+        $pasada = now()->subDays(3)->startOfMinute();
+        $this->event->update(['event_date' => $pasada]);
+
+        $this->guardarGeneral($pasada->format('Y-m-d H:i:s'))
+            ->assertSessionHasNoErrors();
+    }
+
+    public function test_la_fecha_limite_no_se_puede_poner_en_el_pasado(): void
+    {
+        $this->guardar(['rsvp_deadline' => now()->subDay()->format('Y-m-d H:i:s')])
+            ->assertSessionHasErrors('rsvp_deadline');
+
+        $this->assertNull($this->event->fresh()->features);
+    }
+
+    /** Un límite que ya venció se puede conservar al editar otra cosa del paso. */
+    public function test_conservar_una_fecha_limite_ya_vencida_si_se_permite(): void
+    {
+        $vencida = now()->subDays(2)->startOfMinute()->format('Y-m-d H:i:s');
+
+        $this->event->update(['features' => ['rsvp' => ['rsvp_deadline' => $vencida]]]);
+
+        $this->guardar(['rsvp_deadline' => $vencida])
+            ->assertSessionHasNoErrors();
+    }
+
+    /* =====================================================================
      | Cuando mueven la boda, no al revés
      |
      | Adelantar la boda a antes del límite deja un límite imposible. No se

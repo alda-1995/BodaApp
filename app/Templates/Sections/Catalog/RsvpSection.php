@@ -13,6 +13,8 @@ use App\FormBuilder\Controls\TextareaField;
 use App\Services\EventSettingsService;
 use App\Templates\BlockType;
 use Carbon\Carbon;
+use Closure;
+use Exception;
 
 /**
  * Formulario de confirmación de asistencia.
@@ -51,6 +53,12 @@ class RsvpSection extends Section
      *
      * Sin fecha de boda todavía no hay contra qué comparar: el paso uno está a
      * medias y ahí se le va a exigir de todos modos.
+     *
+     * Por el otro lado tampoco puede quedar en el pasado: una fecha límite que
+     * ya venció cierra las confirmaciones en el momento de guardarla, y nadie
+     * quiere eso a propósito. Igual que con la fecha de la boda, conservar la
+     * que ya estaba guardada sí se permite: si no, pasada esa fecha el
+     * organizador no podría tocar ningún otro campo de este paso.
      */
     public function rulesFor(Event $event): array
     {
@@ -58,9 +66,38 @@ class RsvpSection extends Section
             return [];
         }
 
+        $guardada = $event->features['rsvp']['rsvp_deadline'] ?? null;
+
         return [
-            'rsvp_deadline' => ['before_or_equal:' . $event->event_date->copy()->endOfDay()->toDateTimeString()],
+            'rsvp_deadline' => [
+                'before_or_equal:' . $event->event_date->copy()->endOfDay()->toDateTimeString(),
+                fn (string $attribute, $value, Closure $fail) => $this->failIfPast($value, $guardada, $fail),
+            ],
         ];
+    }
+
+    /** Rechaza una fecha límite ya vencida, salvo que sea la que ya tenía. */
+    private function failIfPast($value, ?string $guardada, Closure $fail): void
+    {
+        if (blank($value)) {
+            return; // de lo vacío ya se queja el 'required' del campo.
+        }
+
+        try {
+            $fecha = Carbon::parse($value);
+        } catch (Exception) {
+            return; // de lo que no es fecha ya se queja el 'date'.
+        }
+
+        if ($fecha->endOfDay()->isFuture()) {
+            return;
+        }
+
+        if ($guardada !== null && Carbon::parse($guardada)->toDateTimeString() === Carbon::parse($value)->toDateTimeString()) {
+            return;
+        }
+
+        $fail('La fecha límite para confirmar no puede ser anterior a hoy.');
     }
 
     /**
